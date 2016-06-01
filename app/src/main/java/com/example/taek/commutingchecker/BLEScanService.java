@@ -22,6 +22,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.text.SimpleDateFormat;
@@ -50,7 +51,7 @@ public class BLEScanService extends Service {
     private Thread checkTimeThread;
     BroadcastReceiver mReceiver;
     private List<String> filterlist;
-    public static Map<String, String> EssentialData;
+    public static List<Map<String, String>> EssentialDataArray;
     public static Context ServiceContext;
 
     public BLEScanService() {
@@ -71,7 +72,7 @@ public class BLEScanService extends Service {
         mBLEDevices = new ArrayList<DeviceInfo>();
 
         // 비콘의 Mac 주소와 제한 값을 저장할 Map
-        EssentialData = new HashMap<String, String>();
+        EssentialDataArray = new ArrayList<Map<String, String>>();
 
         // 소켓 생성
         mSocketIO = new SocketIO();
@@ -122,19 +123,42 @@ public class BLEScanService extends Service {
         mSocketIO.connect();
 
         // 서버에 Rssi 제한 값 요청 후 데이터 받기
+        //mSocketIO.requestEssentialData();
         /*
-        Map<String, String> data = new HashMap<String, String>();
-        data.put("SmartphoneAddress", myMacAddress);
-        data.put("Datetime", CurrentTime.currentTime());
-        mSocketIO.requestEssentialData(data);
+        if(EssentialDataArray.size() > 0){
+            Map<String, String> map = EssentialDataArray.get(0);
+            Log.d("ReceiveEssentialData", map.get("id_workplace"));
+        } */
+
+    }
+
+    public static void receiveData(){
         mSocketIO.mSocket.on("data", new Emitter.Listener() {
             @Override
             public void call(Object... args) {
-                final JSONObject obj = (JSONObject)args[0];
-                EssentialData = (Map<String, String>)obj;
-                //
+                try {
+                    final JSONArray jarray = new JSONArray(args[0]);
+                    for(int i = 0; i < jarray.length(); i++){
+                        JSONObject obj_listen = jarray.getJSONObject(i);
+                        String str = obj_listen.getString("beacon_address");
+                        String[] str_arr = str.split("-");
+                        Map<String, String> map = new HashMap<String, String>();
+                        map.put("id_workplace", obj_listen.getString("id_workplace"));
+                        map.put("coordinateX", obj_listen.getString("coordinateX"));
+                        map.put("coordinateY", obj_listen.getString("coordinateY"));
+                        map.put("coordinateZ", obj_listen.getString("coordinateZ"));
+                        map.put("beacon_address1", str_arr[0]);
+                        map.put("beacon_address2", str_arr[1]);
+                        map.put("beacon_address3", str_arr[2]);
+                        BLEScanService.EssentialDataArray.add(map);
+                        Log.d("Receive Request_data", "success");
+                    }
+                }catch (JSONException e) {
+                    e.printStackTrace();
+                    Log.d("Receive Request_data", "fail");
+                }
             }
-        }); */
+        });
     }
 
     @Override

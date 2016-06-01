@@ -23,6 +23,7 @@ public class MainActivity extends AppCompatActivity {
     Button startService, stopService;
     Intent intent;
     public static String ServiceTAG;
+    Button showData, request, receive;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,6 +33,9 @@ public class MainActivity extends AppCompatActivity {
         stopService = (Button)findViewById(R.id.Stop_Service);
         intent = new Intent(this, BLEScanService.class);
         ServiceTAG = getResources().getString(R.string.scan_service);
+        request = (Button)findViewById(R.id.Request);
+        showData = (Button)findViewById(R.id.Show_EssentialData);
+        receive = (Button)findViewById(R.id.Receive);
 
         // BLE 관련 Permission 주기
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
@@ -72,6 +76,31 @@ public class MainActivity extends AppCompatActivity {
                 Intent intent = new Intent("android.intent.action.STOP_SERVICE");
                 intent.setData(Uri.parse("sample:"));
                 sendBroadcast(intent);
+            }
+        });
+
+        request.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                BLEScanService.mSocketIO.requestEssentialData();
+            }
+        });
+
+        receive.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                BLEScanService.receiveData();
+            }
+        });
+
+        showData.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(BLEScanService.EssentialDataArray.size() > 0)
+                    Toast.makeText(MainActivity.this, BLEScanService.EssentialDataArray.get(0).get("id_workplace").toString(), Toast.LENGTH_SHORT).show();
+                else{
+                    Toast.makeText(MainActivity.this, "no data", Toast.LENGTH_SHORT).show();
+                }
             }
         });
     }

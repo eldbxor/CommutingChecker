@@ -14,16 +14,16 @@ public class CheckTime {
                 for(int i = 0; i < 3; i++){
                     for(DeviceInfo deviceInfo : BLEScanService.mBLEDevices){
                         if(deviceInfo1.Address.equals(deviceInfo.Address)){
-                            if(deviceInfo.Rssi > Integer.valueOf(BLEScanService.EssentialData.get("Rssi1")) - 10 &
-                                    deviceInfo.Rssi < Integer.valueOf(BLEScanService.EssentialData.get("Rssi1")) + 10)
+                            if(deviceInfo.Rssi > Integer.valueOf(BLEScanService.EssentialDataArray.get(0).get("Rssi1")) - 10 &
+                                    deviceInfo.Rssi < Integer.valueOf(BLEScanService.EssentialDataArray.get(0).get("Rssi1")) + 10)
                                 count++;
                         }else if(deviceInfo2.Address.equals(deviceInfo.Address)){
-                            if(deviceInfo.Rssi > Integer.valueOf(BLEScanService.EssentialData.get("Rssi2")) - 10 &
-                                    deviceInfo.Rssi < Integer.valueOf(BLEScanService.EssentialData.get("Rssi2")) + 10)
+                            if(deviceInfo.Rssi > Integer.valueOf(BLEScanService.EssentialDataArray.get(0).get("Rssi2")) - 10 &
+                                    deviceInfo.Rssi < Integer.valueOf(BLEScanService.EssentialDataArray.get(0).get("Rssi2")) + 10)
                                 count++;
                         }else if(deviceInfo3.Address.equals(deviceInfo.Address)){
-                            if(deviceInfo.Rssi > Integer.valueOf(BLEScanService.EssentialData.get("Rssi3")) - 10 &
-                                    deviceInfo.Rssi < Integer.valueOf(BLEScanService.EssentialData.get("Rssi3")) + 10)
+                            if(deviceInfo.Rssi > Integer.valueOf(BLEScanService.EssentialDataArray.get(0).get("Rssi3")) - 10 &
+                                    deviceInfo.Rssi < Integer.valueOf(BLEScanService.EssentialDataArray.get(0).get("Rssi3")) + 10)
                                 count++;
                         }
                     }

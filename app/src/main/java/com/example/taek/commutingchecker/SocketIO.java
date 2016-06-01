@@ -1,15 +1,21 @@
 package com.example.taek.commutingchecker;
 
+import android.annotation.SuppressLint;
 import android.util.Log;
 import android.widget.Toast;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import io.socket.client.IO;
+import io.socket.emitter.Emitter;
 
 /**
  * Created by Taek on 2016-04-15.
@@ -80,13 +86,50 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
         }
     }
 
-    public void requestEssentialData(Map<String, String> data){
+    // More than api ver.19
+    @SuppressLint("NewApi")
+    public void requestEssentialData(){
         JSONObject obj = new JSONObject();
         try{
             if(mSocket.connected()){
-                obj.put("SmartphoneAddress", data.get("SmartphoneAddress"));
-                obj.put("Datetime", data.get("Datetime"));
+                /*
+                requestEssentialData
+                {
+                     SmartphoneAddress: '00:00:00:00:00:00',
+                     DateTime: '0000/00/00 00:00:00'
+                }
+                 */
+                obj.put("SmartphoneAddress", BLEScanService.myMacAddress);
+                obj.put("DateTime", CurrentTime.currentTime());
                 mSocket.emit("requestEssentialData", obj);
+                Log.d("requestEssentialData", "true");
+
+                mSocket.on("data", new Emitter.Listener() {
+                    @Override
+                    public void call(Object... args) {
+                        try {
+                            final JSONArray jarray = new JSONArray(args[0].toString());
+                            Log.d("request", args[0].toString());
+                            for(int i = 0; i < jarray.length(); i++){
+                                JSONObject obj_listen = jarray.getJSONObject(i);
+                                String str = obj_listen.getString("beacon_address");
+                                String[] str_arr = str.split("-");
+                                Map<String, String> map = new HashMap<String, String>();
+                                map.put("id_workplace", obj_listen.getString("id_workplace"));
+                                map.put("coordinateX", obj_listen.getString("coordinateX"));
+                                map.put("coordinateY", obj_listen.getString("coordinateY"));
+                                map.put("coordinateZ", obj_listen.getString("coordinateZ"));
+                                map.put("beacon_address1", str_arr[0]);
+                                map.put("beacon_address2", str_arr[1]);
+                                map.put("beacon_address3", str_arr[2]);
+                                BLEScanService.EssentialDataArray.add(map);
+                            }
+                        }catch (JSONException e) {
+                            e.printStackTrace();
+                            Log.d("Receive Request_data", "fail");
+                        }
+                    }
+                });
             }
         }catch (JSONException e){
             e.printStackTrace();
