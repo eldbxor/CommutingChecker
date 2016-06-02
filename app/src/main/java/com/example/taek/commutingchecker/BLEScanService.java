@@ -1,8 +1,6 @@
 package com.example.taek.commutingchecker;
 
 import android.annotation.SuppressLint;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.app.Service;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -15,24 +13,15 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.nfc.Tag;
 import android.os.Build;
 import android.os.IBinder;
 import android.util.Log;
 import android.widget.Toast;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import io.socket.emitter.Emitter;
 
 public class BLEScanService extends Service {
     BluetoothAdapter mBluetoothAdapter; // Bluetooth 어뎁터
@@ -45,10 +34,10 @@ public class BLEScanService extends Service {
     private static String sendTime; // 서버에 데이터를 보낸 시간
     String TAG = MainActivity.ServiceTAG;
     Thread t; // 출퇴근 등록 쓰레드
-    boolean flag; // 출퇴근등록 쓰레드 실행 플래그
+    boolean ScanFlag, CalibrationFlag; // 출퇴근등록 쓰레드 실행 플래그, Rssi 측정 플래그
     // Notification ID
     public static final int NOTIFICATION_ID = 1;
-    BroadcastReceiver mReceiver;
+    BroadcastReceiver StopSelfReceiver, CalibrationReceiver;
     private List<String> filterlist;
     public static List<Map<String, String>> EssentialDataArray;
     public static Context ServiceContext;
@@ -59,7 +48,8 @@ public class BLEScanService extends Service {
     @Override
     public void onCreate(){
         Log.i(TAG, "Service onCreate");
-        flag = true;
+        ScanFlag = true;
+        CalibrationFlag = false;
         ServiceContext = this;
         // 임의의 비콘 Mac 주소
         filterlist = new ArrayList<String>();
@@ -77,17 +67,28 @@ public class BLEScanService extends Service {
         mSocketIO = new SocketIO();
 
         // 리시버 등록
-        IntentFilter pkgFilter = new IntentFilter();
-        pkgFilter.addAction("android.intent.action.STOP_SERVICE");
-        pkgFilter.addDataScheme("sample");
+        IntentFilter StopSelfPkgFilter = new IntentFilter();
+        IntentFilter CalibrationPkgFilter = new IntentFilter();
+        StopSelfPkgFilter.addAction("android.intent.action.STOP_SERVICE");
+        StopSelfPkgFilter.addDataScheme("StopSelf");
+        CalibrationPkgFilter.addAction("android.intent.action.CALIBRATION_SERVICE");
+        CalibrationPkgFilter.addDataScheme("Calibration");
 
-        mReceiver = new BroadcastReceiver() {
+        StopSelfReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
                 stopSelf();
             }
         };
-        registerReceiver(mReceiver, pkgFilter);
+
+        CalibrationReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                CalibrationFlag = true;
+            }
+        };
+
+        registerReceiver(StopSelfReceiver, StopSelfPkgFilter);
 
         EnableBLE mEnableBLE = new EnableBLE(getSystemService(this.BLUETOOTH_SERVICE)); // BLE 활성화 클래스 생성
         mBluetoothAdapter = mEnableBLE.enable(); // BLE 활성화
@@ -133,46 +134,35 @@ public class BLEScanService extends Service {
         Runnable r = new Runnable() {
             @Override
             public void run() {
-                // Waiting for connecting
+                // To Wait for connecting
                 try{
                     Thread.sleep(5000);
                 }catch (InterruptedException e){
                     e.printStackTrace();
                 }
-                while(flag){
-                    try{
-                        Thread.sleep(500);
-                    }catch (InterruptedException e){
-                        e.printStackTrace();
+                while(ScanFlag) {
+                    if (CalibrationFlag) {  // if you receive Calibration_Broadcast
+                        Calibration.calibration();
                     }
+                    else {
+                        try {
+                            Thread.sleep(500);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
 
-                    DeviceInfo deviceInfo1 = null;
-                    DeviceInfo deviceInfo2 = null;
-                    DeviceInfo deviceInfo3 = null;
+                        // 3개의 비콘 정보가 없을 경우 continue
+                        if (mBLEDevices.size() != 3)
+                            continue;
 
-                    for(DeviceInfo deviceInfo : mBLEDevices){
-                        if(Integer.valueOf(deviceInfo.Major) == 1)
-                            deviceInfo1 = deviceInfo;
-                        else if(Integer.valueOf(deviceInfo.Major) == 2)
-                            deviceInfo2 = deviceInfo;
-                        else if(Integer.valueOf(deviceInfo.Major) == 3)
-                            deviceInfo3 = deviceInfo;
+                        // 0.5초 동안 3번 Rssi 체크 후 2번 이상 적합하면 sendEvent() 메서드 실행
+                        CheckTime.checkTime();
+
+                        //mSocketIO.sendEvent(new HashMap<String, String>());
+                        //scanLeDevice(false);
+                        //ScanFlag = false;
                     }
-
-                    // 3개의 비콘 정보가 없을 경우 continue
-                    /*
-                    if(deviceInfo1 == null || deviceInfo2 == null || deviceInfo3 == null)
-                        continue; */
-                    if(mBLEDevices.size() != 3)
-                        continue;
-
-                    // 0.5초 동안 3번 Rssi 체크 후 2번 이상 적합하면 sendEvent() 메서드 실행
-                    CheckTime.checkTime();
-
-                    //mSocketIO.sendEvent(new HashMap<String, String>());
-                    //scanLeDevice(false);
-                    //flag = false;
-                }
+                } // End of while
             }
         };
 
@@ -224,7 +214,7 @@ public class BLEScanService extends Service {
     @Override
     public void onDestroy(){
         Log.i(TAG, "Service onDestroy");
-        flag = false;
+        ScanFlag = false;
         scanLeDevice(false); // 스캔 중지
         GenerateNotification.generateNotification(this, "서비스 종료", "서비스가 종료되었습니다.", "");
     }
