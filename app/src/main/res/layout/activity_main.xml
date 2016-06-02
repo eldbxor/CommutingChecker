@@ -23,12 +23,6 @@
         android:text="Request Data"/>
 
     <Button
-        android:id="@+id/Receive"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Receive Data"/>
-
-    <Button
         android:id="@+id/Show_EssentialData"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

@@ -48,7 +48,6 @@ public class BLEScanService extends Service {
     boolean flag; // 출퇴근등록 쓰레드 실행 플래그
     // Notification ID
     public static final int NOTIFICATION_ID = 1;
-    private Thread checkTimeThread;
     BroadcastReceiver mReceiver;
     private List<String> filterlist;
     public static List<Map<String, String>> EssentialDataArray;
@@ -123,42 +122,7 @@ public class BLEScanService extends Service {
         mSocketIO.connect();
 
         // 서버에 Rssi 제한 값 요청 후 데이터 받기
-        //mSocketIO.requestEssentialData();
-        /*
-        if(EssentialDataArray.size() > 0){
-            Map<String, String> map = EssentialDataArray.get(0);
-            Log.d("ReceiveEssentialData", map.get("id_workplace"));
-        } */
-
-    }
-
-    public static void receiveData(){
-        mSocketIO.mSocket.on("data", new Emitter.Listener() {
-            @Override
-            public void call(Object... args) {
-                try {
-                    final JSONArray jarray = new JSONArray(args[0]);
-                    for(int i = 0; i < jarray.length(); i++){
-                        JSONObject obj_listen = jarray.getJSONObject(i);
-                        String str = obj_listen.getString("beacon_address");
-                        String[] str_arr = str.split("-");
-                        Map<String, String> map = new HashMap<String, String>();
-                        map.put("id_workplace", obj_listen.getString("id_workplace"));
-                        map.put("coordinateX", obj_listen.getString("coordinateX"));
-                        map.put("coordinateY", obj_listen.getString("coordinateY"));
-                        map.put("coordinateZ", obj_listen.getString("coordinateZ"));
-                        map.put("beacon_address1", str_arr[0]);
-                        map.put("beacon_address2", str_arr[1]);
-                        map.put("beacon_address3", str_arr[2]);
-                        BLEScanService.EssentialDataArray.add(map);
-                        Log.d("Receive Request_data", "success");
-                    }
-                }catch (JSONException e) {
-                    e.printStackTrace();
-                    Log.d("Receive Request_data", "fail");
-                }
-            }
-        });
+        mSocketIO.requestEssentialData();
     }
 
     @Override
@@ -169,9 +133,15 @@ public class BLEScanService extends Service {
         Runnable r = new Runnable() {
             @Override
             public void run() {
+                // Waiting for connecting
+                try{
+                    Thread.sleep(5000);
+                }catch (InterruptedException e){
+                    e.printStackTrace();
+                }
                 while(flag){
                     try{
-                        Thread.sleep(5000);
+                        Thread.sleep(500);
                     }catch (InterruptedException e){
                         e.printStackTrace();
                     }
@@ -196,13 +166,10 @@ public class BLEScanService extends Service {
                     if(mBLEDevices.size() != 3)
                         continue;
 
-                    // 0.5초 동안 3번 Rssi 체크
-                    /*
-                    Runnable r = CheckTime.checkTime(deviceInfo1, deviceInfo2, deviceInfo3);
-                    checkTimeThread = new Thread(r);
-                    checkTimeThread.start(); */
+                    // 0.5초 동안 3번 Rssi 체크 후 2번 이상 적합하면 sendEvent() 메서드 실행
+                    CheckTime.checkTime();
 
-                    mSocketIO.sendEvent(new HashMap<String, String>());
+                    //mSocketIO.sendEvent(new HashMap<String, String>());
                     //scanLeDevice(false);
                     //flag = false;
                 }

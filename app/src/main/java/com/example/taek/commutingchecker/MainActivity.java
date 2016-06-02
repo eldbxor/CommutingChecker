@@ -23,7 +23,7 @@ public class MainActivity extends AppCompatActivity {
     Button startService, stopService;
     Intent intent;
     public static String ServiceTAG;
-    Button showData, request, receive;
+    Button showData, request;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,7 +35,6 @@ public class MainActivity extends AppCompatActivity {
         ServiceTAG = getResources().getString(R.string.scan_service);
         request = (Button)findViewById(R.id.Request);
         showData = (Button)findViewById(R.id.Show_EssentialData);
-        receive = (Button)findViewById(R.id.Receive);
 
         // BLE 관련 Permission 주기
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
@@ -83,13 +82,6 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 BLEScanService.mSocketIO.requestEssentialData();
-            }
-        });
-
-        receive.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                BLEScanService.receiveData();
             }
         });
 
