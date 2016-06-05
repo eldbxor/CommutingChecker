@@ -31,16 +31,17 @@ public class BLEScanService extends Service {
     private ScanSettings settings; // BLE 스캔 옵션 세팅
     private List<ScanFilter> filters; // BLE 스캔 필터
     public static String myMacAddress; // 스마트폰 블루투스 Mac 주소
-    private static String sendTime; // 서버에 데이터를 보낸 시간
+    // private static String sendTime; // 서버에 데이터를 보낸 시간
     String TAG = MainActivity.ServiceTAG;
     Thread t; // 출퇴근 등록 쓰레드
-    boolean ScanFlag, CalibrationFlag; // 출퇴근등록 쓰레드 실행 플래그, Rssi 측정 플래그
+    public static boolean ScanFlag, CalibrationFlag; // 출퇴근등록 쓰레드 실행 플래그, Rssi 측정 플래그
     // Notification ID
     public static final int NOTIFICATION_ID = 1;
     BroadcastReceiver StopSelfReceiver, CalibrationReceiver;
     private List<String> filterlist;
     public static List<Map<String, String>> EssentialDataArray;
     public static Context ServiceContext;
+    public static boolean coolTime;
 
     public BLEScanService() {
     }
@@ -50,6 +51,7 @@ public class BLEScanService extends Service {
         Log.i(TAG, "Service onCreate");
         ScanFlag = true;
         CalibrationFlag = false;
+        coolTime = false;
         ServiceContext = this;
         // 임의의 비콘 Mac 주소
         filterlist = new ArrayList<String>();
@@ -89,6 +91,7 @@ public class BLEScanService extends Service {
         };
 
         registerReceiver(StopSelfReceiver, StopSelfPkgFilter);
+        registerReceiver(CalibrationReceiver, CalibrationPkgFilter);
 
         EnableBLE mEnableBLE = new EnableBLE(getSystemService(this.BLUETOOTH_SERVICE)); // BLE 활성화 클래스 생성
         mBluetoothAdapter = mEnableBLE.enable(); // BLE 활성화
@@ -123,7 +126,7 @@ public class BLEScanService extends Service {
         mSocketIO.connect();
 
         // 서버에 Rssi 제한 값 요청 후 데이터 받기
-        mSocketIO.requestEssentialData();
+        //mSocketIO.requestEssentialData();
     }
 
     @Override
@@ -136,13 +139,25 @@ public class BLEScanService extends Service {
             public void run() {
                 // To Wait for connecting
                 try{
+                    Thread.sleep(1000);
+                }catch (InterruptedException e){
+                    e.printStackTrace();
+                }
+
+                // 서버에 Rssi 제한 값 요청 후 데이터 받기
+                mSocketIO.requestEssentialData();
+
+                try{
                     Thread.sleep(5000);
                 }catch (InterruptedException e){
                     e.printStackTrace();
                 }
+
                 while(ScanFlag) {
                     if (CalibrationFlag) {  // if you receive Calibration_Broadcast
                         Calibration.calibration();
+                        CalibrationFlag = false;
+                        mSocketIO.requestEssentialData();
                     }
                     else {
                         try {
@@ -171,6 +186,10 @@ public class BLEScanService extends Service {
         return Service.START_STICKY;
     }
 
+    public static void test(){
+        mSocketIO.test();
+    }
+    /*
     public static void sendEvent(){
         sendTime = CurrentTime.currentTime();
 
@@ -182,9 +201,9 @@ public class BLEScanService extends Service {
         data.put("BeaconData2", mBLEDevices.get(1).ScanRecord);
         data.put("BeaconData3", mBLEDevices.get(2).ScanRecord);
         data.put("SmartphoneAddress", myMacAddress);
-        data.put("Datetime", sendTime);
+        data.put("DateTime", sendTime);
         mSocketIO.sendEvent(data);
-    }
+    } */
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -216,6 +235,7 @@ public class BLEScanService extends Service {
         Log.i(TAG, "Service onDestroy");
         ScanFlag = false;
         scanLeDevice(false); // 스캔 중지
+        mSocketIO.close();
         GenerateNotification.generateNotification(this, "서비스 종료", "서비스가 종료되었습니다.", "");
     }
 
@@ -228,10 +248,10 @@ public class BLEScanService extends Service {
         int minor_int;
         for (int i = 0; i <= 28; i++) {
             byte b = scanRecord[i];
-            if (i == 28) {
-                all += String.format("%02x", b);
-            } else {
+            if (i > 8 && i < 28) {
                 all += String.format("%02x ", b);
+            } else if(i == 28) {
+                all += String.format("%02x", b);
             }
             if (i > 8 && i <= 24) {
                 if (i == 24) {

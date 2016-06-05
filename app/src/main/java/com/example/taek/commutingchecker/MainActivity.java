@@ -23,7 +23,7 @@ public class MainActivity extends AppCompatActivity {
     Button startService, stopService;
     Intent intent;
     public static String ServiceTAG;
-    Button showData, request;
+    Button showData, request, calibration, calibrationTest;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,6 +35,8 @@ public class MainActivity extends AppCompatActivity {
         ServiceTAG = getResources().getString(R.string.scan_service);
         request = (Button)findViewById(R.id.Request);
         showData = (Button)findViewById(R.id.Show_EssentialData);
+        calibration = (Button)findViewById(R.id.Calibration);
+        calibrationTest = (Button)findViewById(R.id.test);
 
         // BLE 관련 Permission 주기
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
@@ -73,7 +75,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 //stopService(intent);
                 Intent intent = new Intent("android.intent.action.STOP_SERVICE");
-                intent.setData(Uri.parse("sample:"));
+                intent.setData(Uri.parse("StopSelf:"));
                 sendBroadcast(intent);
             }
         });
@@ -89,10 +91,31 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if(BLEScanService.EssentialDataArray.size() > 0)
-                    Toast.makeText(MainActivity.this, BLEScanService.EssentialDataArray.get(0).get("id_workplace").toString(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.this, BLEScanService.EssentialDataArray.get(0).get("id_workplace").toString() + ", "
+                            + BLEScanService.EssentialDataArray.get(0).get("coordinateX").toString() + ", "
+                            + BLEScanService.EssentialDataArray.get(0).get("coordinateY").toString() + ", "
+                            + BLEScanService.EssentialDataArray.get(0).get("coordinateZ").toString() + ", "
+                            + BLEScanService.EssentialDataArray.get(0).get("beacon_address1").toString() + ", "
+                            + BLEScanService.EssentialDataArray.get(0).get("beacon_address2").toString() + ", "
+                            + BLEScanService.EssentialDataArray.get(0).get("beacon_address3").toString() + ", "
+                            + BLEScanService.EssentialDataArray.size(), Toast.LENGTH_LONG).show();
                 else{
                     Toast.makeText(MainActivity.this, "no data", Toast.LENGTH_SHORT).show();
                 }
+            }
+        });
+
+        calibration.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                BLEScanService.CalibrationFlag = true;
+            }
+        });
+
+        calibrationTest.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                BLEScanService.test();
             }
         });
     }

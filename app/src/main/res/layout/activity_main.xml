@@ -27,4 +27,16 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Show data"/>
+
+    <Button
+        android:id="@+id/Calibration"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="CALIBRATION"/>
+
+    <Button
+        android:id="@+id/test"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="calibration test"/>
 </LinearLayout>

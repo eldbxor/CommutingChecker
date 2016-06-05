@@ -46,37 +46,46 @@ public class SocketIO {
         try {
             if (mSocket.connected()) {
                 Log.d("Socket", "connected");
-                /*
-                obj.put("DeviceAddress", data.get("DeviceAddress"));
-                obj.put("UUID", data.get("UUID"));
-                obj.put("Major", data.get("Major"));
-                obj.put("Minor", data.get("Minor"));
-                obj.put("SmartphoneAddress", data.get("SmartphoneAddress"));
-                obj.put("Datetime", data.get("Datetime"));
-                mSocket.emit("call", obj);
-                Log.d("sendSocketData", "true");*/
 
-                obj.put("BeaconDeviceAddress1", "00:1A:7D:DA:71:07");
-                obj.put("BeaconDeviceAddress2", "00:1A:7D:DA:71:03");
-                obj.put("BeaconDeviceAddress3", "B8:27:EB:E1:47:EB");
+                /*
+                data.put("BeaconDeviceAddress1", mDeviceInfo1.Address);
+                    data.put("BeaconDeviceAddress2", mDeviceInfo2.Address);
+                    data.put("BeaconDeviceAddress3", mDeviceInfo3.Address);
+                    data.put("BeaconData1", mDeviceInfo1.ScanRecord);
+                    data.put("BeaconData2", mDeviceInfo2.ScanRecord);
+                    data.put("BeaconData3", mDeviceInfo3.ScanRecord);
+                    data.put("SmartphoneAddress", BLEScanService.myMacAddress);
+                    data.put("DateTime", CurrentTime.currentTime());
+
+                 */
+                obj.put("BeaconDeviceAddress1", data.get("BeaconDeviceAddress1"));
+                obj.put("BeaconDeviceAddress2", data.get("BeaconDeviceAddress2"));
+                obj.put("BeaconDeviceAddress3", data.get("BeaconDeviceAddress3"));
                 /*
                 Gateway 1 (pi2): f0 f4 c1 76 a6 23 42 ef ac 3a 66 f2 1a 11 99 3e 00 02 00 01
 Gateway 2 (pi2): bf 0c c4 a4 eb 9f 4f 06 b7 16 1f 5f f4 9a 8f 47 00 02 00 02
 Gateway 3 (pi3): 70 9b d6 40 42 d1 4b 1a 99 0a 36 d4 a1 e5 27 d8 00 03 00 01
 Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
                  */
-                obj.put("BeaconData1", "f0 f4 c1 76 a6 23 42 ef ac 3a 66 f2 1a 11 99 3e 00 02 00 01");
-                obj.put("BeaconData2", "bf 0c c4 a4 eb 9f 4f 06 b7 16 1f 5f f4 9a 8f 47 00 02 00 02");
-                obj.put("BeaconData3", "70 9b d6 40 42 d1 4b 1a 99 0a 36 d4 a1 e5 27 d8 00 03 00 01");
-                obj.put("SmartphoneAddress", BLEScanService.myMacAddress);
-                obj.put("DateTime", CurrentTime.currentTime());
+                obj.put("BeaconData1", data.get("BeaconData1"));
+                obj.put("BeaconData2", data.get("BeaconData2"));
+                obj.put("BeaconData3", data.get("BeaconData3"));
+                obj.put("SmartphoneAddress", data.get("SmartphoneAddress"));
+                obj.put("DateTime", data.get("DateTime"));
                 mSocket.emit("circumstance", obj);
                 Log.d("sendSocketData", "true");
 
-                GenerateNotification.generateNotification(BLEScanService.ServiceContext, "서버에 데이터 전송", "서버에 데이터를 전송하였습니다.", "");
-                //MainActivity.sendData = true;
+                GenerateNotification.generateNotification(BLEScanService.ServiceContext, "서버에 데이터 전송", "서버에 데이터를 전송하였습니다.",
+                        data.get("BeaconDeviceAddress1") + ", "
+                        + data.get("BeaconDeviceAddress2") + ", "
+                        + data.get("BeaconDeviceAddress3") + ", "
+                        + data.get("BeaconData1") + ", "
+                        + data.get("BeaconData2") + ", "
+                        + data.get("BeaconData3") + ", "
+                        + data.get("SmartphoneAddress") + ", "
+                        + data.get("DateTime"));
 
-                this.close();
+                //this.close();
             } else {
                 Log.d("sendSocketData", "false");
             }
@@ -102,7 +111,7 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
                 obj.put("SmartphoneAddress", BLEScanService.myMacAddress);
                 obj.put("DateTime", CurrentTime.currentTime());
                 mSocket.emit("requestEssentialData", obj);
-                Log.d("requestEssentialData", "true");
+                Log.d("requestEssentialData", "success");
 
                 mSocket.on("data", new Emitter.Listener() {
                     @Override
@@ -110,7 +119,7 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
                         try {
                             final JSONArray jarray = new JSONArray(args[0].toString());
                             Log.d("request", args[0].toString());
-                            for(int i = 0; i < jarray.length(); i++){
+                            for (int i = 0; i < jarray.length(); i++) {
                                 JSONObject obj_listen = jarray.getJSONObject(i);
                                 String str = obj_listen.getString("beacon_address");
                                 String[] str_arr = str.split("-");
@@ -122,9 +131,9 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
                                 map.put("beacon_address1", str_arr[0]);
                                 map.put("beacon_address2", str_arr[1]);
                                 map.put("beacon_address3", str_arr[2]);
-                                BLEScanService.EssentialDataArray.add(map);
+                                AddEssentialData.addEssentialData(map);
                             }
-                        }catch (JSONException e) {
+                        } catch (JSONException e) {
                             e.printStackTrace();
                             Log.d("Receive Request_data", "fail");
                         }
@@ -133,6 +142,80 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
             }
         }catch (JSONException e){
             e.printStackTrace();
+        }
+    }
+
+    public void calibration(Map<String, String> data){
+        JSONObject obj = new JSONObject();
+        try {
+            if (mSocket.connected()) {
+                Log.d("Socket", "connected");
+
+                obj.put("BeaconDeviceAddress1", data.get("BeaconDeviceAddress1"));
+                obj.put("BeaconDeviceAddress2", data.get("BeaconDeviceAddress2"));
+                obj.put("BeaconDeviceAddress3", data.get("BeaconDeviceAddress3"));
+                obj.put("BeaconData1", data.get("BeaconData1"));
+                obj.put("BeaconData2", data.get("BeaconData2"));
+                obj.put("BeaconData3", data.get("BeaconData3"));
+                obj.put("SmartphoneAddress", data.get("SmartphoneAddress"));
+                obj.put("DateTime", data.get("DateTime"));
+                obj.put("CoordinateX", data.get("CoordinateX"));
+                obj.put("CoordinateY", data.get("CoordinateY"));
+                obj.put("CoordinateZ", data.get("CoordinateZ"));
+                mSocket.emit("calibration", obj);
+                Log.d("calibration", "success");
+
+                GenerateNotification.generateNotification(BLEScanService.ServiceContext, "Calibration", "Rssi 평균 값을 서버에 전송하였습니다.",
+                        "rss1: " + data.get("CoordinateX") + ", " + "rssi2: " + data.get("CoordinateY") + ", " + "rss3: " + data.get("CoordinateZ"));
+                Log.d("calibration data", data.get("BeaconDeviceAddress1") + ", " +
+                        data.get("BeaconDeviceAddress2") + ", " +
+                        data.get("BeaconDeviceAddress3") + ", " +
+                        data.get("BeaconData1") + ", " +
+                        data.get("BeaconData2") + ", " +
+                        data.get("BeaconData3") + ", " +
+                        data.get("SmartphoneAddress") + ", " +
+                        data.get("DateTime") + ", " +
+                        data.get("CoordinateX") + ", " +
+                        data.get("CoordinateY") + ", " +
+                        data.get("CoordinateZ"));
+                //MainActivity.sendData = true;
+
+                //this.close();
+            } else {
+                Log.d("calibration", "false");
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+            Log.d("CalibrationError(JSON)", e.getMessage());
+        }
+    }
+
+    public void test(){
+        JSONObject obj = new JSONObject();
+        try {
+            if (mSocket.connected()) {
+                Log.d("Socket", "connected");
+
+                obj.put("BeaconDeviceAddress1", "00:1A:7D:DA:71:07");
+                obj.put("BeaconDeviceAddress2", "00:1A:7D:DA:71:03");
+                obj.put("BeaconDeviceAddress3", "B8:27:EB:E1:47:EB");
+                obj.put("BeaconData1", "f0 f4 c1 76 a6 23 42 ef ac 3a 66 f2 1a 11 99 3e 00 02 00 01");
+                obj.put("BeaconData2", "bf 0c c4 a4 eb 9f 4f 06 b7 16 1f 5f f4 9a 8f 47 00 02 00 02");
+                obj.put("BeaconData3", "70 9b d6 40 42 d1 4b 1a 99 0a 36 d4 a1 e5 27 d8 00 03 00 01");
+                obj.put("SmartphoneAddress", BLEScanService.myMacAddress);
+                obj.put("DateTime", CurrentTime.currentTime());
+                obj.put("CoordinateX", "-50");
+                obj.put("CoordinateY", "-50");
+                obj.put("CoordinateZ", "-50");
+                mSocket.emit("calibration", obj);
+                Log.d("test", "true");
+
+            } else {
+                Log.d("test", "false");
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+            Log.d("TestError(JSON)", e.getMessage());
         }
     }
 
