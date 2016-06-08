@@ -38,19 +38,37 @@ public class CheckTime {
 
                 for(int i = 0; i < 3; i++){
                     mBLEDevice = BLEScanService.mBLEDevices;
+                    int count_for = 0;
 
-                    if(mDeviceInfo1.Rssi > (coordinateX - 10)
-                            && mDeviceInfo1.Rssi < (coordinateX + 10)
-                            && mDeviceInfo2.Rssi > (coordinateY - 10)
-                            && mDeviceInfo2.Rssi < (coordinateY + 10)
-                            && mDeviceInfo3.Rssi > (coordinateZ - 10)
-                            && mDeviceInfo3.Rssi < (coordinateZ + 10)){
+                    if(mDeviceInfo1.Rssi > (coordinateX - 3) && mDeviceInfo1.Rssi < (coordinateX + 3)){
+                        count_for++;
+                    }
+                    if(mDeviceInfo2.Rssi > (coordinateY - 3) && mDeviceInfo2.Rssi < (coordinateY + 3)){
+                        count_for++;
+                    }
+                    if(mDeviceInfo3.Rssi > (coordinateZ - 3) && mDeviceInfo3.Rssi < (coordinateZ + 3)){
+                        count_for++;
+                    }
+
+                    if(count_for >= 2)
                         count++;
+
+                    if(count >= 2)
+                        break;
+
+                    try {
+                        Thread.sleep(300);
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
                 }
 
                 if(count >= 2){
+                    SendEvent.sendEvent(mDeviceInfo1, mDeviceInfo2, mDeviceInfo3);
+                    /*
                     if(!BLEScanService.coolTime) {
+                        sendEvent(mDeviceInfo1, mDeviceInfo2, mDeviceInfo3);
+
                         Map<String, String> data = new HashMap<String, String>();
                         data.put("BeaconDeviceAddress1", mDeviceInfo1.Address);
                         data.put("BeaconDeviceAddress2", mDeviceInfo2.Address);
@@ -71,12 +89,37 @@ public class CheckTime {
                         }
 
                         BLEScanService.coolTime = false;
-                    }
+                    } */
                 }
             }
         };
 
         Thread thread = new Thread(r);
         thread.start();
+    }
+
+    private synchronized static void sendEvent(DeviceInfo deviceInfo1, DeviceInfo deviceInfo2, DeviceInfo deviceInfo3){
+        if(!BLEScanService.coolTime) {
+            Map<String, String> data = new HashMap<String, String>();
+            data.put("BeaconDeviceAddress1", deviceInfo1.Address);
+            data.put("BeaconDeviceAddress2", deviceInfo2.Address);
+            data.put("BeaconDeviceAddress3", deviceInfo3.Address);
+            data.put("BeaconData1", deviceInfo1.ScanRecord);
+            data.put("BeaconData2", deviceInfo2.ScanRecord);
+            data.put("BeaconData3", deviceInfo3.ScanRecord);
+            data.put("SmartphoneAddress", BLEScanService.myMacAddress);
+            data.put("DateTime", CurrentTime.currentTime());
+
+            BLEScanService.mSocketIO.sendEvent(data);
+            BLEScanService.coolTime = true;
+
+            try {
+                Thread.sleep(3000);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            BLEScanService.coolTime = false;
+        }
     }
 }

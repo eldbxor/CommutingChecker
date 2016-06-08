@@ -29,7 +29,7 @@ public class BLEScanService extends Service {
     public static SocketIO mSocketIO; // Jason을 이용한 서버와의 통신 클래스
     public static List<DeviceInfo> mBLEDevices; // 비콘 디바이스 정보를 갖는 ArrayList
     private ScanSettings settings; // BLE 스캔 옵션 세팅
-    private List<ScanFilter> filters; // BLE 스캔 필터
+    public static List<ScanFilter> filters; // BLE 스캔 필터
     public static String myMacAddress; // 스마트폰 블루투스 Mac 주소
     // private static String sendTime; // 서버에 데이터를 보낸 시간
     String TAG = MainActivity.ServiceTAG;
@@ -38,10 +38,11 @@ public class BLEScanService extends Service {
     // Notification ID
     public static final int NOTIFICATION_ID = 1;
     BroadcastReceiver StopSelfReceiver, CalibrationReceiver;
-    private List<String> filterlist;
+    public static List<String> filterlist;
     public static List<Map<String, String>> EssentialDataArray;
     public static Context ServiceContext;
     public static boolean coolTime;
+    //public static Thread threadInCallback, checkRunningThead;
 
     public BLEScanService() {
     }
@@ -53,11 +54,8 @@ public class BLEScanService extends Service {
         CalibrationFlag = false;
         coolTime = false;
         ServiceContext = this;
-        // 임의의 비콘 Mac 주소
+        // 비콘 Mac 주소를 저장할 ArrayList
         filterlist = new ArrayList<String>();
-        filterlist.add("00:1A:7D:DA:71:07");
-        filterlist.add("00:1A:7D:DA:71:03");
-        filterlist.add("B8:27:EB:E1:47:EB");
 
         // 비콘 디바이스 정보
         mBLEDevices = new ArrayList<DeviceInfo>();
@@ -67,6 +65,9 @@ public class BLEScanService extends Service {
 
         // 소켓 생성
         mSocketIO = new SocketIO();
+
+        // 콜백메서드 내에서 실행시킬 스레드 생성
+        //threadInCallback = newThreadInCallback();
 
         // 리시버 등록
         IntentFilter StopSelfPkgFilter = new IntentFilter();
@@ -131,9 +132,6 @@ public class BLEScanService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId){
-        // 스캔 시작
-        scanLeDevice(true);
-
         Runnable r = new Runnable() {
             @Override
             public void run() {
@@ -146,6 +144,20 @@ public class BLEScanService extends Service {
 
                 // 서버에 Rssi 제한 값 요청 후 데이터 받기
                 mSocketIO.requestEssentialData();
+
+                try{
+                    Thread.sleep(500);
+                }catch (InterruptedException e){
+                    e.printStackTrace();
+                }
+
+                Log.d("FilterListSize", String.valueOf(filterlist.size()));
+                for(int i = 0; i < filterlist.size(); i++) {
+                    Log.d("FilterList", String.valueOf(i) + ": " + filterlist.get(i));
+                }
+
+                // 스캔 시작
+                scanLeDevice(true);
 
                 try{
                     Thread.sleep(5000);
@@ -161,7 +173,7 @@ public class BLEScanService extends Service {
                     }
                     else {
                         try {
-                            Thread.sleep(500);
+                            Thread.sleep(300);
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
@@ -171,7 +183,8 @@ public class BLEScanService extends Service {
                             continue;
 
                         // 0.5초 동안 3번 Rssi 체크 후 2번 이상 적합하면 sendEvent() 메서드 실행
-                        CheckTime.checkTime();
+                        if(!coolTime)
+                            CheckTime.checkTime();
 
                         //mSocketIO.sendEvent(new HashMap<String, String>());
                         //scanLeDevice(false);
@@ -273,18 +286,42 @@ public class BLEScanService extends Service {
         return result;
     }
 
+    private Thread newThreadInCallback(){
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try{
+                    Thread.sleep(1000);
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
+            }
+        });
+        return thread;
+    }
+
     // api 21 이상
     @SuppressLint("NewApi")
     private ScanCallback mScanCallback = new ScanCallback() {
         @Override
         public void onScanResult(int callbackType, ScanResult result) {
             super.onScanResult(callbackType, result);
+            Log.d("ScanRecord", "Running");
             Log.d("ScanRecord", result.getScanRecord().toString());
 
             List<String> separatedData = separate(result.getScanRecord().getBytes());
 
             AddDeviceInfo.addDeviceInfo(new DeviceInfo(result.getDevice(), result.getDevice().getAddress(), separatedData.get(0),
                     separatedData.get(1), separatedData.get(2), separatedData.get(3), result.getRssi()));
+
+            /*
+            if(threadInCallback.getState() == Thread.State.NEW)
+                threadInCallback.start();
+            else if(!threadInCallback.isAlive()){
+                threadInCallback = newThreadInCallback();
+                threadInCallback.start();
+            }else if(threadInCallback.getState() == Thread.State.TIMED_WAITING)
+                return; */
         }
 
         @Override
@@ -304,8 +341,8 @@ public class BLEScanService extends Service {
         public void onLeScan(BluetoothDevice device, int rssi, byte[] scanRecord) {
             // 비콘 Mac 주소 필터링
             boolean filtering = false;
-            for(String deviceMacAddres : filterlist){
-                if(device.getAddress().equals(deviceMacAddres)){
+            for(String deviceMacAddress : filterlist){
+                if(device.getAddress().equals(deviceMacAddress)){
                     filtering = true;
                 }
             }

@@ -35,9 +35,9 @@ public class Calibration {
 
         GenerateNotification.generateNotification(BLEScanService.ServiceContext, "Calibration", "Calibration start" ,"");
         // 30 times for 30 seconds
-        for(int i = 0; i < 30; i++){
+        for(int i = 0; i < 60; i++){
             try{
-                Thread.sleep(1000);
+                Thread.sleep(500);
             }catch (Exception e){
                 e.printStackTrace();
             }

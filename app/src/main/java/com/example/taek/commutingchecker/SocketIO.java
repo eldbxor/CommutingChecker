@@ -1,6 +1,7 @@
 package com.example.taek.commutingchecker;
 
 import android.annotation.SuppressLint;
+import android.bluetooth.le.ScanFilter;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -118,6 +119,7 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
                     public void call(Object... args) {
                         try {
                             final JSONArray jarray = new JSONArray(args[0].toString());
+                            Log.d("jarray's length", String.valueOf(jarray.length()));
                             Log.d("request", args[0].toString());
                             for (int i = 0; i < jarray.length(); i++) {
                                 JSONObject obj_listen = jarray.getJSONObject(i);
@@ -132,6 +134,16 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
                                 map.put("beacon_address2", str_arr[1]);
                                 map.put("beacon_address3", str_arr[2]);
                                 AddEssentialData.addEssentialData(map);
+                                AddFilterList.addFilterList(str_arr[0]);
+                                AddFilterList.addFilterList(str_arr[1]);
+                                AddFilterList.addFilterList(str_arr[2]);
+                                Log.d("addFilterList", str_arr[0] + ", " + str_arr[1] + ", " + str_arr[2]);
+                                Log.d("FilterSizeInSocketIO", String.valueOf(BLEScanService.filterlist.size()));
+                                BLEScanService.filters.clear();
+                                for(String deviceMacAddress : BLEScanService.filterlist){
+                                    ScanFilter filter = new ScanFilter.Builder().setDeviceAddress(deviceMacAddress).build();
+                                    BLEScanService.filters.add(filter);
+                                }
                             }
                         } catch (JSONException e) {
                             e.printStackTrace();
