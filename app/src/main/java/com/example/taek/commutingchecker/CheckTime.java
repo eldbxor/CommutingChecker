@@ -64,62 +64,13 @@ public class CheckTime {
                 }
 
                 if(count >= 2){
-                    SendEvent.sendEvent(mDeviceInfo1, mDeviceInfo2, mDeviceInfo3);
-                    /*
-                    if(!BLEScanService.coolTime) {
-                        sendEvent(mDeviceInfo1, mDeviceInfo2, mDeviceInfo3);
-
-                        Map<String, String> data = new HashMap<String, String>();
-                        data.put("BeaconDeviceAddress1", mDeviceInfo1.Address);
-                        data.put("BeaconDeviceAddress2", mDeviceInfo2.Address);
-                        data.put("BeaconDeviceAddress3", mDeviceInfo3.Address);
-                        data.put("BeaconData1", mDeviceInfo1.ScanRecord);
-                        data.put("BeaconData2", mDeviceInfo2.ScanRecord);
-                        data.put("BeaconData3", mDeviceInfo3.ScanRecord);
-                        data.put("SmartphoneAddress", BLEScanService.myMacAddress);
-                        data.put("DateTime", CurrentTime.currentTime());
-
-                        BLEScanService.mSocketIO.sendEvent(data);
-                        BLEScanService.coolTime = true;
-
-                        try {
-                            Thread.sleep(3000);
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-
-                        BLEScanService.coolTime = false;
-                    } */
+                    SendEvent.sendEvent(mDeviceInfo1, mDeviceInfo2, mDeviceInfo3, true);
+                    BLEScanService.checkCallbackThread = new CheckCallback(mDeviceInfo1, mDeviceInfo2, mDeviceInfo3);
                 }
             }
         };
 
         Thread thread = new Thread(r);
         thread.start();
-    }
-
-    private synchronized static void sendEvent(DeviceInfo deviceInfo1, DeviceInfo deviceInfo2, DeviceInfo deviceInfo3){
-        if(!BLEScanService.coolTime) {
-            Map<String, String> data = new HashMap<String, String>();
-            data.put("BeaconDeviceAddress1", deviceInfo1.Address);
-            data.put("BeaconDeviceAddress2", deviceInfo2.Address);
-            data.put("BeaconDeviceAddress3", deviceInfo3.Address);
-            data.put("BeaconData1", deviceInfo1.ScanRecord);
-            data.put("BeaconData2", deviceInfo2.ScanRecord);
-            data.put("BeaconData3", deviceInfo3.ScanRecord);
-            data.put("SmartphoneAddress", BLEScanService.myMacAddress);
-            data.put("DateTime", CurrentTime.currentTime());
-
-            BLEScanService.mSocketIO.sendEvent(data);
-            BLEScanService.coolTime = true;
-
-            try {
-                Thread.sleep(3000);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
-            BLEScanService.coolTime = false;
-        }
     }
 }

@@ -7,7 +7,7 @@ import java.util.Map;
  * Created by Taek on 2016-06-08.
  */
 public class SendEvent {
-    public synchronized static void sendEvent(DeviceInfo deviceInfo1, DeviceInfo deviceInfo2, DeviceInfo deviceInfo3){
+    public synchronized static void sendEvent(DeviceInfo deviceInfo1, DeviceInfo deviceInfo2, DeviceInfo deviceInfo3, boolean comeToWork){
         if(!BLEScanService.coolTime) {
             Map<String, String> data = new HashMap<String, String>();
             data.put("BeaconDeviceAddress1", deviceInfo1.Address);
@@ -20,15 +20,11 @@ public class SendEvent {
             data.put("DateTime", CurrentTime.currentTime());
 
             BLEScanService.mSocketIO.sendEvent(data);
-            BLEScanService.coolTime = true;
-
-            try {
-                Thread.sleep(3000);
-            } catch (Exception e) {
-                e.printStackTrace();
+            if(comeToWork) {
+                BLEScanService.coolTime = true;
+            }else{
+                BLEScanService.coolTime = false;
             }
-
-            BLEScanService.coolTime = false;
         }
     }
 }
