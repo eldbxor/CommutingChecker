@@ -1,5 +1,7 @@
 package com.example.taek.commutingchecker;
 
+import android.util.Log;
+
 /**
  * Created by Taek on 2016-06-08.
  */
@@ -13,6 +15,7 @@ public class CheckCallback {
             @Override
             public void run() {
                 while(flag){
+                    Log.d("CheckCallback", "Running");
                     BLEScanService.isCallbackRunning = false;
 
                     try{
@@ -22,6 +25,7 @@ public class CheckCallback {
                     }
 
                     if(!BLEScanService.isCallbackRunning){ // callback method isn't running
+                        Log.d("isCallbackRunning)", "false");
                         SendEvent.sendEvent(deviceInfo1, deviceInfo2, deviceInfo3, false);
                         flag = false;
                     }

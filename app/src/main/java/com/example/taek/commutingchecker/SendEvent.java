@@ -8,7 +8,7 @@ import java.util.Map;
  */
 public class SendEvent {
     public synchronized static void sendEvent(DeviceInfo deviceInfo1, DeviceInfo deviceInfo2, DeviceInfo deviceInfo3, boolean comeToWork){
-        if(!BLEScanService.coolTime) {
+        if(!BLEScanService.coolTime && comeToWork || !comeToWork) {
             Map<String, String> data = new HashMap<String, String>();
             data.put("BeaconDeviceAddress1", deviceInfo1.Address);
             data.put("BeaconDeviceAddress2", deviceInfo2.Address);
@@ -20,9 +20,10 @@ public class SendEvent {
             data.put("DateTime", CurrentTime.currentTime());
 
             BLEScanService.mSocketIO.sendEvent(data);
-            if(comeToWork) {
+            if (comeToWork) {
                 BLEScanService.coolTime = true;
-            }else{
+                BLEScanService.checkCallbackThread = new CheckCallback(deviceInfo1, deviceInfo2, deviceInfo3);
+            } else {
                 BLEScanService.coolTime = false;
             }
         }

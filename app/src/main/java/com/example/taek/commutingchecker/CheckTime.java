@@ -38,15 +38,23 @@ public class CheckTime {
 
                 for(int i = 0; i < 3; i++){
                     mBLEDevice = BLEScanService.mBLEDevices;
+                    for(DeviceInfo deviceInfo : mBLEDevice){ // update deviceInfo1, 2, 3
+                        if(deviceInfo.Address.equals(mDeviceInfo1.Address))
+                            mDeviceInfo1 = deviceInfo;
+                        else if(deviceInfo.Address.equals(mDeviceInfo2.Address))
+                            mDeviceInfo2 = deviceInfo;
+                        else if(deviceInfo.Address.equals(mDeviceInfo3.Address))
+                            mDeviceInfo3 = deviceInfo;
+                    }
                     int count_for = 0;
 
-                    if(mDeviceInfo1.Rssi > (coordinateX - 3) && mDeviceInfo1.Rssi < (coordinateX + 3)){
+                    if(mDeviceInfo1.Rssi > (coordinateX - 5) && mDeviceInfo1.Rssi < (coordinateX + 5)){
                         count_for++;
                     }
-                    if(mDeviceInfo2.Rssi > (coordinateY - 3) && mDeviceInfo2.Rssi < (coordinateY + 3)){
+                    if(mDeviceInfo2.Rssi > (coordinateY - 5) && mDeviceInfo2.Rssi < (coordinateY + 5)){
                         count_for++;
                     }
-                    if(mDeviceInfo3.Rssi > (coordinateZ - 3) && mDeviceInfo3.Rssi < (coordinateZ + 3)){
+                    if(mDeviceInfo3.Rssi > (coordinateZ - 5) && mDeviceInfo3.Rssi < (coordinateZ + 5)){
                         count_for++;
                     }
 
@@ -65,7 +73,7 @@ public class CheckTime {
 
                 if(count >= 2){
                     SendEvent.sendEvent(mDeviceInfo1, mDeviceInfo2, mDeviceInfo3, true);
-                    BLEScanService.checkCallbackThread = new CheckCallback(mDeviceInfo1, mDeviceInfo2, mDeviceInfo3);
+                    //BLEScanService.checkCallbackThread = new CheckCallback(mDeviceInfo1, mDeviceInfo2, mDeviceInfo3);
                 }
             }
         };
