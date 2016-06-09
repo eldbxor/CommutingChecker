@@ -43,6 +43,23 @@ public class BLEScanService extends Service {
     public static Context ServiceContext;
     public static boolean coolTime, isCallbackRunning;
     public static CheckCallback checkCallbackThread;
+    /**
+     * Trigger a callback for every Bluetooth advertisement found that matches the filter criteria.
+     * If no filter is active, all advertisement packets are reported.
+     */
+    public static final int CALLBACK_TYPE_ALL_MATCHES = 1;
+
+    /**
+     * A result callback is only triggered for the first advertisement packet received that matches
+     * the filter criteria.
+     */
+    public static final int CALLBACK_TYPE_FIRST_MATCH = 2;
+
+    /**
+     * Receive a callback when advertisements are no longer received from a device that has been
+     * previously reported by a first match callback.
+     */
+    public static final int CALLBACK_TYPE_MATCH_LOST = 4;
 
     public BLEScanService() {
     }
@@ -98,9 +115,16 @@ public class BLEScanService extends Service {
         if(mBluetoothAdapter != null){ // && mBluetoothAdapter.isEnabled()){
             if(Build.VERSION.SDK_INT >= 21){
                 mBLEScanner = mBluetoothAdapter.getBluetoothLeScanner();
-                settings = new ScanSettings.Builder()
-                        .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
-                        .build();
+                if(Build.VERSION.SDK_INT == Build.VERSION_CODES.M){
+                    settings = new ScanSettings.Builder()
+                            .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
+                            .setCallbackType(CALLBACK_TYPE_ALL_MATCHES)
+                            .build();
+                }else if(Build.VERSION.SDK_INT >= 21 && Build.VERSION.SDK_INT < 23) {
+                    settings = new ScanSettings.Builder()
+                            .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
+                            .build();
+                }
                 filters = new ArrayList<ScanFilter>();
 
                 // 스캔 필터 리스트 추가
