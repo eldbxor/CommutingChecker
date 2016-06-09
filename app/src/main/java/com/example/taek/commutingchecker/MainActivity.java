@@ -1,42 +1,42 @@
 package com.example.taek.commutingchecker;
 
 import android.annotation.TargetApi;
-import android.app.ActivityManager;
 import android.app.AlertDialog;
-import android.content.Context;
+import android.app.FragmentManager;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.net.Uri;
 import android.os.Build;
+import android.support.design.widget.NavigationView;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
-import java.util.List;
-
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity
+        implements NavigationView.OnNavigationItemSelectedListener {
     private static final int PERMISSION_REQUEST_COARSE_LOCATION = 1;
-    Button startService, stopService;
-    Intent intent;
+
+    /** 2016. 6. 9
+     * Migrating views from MainActivity to this SetupFragment
+     * Reference: https://github.com/awesometic/facetalk_android
+     */
+
     public static String ServiceTAG;
-    Button showData, request, calibration, calibrationTest;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        startService = (Button)findViewById(R.id.Start_Service);
-        stopService = (Button)findViewById(R.id.Stop_Service);
-        intent = new Intent(this, BLEScanService.class);
+
         ServiceTAG = getResources().getString(R.string.scan_service);
-        request = (Button)findViewById(R.id.Request);
-        showData = (Button)findViewById(R.id.Show_EssentialData);
-        calibration = (Button)findViewById(R.id.Calibration);
-        calibrationTest = (Button)findViewById(R.id.test);
 
         // BLE 관련 Permission 주기
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
@@ -57,67 +57,10 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-        startService.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                boolean isRunning = isRunningProcess(MainActivity.this, "com.example.taek.commutingchecker:remote");
-                if(isRunning){
-                    Toast.makeText(MainActivity.this, "service is already running", Toast.LENGTH_SHORT).show();
-                }else{
-                    Toast.makeText(MainActivity.this, "service start", Toast.LENGTH_SHORT).show();
-                    startService(intent);
-                }
-            }
-        });
-
-        stopService.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //stopService(intent);
-                Intent intent = new Intent("android.intent.action.STOP_SERVICE");
-                intent.setData(Uri.parse("StopSelf:"));
-                sendBroadcast(intent);
-            }
-        });
-
-        request.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                BLEScanService.mSocketIO.requestEssentialData();
-            }
-        });
-
-        showData.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(BLEScanService.EssentialDataArray.size() > 0)
-                    Toast.makeText(MainActivity.this, BLEScanService.EssentialDataArray.get(0).get("id_workplace").toString() + ", "
-                            + BLEScanService.EssentialDataArray.get(0).get("coordinateX").toString() + ", "
-                            + BLEScanService.EssentialDataArray.get(0).get("coordinateY").toString() + ", "
-                            + BLEScanService.EssentialDataArray.get(0).get("coordinateZ").toString() + ", "
-                            + BLEScanService.EssentialDataArray.get(0).get("beacon_address1").toString() + ", "
-                            + BLEScanService.EssentialDataArray.get(0).get("beacon_address2").toString() + ", "
-                            + BLEScanService.EssentialDataArray.get(0).get("beacon_address3").toString() + ", "
-                            + BLEScanService.EssentialDataArray.size(), Toast.LENGTH_LONG).show();
-                else{
-                    Toast.makeText(MainActivity.this, "no data", Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
-
-        calibration.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                BLEScanService.CalibrationFlag = true;
-            }
-        });
-
-        calibrationTest.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                BLEScanService.test();
-            }
-        });
+        /** 2016. 6. 9
+         * Init UI Elements including navigation view
+         */
+        initUiElements();
     }
 
     @Override
@@ -135,22 +78,6 @@ public class MainActivity extends AppCompatActivity {
         //startService(intent);
 
         Log.d("connect in mainactivity", "true");
-    }
-
-    // 서비스 프로세스 실행 상태 확인
-    private boolean isRunningProcess(Context context, String packageName){
-        boolean isRunning = false;
-        ActivityManager actMng = (ActivityManager)context.getSystemService(Context.ACTIVITY_SERVICE);
-        //List<ActivityManager.RunningAppProcessInfo> list = actMng.getRunningAppProcesses();
-        List<ActivityManager.RunningServiceInfo> list = actMng.getRunningServices(Integer.MAX_VALUE);
-        for(ActivityManager.RunningServiceInfo rap : list){
-            if(rap.service.getPackageName().equals(packageName)){
-                isRunning = true;
-                break;
-            }
-        }
-
-        return isRunning;
     }
 
     @Override
@@ -176,5 +103,143 @@ public class MainActivity extends AppCompatActivity {
                 return;
             }
         }
+    }
+
+
+    /** 2016. 06. 09
+     * Member variables and methods comes with implementing navigation view
+     */
+
+    /* DrawerLayout object */
+    private DrawerLayout drawerLayout;
+
+    /* Fragments objects */
+    private MainFragment fragMain;
+    private WebFragment fragWeb;
+    private SetupFragment fragSetup;
+
+    /* Navigation View object */
+    private NavigationView navigationView;
+
+    private void initUiElements() {
+        // Toolbar
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        // Fragments
+        fragMain = MainFragment.newInstance();
+        fragWeb = WebFragment.newInstance();
+        fragSetup = SetupFragment.newInstance();
+
+        // DrawerLayout
+        drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                this, drawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawerLayout.setDrawerListener(toggle);
+        toggle.syncState();
+
+        // Navigation View
+        navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(this);
+
+        // Set the header of the Navigation View
+        View navHeaderView = navigationView.inflateHeaderView(R.layout.nav_header);
+        TextView tvNavHeadId = (TextView) navHeaderView.findViewById(R.id.nav_head_id);
+        TextView tvNavHeadAddr = (TextView) navHeaderView.findViewById(R.id.nav_head_bluetooth_addr);
+        tvNavHeadId.setText("employee id here");
+        tvNavHeadAddr.setText("employee bluetooth address here");
+
+        // Set the menu of the Navigation View
+        navigationView.inflateMenu(R.menu.nav_menu);
+
+        getFragmentManager().beginTransaction()
+                .replace(R.id.content_frame, fragMain)
+                .detach(fragMain).attach(fragMain)
+                .commit();
+    }
+
+    /* Essential overriding methods */
+    @Override
+    public void onBackPressed() {
+        drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
+            drawerLayout.closeDrawer(GravityCompat.START);
+        } else {
+            super.onBackPressed();
+        }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.option_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_exit) {
+            moveTaskToBack(true);
+            finish();
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    @SuppressWarnings("StatementWithEmptyBody")
+    @Override
+    public boolean onNavigationItemSelected(MenuItem item) {
+        FragmentManager fragmentManager = getFragmentManager();
+        int id = item.getItemId();
+
+        switch (id) {
+            case R.id.nav_main:
+                fragmentManager.beginTransaction()
+                        .replace(R.id.content_frame, fragMain)
+                        .detach(fragMain).attach(fragMain)
+                        .commit();
+                break;
+            case R.id.nav_setup:
+                fragmentManager.beginTransaction()
+                        .replace(R.id.content_frame, fragSetup)
+                        .detach(fragSetup).attach(fragSetup)
+                        .commit();
+                break;
+            case R.id.nav_web1:
+                fragmentManager.beginTransaction()
+                        .replace(R.id.content_frame, fragWeb)
+                        .detach(fragWeb).attach(fragWeb)
+                        .commit();
+                break;
+            case R.id.nav_web2:
+                fragmentManager.beginTransaction()
+                        .replace(R.id.content_frame, fragWeb)
+                        .detach(fragWeb).attach(fragWeb)
+                        .commit();
+                break;
+            case R.id.nav_web3:
+                fragmentManager.beginTransaction()
+                        .replace(R.id.content_frame, fragWeb)
+                        .detach(fragWeb).attach(fragWeb)
+                        .commit();
+                break;
+            default:
+                break;
+        }
+
+        // Change title on appbar
+        if (id == R.id.nav_main)
+            setTitle(R.string.app_name);
+        else
+            setTitle(item.getTitle());
+
+        drawerLayout.closeDrawers();
+        return true;
     }
 }

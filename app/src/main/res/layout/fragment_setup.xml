@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.example.taek.commutingchecker.MainActivity">
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <Button
+            android:id="@+id/Start_Service"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Start Service"/>
+
+        <Button
+            android:id="@+id/Stop_Service"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Stop Service"/>
+
+        <Button
+            android:id="@+id/Request"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Request Data"/>
+
+        <Button
+            android:id="@+id/Show_EssentialData"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Show data"/>
+
+        <Button
+            android:id="@+id/Calibration"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="CALIBRATION"/>
+
+        <Button
+            android:id="@+id/test"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="calibration test"/>
+    </LinearLayout>
+
+</FrameLayout>
