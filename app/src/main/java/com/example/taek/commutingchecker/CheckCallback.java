@@ -19,7 +19,7 @@ public class CheckCallback {
                     BLEScanService.isCallbackRunning = false;
 
                     try{
-                        Thread.sleep(1000);
+                        Thread.sleep(3000);
                     }catch (Exception e){
                         e.printStackTrace();
                     }
