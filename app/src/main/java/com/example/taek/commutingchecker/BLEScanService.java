@@ -138,7 +138,7 @@ public class BLEScanService extends Service {
             Log.d("myMacAddress", myMacAddress);
 
             // BLEScanner 객체 확인
-            if(mBLEScanner == null){
+            if(mBLEScanner == null && Build.VERSION.SDK_INT >= 21){
                 Toast.makeText(this, "Can not find BLE Scanner", Toast.LENGTH_SHORT).show();
                 return;
             }
@@ -324,20 +324,53 @@ public class BLEScanService extends Service {
     BluetoothAdapter.LeScanCallback mLeScanCallback = new BluetoothAdapter.LeScanCallback() {
         @Override
         public void onLeScan(BluetoothDevice device, int rssi, byte[] scanRecord) {
+
             isCallbackRunning = true;
+            Log.d("ScanRecord", "Running");
+            Log.d("filterList's size", String.valueOf(filterlist.size()));
+            Log.d("Essential Data's size", String.valueOf(EssentialDataArray.size()));
             // 비콘 Mac 주소 필터링
             boolean filtering = false;
             for(String deviceMacAddress : filterlist){
+                if((String.valueOf(deviceMacAddress)).equals(device.getAddress())){
+                    filtering = true;
+                    break;
+                }
+                /*
                 if(device.getAddress().equals(deviceMacAddress)){
                     filtering = true;
-                }
+                    break;
+                }*/
             }
             if(!filtering) return;
 
-            List<String> separatedData = separate(scanRecord);
+            String all = "";
+            String uuid = "";
+            int major_int;
+            int minor_int;
+            for (int i = 0; i <= 28; i++) {
+                byte b = scanRecord[i];
+                if (i > 8 && i < 28) {
+                    all += String.format("%02x ", b);
+                } else if(i == 28) {
+                    all += String.format("%02x", b);
+                }
+                if (i > 8 && i <= 24) {
+                    if (i == 24) {
+                        uuid += String.format("%02x", b);
+                    } else {
+                        uuid += String.format("%02x ", b);
+                    }
+                }
+            }
 
-            AddDeviceInfo.addDeviceInfo(new DeviceInfo(device, device.getAddress(), separatedData.get(0),
-                    separatedData.get(1), separatedData.get(2), separatedData.get(3), rssi));
+            major_int = (scanRecord[25] & 0xff) * 0x100 + (scanRecord[26] & 0xff);
+            minor_int = (scanRecord[27] & 0xff) * 0x100 + (scanRecord[28] & 0xff);
+
+            Log.d("AllOfScanRecord", all + ", " + uuid + ", " + String.valueOf(major_int) + ", " + String.valueOf(minor_int));
+
+            AddDeviceInfo.addDeviceInfo(new DeviceInfo(device, device.getAddress(), all,
+                    uuid, String.valueOf(major_int), String.valueOf(minor_int), rssi));
         }
     };
 }

@@ -2,6 +2,7 @@ package com.example.taek.commutingchecker;
 
 import android.annotation.SuppressLint;
 import android.bluetooth.le.ScanFilter;
+import android.os.Build;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -12,6 +13,7 @@ import org.json.JSONObject;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -44,6 +46,7 @@ public class SocketIO {
     // 이벤트 보내기
     public void sendEvent(Map<String, String> data) {
         JSONObject obj = new JSONObject();
+        JSONArray arr = new JSONArray();
         try {
             if (mSocket.connected()) {
                 Log.d("Socket", "connected");
@@ -57,7 +60,6 @@ public class SocketIO {
                     data.put("BeaconData3", mDeviceInfo3.ScanRecord);
                     data.put("SmartphoneAddress", BLEScanService.myMacAddress);
                     data.put("DateTime", CurrentTime.currentTime());
-
                  */
                 obj.put("BeaconDeviceAddress1", data.get("BeaconDeviceAddress1"));
                 obj.put("BeaconDeviceAddress2", data.get("BeaconDeviceAddress2"));
@@ -73,6 +75,19 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
                 obj.put("BeaconData3", data.get("BeaconData3"));
                 obj.put("SmartphoneAddress", data.get("SmartphoneAddress"));
                 obj.put("DateTime", data.get("DateTime"));
+
+                /*
+                String str = "{ \"BeaconDeviceAddress1\":\"" + data.get("BeaconDeviceAddress1") + "\"," +
+                        "\"BeaconDeviceAddress2\":\"" + data.get("BeaconDeviceAddress2") + "\"," +
+                        "\"BeaconDeviceAddress3\":\"" + data.get("BeaconDeviceAddress3") + "\"," +
+                        "\"BeaconData1\":\"" + data.get("BeaconData1") + "\"," +
+                        "\"BeaconData2\":\"" + data.get("BeaconData2") + "\"," +
+                        "\"BeaconData3\":\"" + data.get("BeaconData3") + "\"," +
+                        "\"SmartphoneAddress\":\"" + data.get("SmartphoneAddress") + "\"," +
+                        "\"DateTime\":\"" + data.get("DateTime") + "\" }";
+
+                JSONObject obj_kitkat = new JSONObject(str); */
+
                 mSocket.emit("circumstance", obj);
                 Log.d("sendSocketData", "true");
 
@@ -97,7 +112,7 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
     }
 
     // More than api ver.19
-    @SuppressLint("NewApi")
+    //@SuppressLint("NewApi")
     public void requestEssentialData(){
         JSONObject obj = new JSONObject();
         try{
@@ -139,10 +154,12 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
                                 AddFilterList.addFilterList(str_arr[2]);
                                 Log.d("addFilterList", str_arr[0] + ", " + str_arr[1] + ", " + str_arr[2]);
                                 Log.d("FilterSizeInSocketIO", String.valueOf(BLEScanService.filterlist.size()));
-                                BLEScanService.filters.clear();
-                                for(String deviceMacAddress : BLEScanService.filterlist){
-                                    ScanFilter filter = new ScanFilter.Builder().setDeviceAddress(deviceMacAddress).build();
-                                    BLEScanService.filters.add(filter);
+                                if(Build.VERSION.SDK_INT >= 21) {
+                                    BLEScanService.filters.clear();
+                                    for (String deviceMacAddress : BLEScanService.filterlist) {
+                                        ScanFilter filter = new ScanFilter.Builder().setDeviceAddress(deviceMacAddress).build();
+                                        BLEScanService.filters.add(filter);
+                                    }
                                 }
                             }
                         } catch (JSONException e) {

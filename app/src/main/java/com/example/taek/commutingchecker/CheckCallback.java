@@ -27,7 +27,8 @@ public class CheckCallback {
                     if(!BLEScanService.isCallbackRunning){ // callback method isn't running
                         Log.d("isCallbackRunning)", "false");
                         SendEvent.sendEvent(deviceInfo1, deviceInfo2, deviceInfo3, false);
-                        flag = false;
+                        //flag = false;
+                        break;
                     }
                 }
             }
