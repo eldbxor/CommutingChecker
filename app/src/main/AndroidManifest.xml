@@ -19,9 +19,8 @@
         <service
             android:name=".BLEScanService"
             android:enabled="true"
-            android:exported="true" >
-
-            <!-- android:process=":remote"> -->
+            android:exported="true"
+            android:process=":remote">
         </service>
     </application>
 

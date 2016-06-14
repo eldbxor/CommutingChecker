@@ -10,17 +10,15 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <Button
-            android:id="@+id/Start_Service"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Start Service"/>
-
-        <Button
-            android:id="@+id/Stop_Service"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Stop Service"/>
+        <Switch
+            android:id="@+id/BLEScanSwitch"
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
+            android:layout_gravity="right"
+            android:text="BLE SCAN"/>
 
         <Button
             android:id="@+id/Request"
@@ -41,10 +39,16 @@
             android:text="CALIBRATION"/>
 
         <Button
-            android:id="@+id/test"
+            android:id="@+id/setValueOfRssi"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="calibration test"/>
+            android:text="SET VALUE OF RSSI: -1, -1, -1"/>
+
+        <Button
+            android:id="@+id/CheckRunning"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Check Running"/>
     </LinearLayout>
 
 </FrameLayout>

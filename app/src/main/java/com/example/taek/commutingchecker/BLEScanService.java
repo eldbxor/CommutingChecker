@@ -146,7 +146,11 @@ public class BLEScanService extends Service {
         }
 
         // 소켓 연결
-        mSocketIO.connect();
+        if(!mSocketIO.mSocket.connected()) {
+            Log.d("Service's SocketIO", "not connected");
+            mSocketIO.connect();
+        }else
+            Log.d("Service's SocketIO", "already connected");
 
         // 서버에 Rssi 제한 값 요청 후 데이터 받기
         //mSocketIO.requestEssentialData();
@@ -191,7 +195,16 @@ public class BLEScanService extends Service {
                     if (CalibrationFlag) {  // if you receive Calibration_Broadcast
                         Calibration.calibration();
                         CalibrationFlag = false;
-                        mSocketIO.requestEssentialData();
+
+                        try {
+                            Thread.sleep(3000);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        // mSocketIO.requestEssentialData();
+
+                        stopSelf();
+                        break;
                     }
                     else {
                         try {
@@ -221,8 +234,8 @@ public class BLEScanService extends Service {
         return Service.START_STICKY;
     }
 
-    public static void test(){
-        mSocketIO.test();
+    public static void setValueOfRssi(){
+        mSocketIO.setValue();
     }
 
     @Override
@@ -256,6 +269,11 @@ public class BLEScanService extends Service {
         ScanFlag = false;
         scanLeDevice(false); // 스캔 중지
         mSocketIO.close();
+        try{
+            SetupFragment.bleScanSwitch.setChecked(false);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
         GenerateNotification.generateNotification(this, "서비스 종료", "서비스가 종료되었습니다.", "");
     }
 

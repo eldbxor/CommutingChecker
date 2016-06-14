@@ -21,14 +21,15 @@ public class Calibration {
             BLEScanService.CalibrationFlag = false;
             return;
         }
+        rssi1 = new ArrayList<Integer>();
+        rssi2 = new ArrayList<Integer>();
+        rssi3 = new ArrayList<Integer>();
 
         sumOfRssi1 = 0;
         sumOfRssi2 = 0;
         sumOfRssi3 = 0;
+        rssi1.clear(); rssi2.clear(); rssi3.clear();
 
-        rssi1 = new ArrayList<Integer>();
-        rssi2 = new ArrayList<Integer>();
-        rssi3 = new ArrayList<Integer>();
         mDeviceInfo1 = BLEScanService.mBLEDevices.get(0);
         mDeviceInfo2 = BLEScanService.mBLEDevices.get(1);
         mDeviceInfo3 = BLEScanService.mBLEDevices.get(2);

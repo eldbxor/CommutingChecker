@@ -10,6 +10,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CompoundButton;
+import android.widget.Switch;
 import android.widget.Toast;
 
 import java.util.List;
@@ -20,9 +22,9 @@ import java.util.List;
  */
 public class SetupFragment extends Fragment {
 
-    Button startService, stopService;
     Intent intent;
-    Button showData, request, calibration, calibrationTest;
+    public static Button showData, request, calibration, setValueOfRssi, checkRunning;
+    public static Switch bleScanSwitch;
 
     public static SetupFragment newInstance() {
         SetupFragment fragment = new SetupFragment();
@@ -41,58 +43,69 @@ public class SetupFragment extends Fragment {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_setup, container, false);
 
-        startService = (Button) rootView.findViewById(R.id.Start_Service);
-        stopService = (Button) rootView.findViewById(R.id.Stop_Service);
+        bleScanSwitch = (Switch) rootView.findViewById(R.id.BLEScanSwitch);
         intent = new Intent(getActivity(), BLEScanService.class);
         request = (Button) rootView.findViewById(R.id.Request);
         showData = (Button) rootView.findViewById(R.id.Show_EssentialData);
         calibration = (Button) rootView.findViewById(R.id.Calibration);
-        calibrationTest = (Button) rootView.findViewById(R.id.test);
+        setValueOfRssi = (Button) rootView.findViewById(R.id.setValueOfRssi);
+        checkRunning = (Button) rootView.findViewById(R.id.CheckRunning);
 
-        startService.setOnClickListener(new View.OnClickListener() {
+        // if service is running switch off
+        if(isRunningProcess(getActivity(), "com.example.taek.commutingchecker:remote"))
+            bleScanSwitch.setChecked(true);
+
+        bleScanSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
-            public void onClick(View v) {
-                boolean isRunning = isRunningProcess(getActivity(), "com.example.taek.commutingchecker:remote");
-                if(isRunning){
-                    Toast.makeText(getActivity(), "service is already running", Toast.LENGTH_SHORT).show();
-                }else{
-                    Toast.makeText(getActivity(), "service start", Toast.LENGTH_SHORT).show();
-                    getActivity().startService(intent);
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if(isChecked){ // Switch on
+                    boolean isRunning = isRunningProcess(getActivity(), "com.example.taek.commutingchecker:remote");
+                    if(isRunning){
+                        Toast.makeText(getActivity(), "service is already running", Toast.LENGTH_SHORT).show();
+                    }else{
+                        Toast.makeText(getActivity(), "service start", Toast.LENGTH_SHORT).show();
+                        getActivity().startService(intent);
+                    }
+                }else{ // Switch off
+                    //stopService(intent);
+                    Intent intent = new Intent("android.intent.action.STOP_SERVICE");
+                    intent.setData(Uri.parse("StopSelf:"));
+                    getActivity().sendBroadcast(intent);
                 }
-            }
-        });
-
-        stopService.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //stopService(intent);
-                Intent intent = new Intent("android.intent.action.STOP_SERVICE");
-                intent.setData(Uri.parse("StopSelf:"));
-                getActivity().sendBroadcast(intent);
             }
         });
 
         request.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                BLEScanService.mSocketIO.requestEssentialData();
+                try{
+                    BLEScanService.mSocketIO.requestEssentialData();
+                }catch (Exception e){
+                    e.printStackTrace();
+                    Toast.makeText(getActivity(), "서비스 실행상태가 아닙니다.", Toast.LENGTH_LONG).show();
+                }
             }
         });
 
         showData.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(BLEScanService.EssentialDataArray.size() > 0)
-                    Toast.makeText(getActivity(), BLEScanService.EssentialDataArray.get(0).get("id_workplace").toString() + ", "
-                            + BLEScanService.EssentialDataArray.get(0).get("coordinateX").toString() + ", "
-                            + BLEScanService.EssentialDataArray.get(0).get("coordinateY").toString() + ", "
-                            + BLEScanService.EssentialDataArray.get(0).get("coordinateZ").toString() + ", "
-                            + BLEScanService.EssentialDataArray.get(0).get("beacon_address1").toString() + ", "
-                            + BLEScanService.EssentialDataArray.get(0).get("beacon_address2").toString() + ", "
-                            + BLEScanService.EssentialDataArray.get(0).get("beacon_address3").toString() + ", "
-                            + BLEScanService.EssentialDataArray.size(), Toast.LENGTH_LONG).show();
-                else{
-                    Toast.makeText(getActivity(), "no data", Toast.LENGTH_SHORT).show();
+                try{
+                    if(BLEScanService.EssentialDataArray.size() > 0)
+                        Toast.makeText(getActivity(), BLEScanService.EssentialDataArray.get(0).get("id_workplace").toString() + ", "
+                                + BLEScanService.EssentialDataArray.get(0).get("coordinateX").toString() + ", "
+                                + BLEScanService.EssentialDataArray.get(0).get("coordinateY").toString() + ", "
+                                + BLEScanService.EssentialDataArray.get(0).get("coordinateZ").toString() + ", "
+                                + BLEScanService.EssentialDataArray.get(0).get("beacon_address1").toString() + ", "
+                                + BLEScanService.EssentialDataArray.get(0).get("beacon_address2").toString() + ", "
+                                + BLEScanService.EssentialDataArray.get(0).get("beacon_address3").toString() + ", "
+                                + BLEScanService.EssentialDataArray.size(), Toast.LENGTH_LONG).show();
+                    else{
+                        Toast.makeText(getActivity(), "no data", Toast.LENGTH_SHORT).show();
+                    }
+                }catch (Exception e){
+                    e.printStackTrace();
+                    Toast.makeText(getActivity(), "서비스 실행상태가 아닙니다.", Toast.LENGTH_LONG).show();
                 }
             }
         });
@@ -100,14 +113,33 @@ public class SetupFragment extends Fragment {
         calibration.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                BLEScanService.CalibrationFlag = true;
+                if(isRunningProcess(getActivity(), "com.example.taek.commutingchecker:remote"))
+                    BLEScanService.CalibrationFlag = true;
+                else
+                    Toast.makeText(getActivity(), "서비스 실행상태가 아닙니다.", Toast.LENGTH_LONG).show();
             }
         });
 
-        calibrationTest.setOnClickListener(new View.OnClickListener() {
+        setValueOfRssi.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                BLEScanService.test();
+                try{
+                    BLEScanService.setValueOfRssi();
+                }catch (Exception e){
+                    e.printStackTrace();
+                    Toast.makeText(getActivity(), "서비스 실행상태가 아닙니다.", Toast.LENGTH_LONG).show();
+                }
+            }
+        });
+
+        checkRunning.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // if service is running switch off
+                if(isRunningProcess(getActivity(), "com.example.taek.commutingchecker:remote"))
+                    Toast.makeText(getActivity(), "True", Toast.LENGTH_SHORT).show();
+                else
+                    Toast.makeText(getActivity(), "False", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -117,11 +149,11 @@ public class SetupFragment extends Fragment {
     // 서비스 프로세스 실행 상태 확인
     private boolean isRunningProcess(Context context, String packageName){
         boolean isRunning = false;
+
         ActivityManager actMng = (ActivityManager)context.getSystemService(Context.ACTIVITY_SERVICE);
-        //List<ActivityManager.RunningAppProcessInfo> list = actMng.getRunningAppProcesses();
-        List<ActivityManager.RunningServiceInfo> list = actMng.getRunningServices(Integer.MAX_VALUE);
+        List <ActivityManager.RunningServiceInfo> list = actMng.getRunningServices(Integer.MAX_VALUE);
         for(ActivityManager.RunningServiceInfo rap : list){
-            if(rap.service.getPackageName().equals(packageName)){
+            if(rap.process.equals(packageName)){
                 isRunning = true;
                 break;
             }

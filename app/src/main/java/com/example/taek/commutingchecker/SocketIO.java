@@ -194,7 +194,8 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
                 mSocket.emit("calibration", obj);
                 Log.d("calibration", "success");
 
-                GenerateNotification.generateNotification(BLEScanService.ServiceContext, "Calibration", "Rssi 평균 값을 서버에 전송하였습니다.",
+                GenerateNotification.generateNotification(BLEScanService.ServiceContext, "Calibration", "Rssi 평균 값을 서버에 전송하였습니다." +
+                        ".",
                         "rss1: " + data.get("CoordinateX") + ", " + "rssi2: " + data.get("CoordinateY") + ", " + "rss3: " + data.get("CoordinateZ"));
                 Log.d("calibration data", data.get("BeaconDeviceAddress1") + ", " +
                         data.get("BeaconDeviceAddress2") + ", " +
@@ -219,7 +220,50 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
         }
     }
 
-    public void test(){
+    public void amIRegisted(String dateTime, String smartphoneAddress){
+        JSONObject obj = new JSONObject();
+        try {
+            if (mSocket.connected()) {
+                Log.d("Socket", "connected");
+                obj.put("DateTime", dateTime);
+                obj.put("SmartphoneAddress", smartphoneAddress);
+
+                mSocket.emit("amIRegistered", obj);
+                Log.d("amIRegistered", "success");
+
+                mSocket.on("data", new Emitter.Listener() {
+                    @Override
+                    public void call(Object... args) {
+                        try {
+                            JSONObject robj = (JSONObject) args[0];
+                            String registered = String.valueOf(robj.get("registered"));
+                            if(registered.equals("true")) {
+                                String name = String.valueOf(robj.get("name"));
+                                String employee_number = String.valueOf(robj.get("employee_number"));
+                                Log.d("request", registered + ", " + name + ", " + employee_number);
+
+                                MainActivity.amIRegistered = true;
+                                MainActivity.employee_name = name;
+                                MainActivity.employee_number = employee_number;
+                            }else
+                                MainActivity.amIRegistered = false;
+
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            Log.d("Receive Request_data", "fail");
+                        }
+                    }
+                });
+            } else {
+                Log.d("amIRegistered", "fail");
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+            Log.d("TestError(JSON)", e.getMessage());
+        }
+    }
+
+    public void setValue(){
         JSONObject obj = new JSONObject();
         try {
             if (mSocket.connected()) {
@@ -233,9 +277,9 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
                 obj.put("BeaconData3", "70 9b d6 40 42 d1 4b 1a 99 0a 36 d4 a1 e5 27 d8 00 03 00 01");
                 obj.put("SmartphoneAddress", BLEScanService.myMacAddress);
                 obj.put("DateTime", CurrentTime.currentTime());
-                obj.put("CoordinateX", "-50");
-                obj.put("CoordinateY", "-50");
-                obj.put("CoordinateZ", "-50");
+                obj.put("CoordinateX", "-1");
+                obj.put("CoordinateY", "-1");
+                obj.put("CoordinateZ", "-1");
                 mSocket.emit("calibration", obj);
                 Log.d("test", "true");
 

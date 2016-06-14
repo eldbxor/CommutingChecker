@@ -3,6 +3,7 @@ package com.example.taek.commutingchecker;
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.app.FragmentManager;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.os.Build;
@@ -30,6 +31,11 @@ public class MainActivity extends AppCompatActivity
      */
 
     public static String ServiceTAG;
+    public static SocketIO mScoket;
+    private String myMacAddress;
+    public static boolean amIRegistered;
+    public static String employee_number;
+    public static String employee_name;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,6 +43,9 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
 
         ServiceTAG = getResources().getString(R.string.scan_service);
+        mScoket = new SocketIO();
+
+        mScoket.connect();
 
         // BLE 관련 Permission 주기
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
@@ -77,7 +86,16 @@ public class MainActivity extends AppCompatActivity
         // 서비스 실행
         //startService(intent);
 
-        Log.d("connect in mainactivity", "true");
+        myMacAddress = android.provider.Settings.Secure.getString(this.getContentResolver(), "bluetooth_address");
+        Log.d("myMacAddress", myMacAddress);
+
+        try{
+            Thread.sleep(1000);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
+        mScoket.amIRegisted(CurrentTime.currentTime(), myMacAddress);
     }
 
     @Override
@@ -241,5 +259,11 @@ public class MainActivity extends AppCompatActivity
 
         drawerLayout.closeDrawers();
         return true;
+    }
+
+    @Override
+    public void onDestroy(){
+        super.onDestroy();
+        mScoket.close();
     }
 }
