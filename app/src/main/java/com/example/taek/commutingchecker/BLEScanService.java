@@ -82,7 +82,7 @@ public class BLEScanService extends Service {
         EssentialDataArray = new ArrayList<Map<String, String>>();
 
         // 소켓 생성
-        mSocketIO = new SocketIO();
+        this.mSocketIO = new SocketIO();
 
         // 리시버 등록
         IntentFilter StopSelfPkgFilter = new IntentFilter();
@@ -146,11 +146,14 @@ public class BLEScanService extends Service {
         }
 
         // 소켓 연결
+        /*
         if(!mSocketIO.mSocket.connected()) {
             Log.d("Service's SocketIO", "not connected");
             mSocketIO.connect();
         }else
             Log.d("Service's SocketIO", "already connected");
+        */
+        this.mSocketIO.connect();
 
         // 서버에 Rssi 제한 값 요청 후 데이터 받기
         //mSocketIO.requestEssentialData();

@@ -254,6 +254,7 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
                         }
                     }
                 });
+                //MainActivity.mScoket.close();
             } else {
                 Log.d("amIRegistered", "fail");
             }
