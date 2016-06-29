@@ -1,5 +1,8 @@
 package com.example.taek.commutingchecker;
 
+import android.util.Log;
+
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,9 +16,11 @@ public class CheckTime {
             @Override
             public void run() {
                 List<DeviceInfo> mBLEDevice;
+                List<Boolean> checkThreeTime = new ArrayList<Boolean>();
                 DeviceInfo mDeviceInfo1 = null, mDeviceInfo2 = null, mDeviceInfo3 = null;
                 int coordinateX = 0, coordinateY = 0, coordinateZ = 0, count = 0;
                 mBLEDevice = BLEScanService.mBLEDevices;
+                BLEScanService.coolTime = true;
 
                 if(BLEScanService.mBLEDevices.size() != 3)
                     return;
@@ -36,6 +41,63 @@ public class CheckTime {
                     }
                 }
 
+                while(true){
+                    Log.d("checkTime-while", "running");
+                    mBLEDevice = BLEScanService.mBLEDevices;
+                    for(DeviceInfo deviceInfo : mBLEDevice){
+                        if(deviceInfo.Address.equals(mDeviceInfo1.Address))
+                            mDeviceInfo1 = deviceInfo;
+                        else if(deviceInfo.Address.equals(mDeviceInfo2.Address))
+                            mDeviceInfo2 = deviceInfo;
+                        else if(deviceInfo.Address.equals(mDeviceInfo3.Address))
+                            mDeviceInfo3 = deviceInfo;
+                    }
+                    int count_for = 0;
+
+                    if(mDeviceInfo1.Rssi > (coordinateX - 5) && mDeviceInfo1.Rssi < (coordinateX + 5)){
+                        count_for++;
+                    }
+                    if(mDeviceInfo2.Rssi > (coordinateY - 5) && mDeviceInfo2.Rssi < (coordinateY + 5)){
+                        count_for++;
+                    }
+                    if(mDeviceInfo3.Rssi > (coordinateZ - 5) && mDeviceInfo3.Rssi < (coordinateZ + 5)){
+                        count_for++;
+                    }
+
+                    if(count_for >= 2){
+                        if(checkThreeTime.size() < 3)
+                            checkThreeTime.add(true);
+                        else if(checkThreeTime.size() == 3){
+                            checkThreeTime.remove(0);
+                            checkThreeTime.add(true);
+                        }
+                    }else{
+                        if(checkThreeTime.size() < 3)
+                            checkThreeTime.add(false);
+                        else if(checkThreeTime.size() == 3){
+                            checkThreeTime.remove(0);
+                            checkThreeTime.add(false);
+                        }
+                    }
+
+                    int times = 0;
+                    for(Boolean bool : checkThreeTime){
+                        if(bool)
+                            times++;
+                    }
+
+                    if(times >= 2){
+                        SendEvent.sendEvent(mDeviceInfo1, mDeviceInfo2, mDeviceInfo3, true);
+                        break;
+                    }
+
+                    try {
+                        Thread.sleep(300);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+                /*
                 for(int i = 0; i < 3; i++){
                     mBLEDevice = BLEScanService.mBLEDevices;
                     for(DeviceInfo deviceInfo : mBLEDevice){ // update deviceInfo1, 2, 3
@@ -74,7 +136,7 @@ public class CheckTime {
                 if(count >= 2){
                     SendEvent.sendEvent(mDeviceInfo1, mDeviceInfo2, mDeviceInfo3, true);
                     //BLEScanService.checkCallbackThread = new CheckCallback(mDeviceInfo1, mDeviceInfo2, mDeviceInfo3);
-                }
+                } */
             }
         };
 

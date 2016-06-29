@@ -74,7 +74,7 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
                 obj.put("BeaconData2", data.get("BeaconData2"));
                 obj.put("BeaconData3", data.get("BeaconData3"));
                 obj.put("SmartphoneAddress", data.get("SmartphoneAddress"));
-                obj.put("DateTime", data.get("DateTime"));
+                //obj.put("DateTime", data.get("DateTime"));
 
                 /*
                 String str = "{ \"BeaconDeviceAddress1\":\"" + data.get("BeaconDeviceAddress1") + "\"," +
@@ -98,8 +98,8 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
                         + data.get("BeaconData1") + ", "
                         + data.get("BeaconData2") + ", "
                         + data.get("BeaconData3") + ", "
-                        + data.get("SmartphoneAddress") + ", "
-                        + data.get("DateTime"));
+                        + data.get("SmartphoneAddress"));
+                        //+ ", " + data.get("DateTime"));
 
                 //this.close();
             } else {
@@ -125,7 +125,7 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
                 }
                  */
                 obj.put("SmartphoneAddress", BLEScanService.myMacAddress);
-                obj.put("DateTime", CurrentTime.currentTime());
+                //obj.put("DateTime", CurrentTime.currentTime());
                 mSocket.emit("requestEssentialData", obj);
                 Log.d("requestEssentialData", "success");
 
@@ -187,7 +187,7 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
                 obj.put("BeaconData2", data.get("BeaconData2"));
                 obj.put("BeaconData3", data.get("BeaconData3"));
                 obj.put("SmartphoneAddress", data.get("SmartphoneAddress"));
-                obj.put("DateTime", data.get("DateTime"));
+                //obj.put("DateTime", data.get("DateTime"));
                 obj.put("CoordinateX", data.get("CoordinateX"));
                 obj.put("CoordinateY", data.get("CoordinateY"));
                 obj.put("CoordinateZ", data.get("CoordinateZ"));
@@ -204,7 +204,7 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
                         data.get("BeaconData2") + ", " +
                         data.get("BeaconData3") + ", " +
                         data.get("SmartphoneAddress") + ", " +
-                        data.get("DateTime") + ", " +
+                        //data.get("DateTime") + ", " +
                         data.get("CoordinateX") + ", " +
                         data.get("CoordinateY") + ", " +
                         data.get("CoordinateZ"));
@@ -225,7 +225,7 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
         try {
             if (mSocket.connected()) {
                 Log.d("Socket", "connected");
-                obj.put("DateTime", dateTime);
+                //obj.put("DateTime", dateTime);
                 obj.put("SmartphoneAddress", smartphoneAddress);
 
                 mSocket.emit("amIRegistered", obj);
@@ -277,7 +277,7 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
                 obj.put("BeaconData2", "bf 0c c4 a4 eb 9f 4f 06 b7 16 1f 5f f4 9a 8f 47 00 02 00 02");
                 obj.put("BeaconData3", "70 9b d6 40 42 d1 4b 1a 99 0a 36 d4 a1 e5 27 d8 00 03 00 01");
                 obj.put("SmartphoneAddress", BLEScanService.myMacAddress);
-                obj.put("DateTime", CurrentTime.currentTime());
+                //obj.put("DateTime", CurrentTime.currentTime());
                 obj.put("CoordinateX", "-1");
                 obj.put("CoordinateY", "-1");
                 obj.put("CoordinateZ", "-1");

@@ -78,57 +78,37 @@ public class SetupFragment extends Fragment {
         request.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                try{
-                    BLEScanService.mSocketIO.requestEssentialData();
-                }catch (Exception e){
-                    e.printStackTrace();
-                    Toast.makeText(getActivity(), "서비스 실행상태가 아닙니다.", Toast.LENGTH_LONG).show();
-                }
+                Intent intent = new Intent("android.intent.action.REQUEST_DATA");
+                intent.setData(Uri.parse("RequestData:"));
+                getActivity().sendBroadcast(intent);
             }
         });
 
         showData.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                try{
-                    if(BLEScanService.EssentialDataArray.size() > 0)
-                        Toast.makeText(getActivity(), BLEScanService.EssentialDataArray.get(0).get("id_workplace").toString() + ", "
-                                + BLEScanService.EssentialDataArray.get(0).get("coordinateX").toString() + ", "
-                                + BLEScanService.EssentialDataArray.get(0).get("coordinateY").toString() + ", "
-                                + BLEScanService.EssentialDataArray.get(0).get("coordinateZ").toString() + ", "
-                                + BLEScanService.EssentialDataArray.get(0).get("beacon_address1").toString() + ", "
-                                + BLEScanService.EssentialDataArray.get(0).get("beacon_address2").toString() + ", "
-                                + BLEScanService.EssentialDataArray.get(0).get("beacon_address3").toString() + ", "
-                                + BLEScanService.EssentialDataArray.size(), Toast.LENGTH_LONG).show();
-                    else{
-                        Toast.makeText(getActivity(), "no data", Toast.LENGTH_SHORT).show();
-                    }
-                }catch (Exception e){
-                    e.printStackTrace();
-                    Toast.makeText(getActivity(), "서비스 실행상태가 아닙니다.", Toast.LENGTH_LONG).show();
-                }
+                Intent intent = new Intent("android.intent.action.SHOW_DATA");
+                intent.setData(Uri.parse("ShowData:"));
+                getActivity().sendBroadcast(intent);
+                //GenerateNotification.generateNotification(getActivity(), "showData", "data", "");
             }
         });
 
         calibration.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(isRunningProcess(getActivity(), "com.example.taek.commutingchecker:remote"))
-                    BLEScanService.CalibrationFlag = true;
-                else
-                    Toast.makeText(getActivity(), "서비스 실행상태가 아닙니다.", Toast.LENGTH_LONG).show();
+                Intent intent = new Intent("android.intent.action.CALIBRATION_SERVICE");
+                intent.setData(Uri.parse("Calibration:"));
+                getActivity().sendBroadcast(intent);
             }
         });
 
         setValueOfRssi.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                try{
-                    BLEScanService.setValueOfRssi();
-                }catch (Exception e){
-                    e.printStackTrace();
-                    Toast.makeText(getActivity(), "서비스 실행상태가 아닙니다.", Toast.LENGTH_LONG).show();
-                }
+                Intent intent = new Intent("android.intent.action.SET_RSSI");
+                intent.setData(Uri.parse("SetValueOfRssi:"));
+                getActivity().sendBroadcast(intent);
             }
         });
 
