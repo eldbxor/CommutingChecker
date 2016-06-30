@@ -42,7 +42,6 @@ public class CheckTime {
                 }
 
                 while(true){
-                    Log.d("checkTime-while", "running");
                     mBLEDevice = BLEScanService.mBLEDevices;
                     for(DeviceInfo deviceInfo : mBLEDevice){
                         if(deviceInfo.Address.equals(mDeviceInfo1.Address))

@@ -44,8 +44,8 @@ public class SocketIO {
     }
 
     // 이벤트 보내기
-    public void sendEvent(Map<String, String> data) {
-        JSONObject obj = new JSONObject();
+    public void sendEvent(final Map<String, String> data, final boolean isComeToWork) {
+        final JSONObject obj = new JSONObject();
         JSONArray arr = new JSONArray();
         try {
             if (mSocket.connected()) {
@@ -76,21 +76,47 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
                 obj.put("SmartphoneAddress", data.get("SmartphoneAddress"));
                 //obj.put("DateTime", data.get("DateTime"));
 
-                /*
-                String str = "{ \"BeaconDeviceAddress1\":\"" + data.get("BeaconDeviceAddress1") + "\"," +
-                        "\"BeaconDeviceAddress2\":\"" + data.get("BeaconDeviceAddress2") + "\"," +
-                        "\"BeaconDeviceAddress3\":\"" + data.get("BeaconDeviceAddress3") + "\"," +
-                        "\"BeaconData1\":\"" + data.get("BeaconData1") + "\"," +
-                        "\"BeaconData2\":\"" + data.get("BeaconData2") + "\"," +
-                        "\"BeaconData3\":\"" + data.get("BeaconData3") + "\"," +
-                        "\"SmartphoneAddress\":\"" + data.get("SmartphoneAddress") + "\"," +
-                        "\"DateTime\":\"" + data.get("DateTime") + "\" }";
-
-                JSONObject obj_kitkat = new JSONObject(str); */
-
                 mSocket.emit("circumstance", obj);
-                Log.d("sendSocketData", "true");
 
+                // 서버에 등록이 되었는지 확인
+                mSocket.on("answer", new Emitter.Listener() {
+                    @Override
+                    public void call(Object... args) {
+                        try {
+                            JSONObject robj = (JSONObject) args[0];
+                            String isSuccess = String.valueOf(robj.get("isSuccess"));
+                            if(isSuccess.equals("true")) {
+                                BLEScanService.failureCount_SendEv = 0;
+                                Log.d("SendEvent", "Success");
+                                if(isComeToWork == true) {
+                                    GenerateNotification.generateNotification(BLEScanService.ServiceContext, "출근 등록", "출근이 등록되었습니다.", "");
+                                }else{
+                                    GenerateNotification.generateNotification(BLEScanService.ServiceContext, "퇴근 등록", "퇴근이 등록되었습니다.", "");
+                                }
+                            }else{
+                                if(BLEScanService.failureCount_SendEv < 2) {
+                                    BLEScanService.failureCount_SendEv++;
+                                    sendEvent(data, isComeToWork);
+                                    return;
+                                }
+                                else{
+                                    Log.d("SendEvent", "failed");
+                                    BLEScanService.failureCount_SendEv = 0;
+                                    if(isComeToWork == true) {
+                                        GenerateNotification.generateNotification(BLEScanService.ServiceContext, "출근 등록 실패", "출근 등록을 실패하였습니다.", "");
+                                    }else{
+                                        GenerateNotification.generateNotification(BLEScanService.ServiceContext, "퇴근 등록 실패", "퇴근 등록을 실패하였습니다.", "");
+                                    }
+                                }
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            Log.d("Request answer(sendEv)", "failed");
+                        }
+                    }
+                });
+
+                /*
                 GenerateNotification.generateNotification(BLEScanService.ServiceContext, "서버에 데이터 전송", "서버에 데이터를 전송하였습니다.",
                         data.get("BeaconDeviceAddress1") + ", "
                         + data.get("BeaconDeviceAddress2") + ", "
@@ -99,7 +125,7 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
                         + data.get("BeaconData2") + ", "
                         + data.get("BeaconData3") + ", "
                         + data.get("SmartphoneAddress"));
-                        //+ ", " + data.get("DateTime"));
+                        //+ ", " + data.get("DateTime")); */
 
                 //this.close();
             } else {
@@ -174,7 +200,7 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
         }
     }
 
-    public void calibration(Map<String, String> data){
+    public void calibration(final Map<String, String> data){
         JSONObject obj = new JSONObject();
         try {
             if (mSocket.connected()) {
@@ -193,6 +219,36 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
                 obj.put("CoordinateZ", data.get("CoordinateZ"));
                 mSocket.emit("calibration", obj);
                 Log.d("calibration", "success");
+
+                // 서버에 등록이 되었는지 확인
+                mSocket.on("answer", new Emitter.Listener() {
+                    @Override
+                    public void call(Object... args) {
+                        try {
+                            JSONObject robj = (JSONObject) args[0];
+                            String isSuccess = String.valueOf(robj.get("isSuccess"));
+                            if(isSuccess.equals("true")) {
+                                BLEScanService.failureCount_Cali = 0;
+                                Log.d("Calibration", "Success");
+                                GenerateNotification.generateNotification(BLEScanService.ServiceContext, "Calibration 성공", "새로운 좌표 값이 등록되었습니다.", "");
+                            }else{
+                                if(BLEScanService.failureCount_Cali < 2) {
+                                    BLEScanService.failureCount_Cali++;
+                                    calibration(data);
+                                    return;
+                                }
+                                else{
+                                    Log.d("Calibration", "failed");
+                                    BLEScanService.failureCount_Cali = 0;
+                                    GenerateNotification.generateNotification(BLEScanService.ServiceContext, "Calibration 실패", "새로운 좌표 값 등록을 실패하였습니다.", "");
+                                }
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            Log.d("Request answer(Cali)", "failed");
+                        }
+                    }
+                });
 
                 GenerateNotification.generateNotification(BLEScanService.ServiceContext, "Calibration", "Rssi 평균 값을 서버에 전송하였습니다." +
                         ".",

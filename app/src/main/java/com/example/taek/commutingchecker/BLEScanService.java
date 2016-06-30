@@ -43,6 +43,8 @@ public class BLEScanService extends Service {
     public static Context ServiceContext;
     public static boolean coolTime, isCallbackRunning;
     public static CheckCallback checkCallbackThread;
+    public static int failureCount_SendEv; // sendEvent's Failure Count
+    public static int failureCount_Cali; // Calibration's Failure Count
     /**
      * Trigger a callback for every Bluetooth advertisement found that matches the filter criteria.
      * If no filter is active, all advertisement packets are reported.
@@ -72,6 +74,9 @@ public class BLEScanService extends Service {
         coolTime = false;
         ServiceContext = this;
         isCallbackRunning = false;
+        failureCount_SendEv = 0;
+        failureCount_Cali = 0;
+
         // 비콘 Mac 주소를 저장할 ArrayList
         filterlist = new ArrayList<String>();
 
