@@ -251,7 +251,7 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
                 });
 
                 GenerateNotification.generateNotification(BLEScanService.ServiceContext, "Calibration", "Rssi 평균 값을 서버에 전송하였습니다." +
-                        ".",
+                                ".",
                         "rss1: " + data.get("CoordinateX") + ", " + "rssi2: " + data.get("CoordinateY") + ", " + "rss3: " + data.get("CoordinateZ"));
                 Log.d("calibration data", data.get("BeaconDeviceAddress1") + ", " +
                         data.get("BeaconDeviceAddress2") + ", " +
@@ -346,6 +346,51 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
         } catch (JSONException e) {
             e.printStackTrace();
             Log.d("TestError(JSON)", e.getMessage());
+        }
+    }
+
+    enum ChartSignal {
+        POPULATION
+    }
+
+    public void requestChartData(ChartSignal signal) {
+        try {
+            JSONObject obj = new JSONObject();
+
+            if (mSocket.connected()) {
+                switch (signal) {
+                    case POPULATION:
+                        obj.put("SmartphoneAddress", BLEScanService.myMacAddress);
+                        obj.put("Signal", signal.toString());
+                        mSocket.emit("requestChartData", obj);
+
+                        mSocket.on("data", new Emitter.Listener() {
+                            @Override
+                            public void call(Object... args) {
+                                try {
+                                    StringBuilder result = new StringBuilder(args[0].toString());
+                                    result.toString().replace("\"", "\\\"");
+                                    result.insert(0, "{ \"data\":");
+                                    result.insert(result.length(), "}");
+
+                                    Log.d("Awesometic", result.toString());
+                                    JSONObject chartData = new JSONObject(result.toString());
+                                    ChartFragment.chartData = chartData.getJSONArray("data");
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        });
+
+                        break;
+                    default:
+                        break;
+                }
+            } else {
+
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
     }
 

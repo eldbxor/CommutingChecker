@@ -3,7 +3,6 @@ package com.example.taek.commutingchecker;
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.app.FragmentManager;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.os.Build;
@@ -18,9 +17,6 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.webkit.WebSettings;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.crashlytics.android.Crashlytics;
@@ -36,7 +32,7 @@ public class MainActivity extends AppCompatActivity
      */
 
     public static String ServiceTAG;
-    //public static SocketIO mScoket;
+    public static SocketIO mSocket;
     private String myMacAddress;
     public static boolean amIRegistered;
     public static String employee_number;
@@ -57,9 +53,9 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
 
         ServiceTAG = getResources().getString(R.string.scan_service);
-        //mScoket = new SocketIO();
+        mSocket = new SocketIO();
 
-        //mScoket.connect();
+        mSocket.connect();
 
         // BLE 관련 Permission 주기
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
@@ -109,7 +105,7 @@ public class MainActivity extends AppCompatActivity
             e.printStackTrace();
         }
 
-        //mScoket.amIRegisted(CurrentTime.currentTime(), myMacAddress);
+        //mSocket.amIRegisted(CurrentTime.currentTime(), myMacAddress);
     }
 
     @Override
@@ -147,7 +143,7 @@ public class MainActivity extends AppCompatActivity
 
     /* Fragments objects */
     private MainFragment fragMain;
-    private WebFragment fragWeb;
+    private ChartFragment fragChart;
     private SetupFragment fragSetup;
 
     /* Navigation View object */
@@ -160,7 +156,7 @@ public class MainActivity extends AppCompatActivity
 
         // Fragments
         fragMain = MainFragment.newInstance();
-        fragWeb = WebFragment.newInstance();
+        fragChart = ChartFragment.newInstance();
         fragSetup = SetupFragment.newInstance();
 
         // DrawerLayout
@@ -243,22 +239,22 @@ public class MainActivity extends AppCompatActivity
                         .detach(fragSetup).attach(fragSetup)
                         .commit();
                 break;
-            case R.id.nav_web1:
+            case R.id.nav_population_of_each_department:
                 fragmentManager.beginTransaction()
-                        .replace(R.id.content_frame, fragWeb)
-                        .detach(fragWeb).attach(fragWeb)
+                        .replace(R.id.content_frame, fragChart)
+                        .detach(fragChart).attach(fragChart)
                         .commit();
                 break;
-            case R.id.nav_web2:
+            case R.id.nav_chart2:
                 fragmentManager.beginTransaction()
-                        .replace(R.id.content_frame, fragWeb)
-                        .detach(fragWeb).attach(fragWeb)
+                        .replace(R.id.content_frame, fragChart)
+                        .detach(fragChart).attach(fragChart)
                         .commit();
                 break;
-            case R.id.nav_web3:
+            case R.id.nav_chart3:
                 fragmentManager.beginTransaction()
-                        .replace(R.id.content_frame, fragWeb)
-                        .detach(fragWeb).attach(fragWeb)
+                        .replace(R.id.content_frame, fragChart)
+                        .detach(fragChart).attach(fragChart)
                         .commit();
                 break;
             default:
@@ -278,6 +274,6 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onDestroy(){
         super.onDestroy();
-        //mScoket.close();
+        mSocket.close();
     }
 }
