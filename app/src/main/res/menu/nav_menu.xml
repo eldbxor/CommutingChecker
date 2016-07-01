@@ -8,14 +8,14 @@
             android:id="@+id/nav_setup"
             android:title="Setup" />
         <item
-            android:id="@+id/nav_web1"
-            android:title="Web1" />
+            android:id="@+id/nav_population_of_each_department"
+            android:title="부서별 인원 수" />
         <item
-            android:id="@+id/nav_web2"
-            android:title="Web2" />
+            android:id="@+id/nav_chart2"
+            android:title="chart2" />
         <item
-            android:id="@+id/nav_web3"
-            android:title="Web3" />
+            android:id="@+id/nav_chart3"
+            android:title="chart3" />
 
     </group>
 </menu>
