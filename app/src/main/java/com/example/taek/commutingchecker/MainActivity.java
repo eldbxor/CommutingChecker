@@ -32,7 +32,7 @@ public class MainActivity extends AppCompatActivity
      */
 
     public static String ServiceTAG;
-    //public static SocketIO mScoket;
+    public static SocketIO mSocket;
     private String myMacAddress;
     public static boolean amIRegistered;
     public static String employee_number;
@@ -53,9 +53,9 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
 
         ServiceTAG = getResources().getString(R.string.scan_service);
-        //mScoket = new SocketIO();
+        mSocket = new SocketIO();
 
-        //mScoket.connect();
+        mSocket.connect();
 
         // BLE 관련 Permission 주기
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
@@ -105,7 +105,7 @@ public class MainActivity extends AppCompatActivity
             e.printStackTrace();
         }
 
-        //mScoket.amIRegisted(CurrentTime.currentTime(), myMacAddress);
+        //mSocket.amIRegisted(CurrentTime.currentTime(), myMacAddress);
     }
 
     @Override
@@ -274,6 +274,6 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onDestroy(){
         super.onDestroy();
-        //mScoket.close();
+        mSocket.close();
     }
 }

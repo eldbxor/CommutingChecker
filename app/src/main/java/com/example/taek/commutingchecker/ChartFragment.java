@@ -12,12 +12,17 @@ import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.utils.ColorTemplate;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+
 import java.util.ArrayList;
 
 /**
  * Created by Awesometic on 2016-06-09.
  */
 public class ChartFragment extends Fragment {
+
+    public static JSONArray chartData = new JSONArray();
 
     public static ChartFragment newInstance() {
         ChartFragment fragment = new ChartFragment();
@@ -37,44 +42,48 @@ public class ChartFragment extends Fragment {
 
         switch (getActivity().getTitle().toString()) {
             case "부서별 인원 수":
-                return populationOfEachDepartment(inflater, container, savedInstanceState);
+                SocketIO.ChartSignal signal = SocketIO.ChartSignal.POPULATION;
+
+                return populationOfEachDepartment(inflater, container, savedInstanceState, signal);
 
             default:
                 return inflater.inflate(R.layout.fragment_chart, container, false);
         }
+
     }
 
-    private View populationOfEachDepartment(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    private View populationOfEachDepartment(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState, SocketIO.ChartSignal signal) {
         View rootView = inflater.inflate(R.layout.fragment_chart_population_of_each_department, container, false);
 
         PieChart pieChart = (PieChart) rootView.findViewById(R.id.chart_population_of_each_department);
 
-        // creating data values
-        ArrayList<Entry> entries = new ArrayList<>();
-        entries.add(new Entry(4f, 0));
-        entries.add(new Entry(8f, 1));
-        entries.add(new Entry(6f, 2));
-        entries.add(new Entry(12f, 3));
-        entries.add(new Entry(18f, 4));
-        entries.add(new Entry(9f, 5));
+        try {
+            MainActivity.mSocket.requestChartData(signal);
 
-        PieDataSet dataset = new PieDataSet(entries, "# of Calls");
-        dataset.setColors(ColorTemplate.COLORFUL_COLORS); // set the color
-        pieChart.animateY(2000);
+            if (chartData != null) {
+                ArrayList<Entry> entries = new ArrayList<>();
+                ArrayList<String> labels = new ArrayList<>();
 
-        // creating labels
-        ArrayList<String> labels = new ArrayList<>();
-        labels.add("January");
-        labels.add("February");
-        labels.add("March");
-        labels.add("April");
-        labels.add("May");
-        labels.add("June");
+                for (int i = 0; i < chartData.length(); i++) {
+                    entries.add(new Entry(chartData.getJSONObject(i).getInt("count"), i));
+                    labels.add(chartData.getJSONObject(i).getString("department"));
+                }
 
-        PieData data = new PieData(labels, dataset); // initialize Piedata
-        pieChart.setData(data); // set data into chart
+                PieDataSet dataset = new PieDataSet(entries, "# of people");
+                dataset.setColors(ColorTemplate.COLORFUL_COLORS);
+                pieChart.animateY(1000);
 
-        pieChart.setDescription("Description");  // set the description
+                PieData data = new PieData(labels, dataset);
+                pieChart.setData(data);
+
+                pieChart.setDescription("부서별 인원 수를 보여줍니다. 클릭하면 해당 부서의 상세 정보를 볼 수 있습니다.");
+
+            } else {
+
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
 
         return rootView;
     }
