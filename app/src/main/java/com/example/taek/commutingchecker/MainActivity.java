@@ -23,6 +23,8 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.TextView;
 import android.widget.Toast;
+import com.crashlytics.android.Crashlytics;
+import io.fabric.sdk.android.Fabric;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -43,6 +45,15 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        /** 2016. 7. 1
+         * Add Fabric Crash Reporter by Awesometic
+         * Official Site: https://www.fabric.io/home
+         * Documents: https://docs.fabric.io/android/fabric/overview.html
+         * If you want to see the reports, you should join Fabric and tell me your email address
+         * To build this properly, you have to install the plugin named "Fabric for Android Studio" at Settings->Plugins
+         */
+        Fabric.with(this, new Crashlytics());
         setContentView(R.layout.activity_main);
 
         ServiceTAG = getResources().getString(R.string.scan_service);
