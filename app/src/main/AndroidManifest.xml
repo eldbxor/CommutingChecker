@@ -22,6 +22,9 @@
             android:exported="true"
             android:process=":remote">
         </service>
+        <meta-data
+            android:name="io.fabric.ApiKey"
+            android:value="d0448b1ac8d6dd0dbd270787d711e3413253e44e" />
     </application>
 
     <uses-permission android:name="android.permission.BLUETOOTH" />
