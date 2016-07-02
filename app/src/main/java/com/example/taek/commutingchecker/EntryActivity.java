@@ -37,7 +37,10 @@ public class EntryActivity extends AppCompatActivity {
         try {
             mSocket = new SocketIO();
             mSocket.connect();
-            Thread.sleep(500);
+
+            do {
+                Thread.sleep(100);
+            } while (!mSocket.connected());
 
             smartphoneAddr = MainActivity.myMacAddress;
             mSocket.amIRegistered(smartphoneAddr);
