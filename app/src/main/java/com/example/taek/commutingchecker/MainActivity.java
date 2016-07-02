@@ -35,6 +35,9 @@ public class MainActivity extends AppCompatActivity
     // Initialize it to exit from EntryActivity
     public static AppCompatActivity mainActivity;
 
+    // Close the app when back button twice pressed
+    private BackPressCloseHandler backPressCloseHandler;
+
     public static String ServiceTAG;
     public static SocketIO mSocket;
     public static String myMacAddress;
@@ -81,6 +84,8 @@ public class MainActivity extends AppCompatActivity
         mainActivity = this;
         Intent intent = new Intent(this.getApplicationContext(), EntryActivity.class);
         startActivity(intent);
+
+        backPressCloseHandler = new BackPressCloseHandler(this);
 
         /** 2016. 6. 9
          * Init UI Elements including navigation view
@@ -197,7 +202,8 @@ public class MainActivity extends AppCompatActivity
         if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
             drawerLayout.closeDrawer(GravityCompat.START);
         } else {
-            super.onBackPressed();
+            // super.onBackPressed();
+            backPressCloseHandler.onBackPressed();
         }
     }
 
