@@ -276,47 +276,89 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
         }
     }
 
-    public void amIRegisted(String dateTime, String smartphoneAddress){
+    public void amIRegistered(String smartphoneAddress) {
         JSONObject obj = new JSONObject();
+
         try {
             if (mSocket.connected()) {
-                Log.d("Socket", "connected");
-                //obj.put("DateTime", dateTime);
                 obj.put("SmartphoneAddress", smartphoneAddress);
 
                 mSocket.emit("amIRegistered", obj);
-                Log.d("amIRegistered", "success");
-
                 mSocket.on("data", new Emitter.Listener() {
                     @Override
                     public void call(Object... args) {
                         try {
                             JSONObject robj = (JSONObject) args[0];
-                            String registered = String.valueOf(robj.get("registered"));
-                            if(registered.equals("true")) {
+
+                            boolean registered = Boolean.valueOf(String.valueOf(robj.get("registered")));
+                            if (registered) {
                                 String name = String.valueOf(robj.get("name"));
                                 String employee_number = String.valueOf(robj.get("employee_number"));
-                                Log.d("request", registered + ", " + name + ", " + employee_number);
+                                boolean permitted = Boolean.valueOf(String.valueOf(robj.get("permitted")));
 
-                                MainActivity.amIRegistered = true;
-                                MainActivity.employee_name = name;
-                                MainActivity.employee_number = employee_number;
-                            }else
-                                MainActivity.amIRegistered = false;
-
+                                Log.d("Awesometic", "amIRegistered - true" + ", " + String.valueOf(permitted) + ", " + name + ", " + employee_number);
+                                EntryActivity.amIRegistered = true;
+                                EntryActivity.permitted = permitted;
+                                EntryActivity.employee_name = name;
+                                EntryActivity.employee_number = employee_number;
+                            } else {
+                                Log.d("Awesometic", "amIRegistered - false");
+                                EntryActivity.amIRegistered = false;
+                            }
                         } catch (Exception e) {
                             e.printStackTrace();
-                            Log.d("Receive Request_data", "fail");
+                            Log.d("Awesometic", "amIRegistered - receive fail");
                         }
                     }
                 });
-                //MainActivity.mScoket.close();
+
             } else {
-                Log.d("amIRegistered", "fail");
+                Log.d("Awesometic", "amIRegistered - socket isn't connected");
             }
         } catch (JSONException e) {
             e.printStackTrace();
             Log.d("TestError(JSON)", e.getMessage());
+        }
+    }
+
+    public void signupRequest(String smartphoneAddr, String employee_number, String name, String password, String department, String position) {
+        JSONObject obj = new JSONObject();
+
+        try {
+            if (mSocket.connected()) {
+                obj.put("SmartphoneAddress", smartphoneAddr);
+                obj.put("EmployeeNumber", employee_number);
+                obj.put("Name", name);
+                obj.put("Password", password);
+                obj.put("Department", department);
+                obj.put("Position", position);
+                obj.put("Permission", 0);
+                obj.put("Admin", 0);
+
+                mSocket.emit("signupRequest", obj);
+                mSocket.on("answer", new Emitter.Listener() {
+                    @Override
+                    public void call(Object... args) {
+                        try {
+                            JSONObject result = (JSONObject) args[0];
+                            boolean requestSuccess = result.getBoolean("requestSuccess");
+
+                            if (requestSuccess)
+                                Log.d("Awesometic", "signupRequest - Success");
+                            else
+                                Log.d("Awesometic", "signupRequest - Fail - Something Wrong");
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                            Log.d("Awesometic", "signupRequest - JSONException");
+                        }
+                    }
+                });
+            } else {
+                Log.d("Awesometic", "signupRequest - socket isn't connected");
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
     }
 
@@ -392,6 +434,13 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
         } catch (JSONException e) {
             e.printStackTrace();
         }
+    }
+
+    public boolean connected() {
+        if (mSocket.connected())
+            return true;
+        else
+            return false;
     }
 
     // 소켓 닫기

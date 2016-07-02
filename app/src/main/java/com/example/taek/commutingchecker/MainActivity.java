@@ -4,6 +4,7 @@ import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.app.FragmentManager;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.support.design.widget.NavigationView;
@@ -31,12 +32,12 @@ public class MainActivity extends AppCompatActivity
      * Reference: https://github.com/awesometic/facetalk_android
      */
 
+    // Initialize it to exit from EntryActivity
+    public static AppCompatActivity mainActivity;
+
     public static String ServiceTAG;
     public static SocketIO mSocket;
-    private String myMacAddress;
-    public static boolean amIRegistered;
-    public static String employee_number;
-    public static String employee_name;
+    public static String myMacAddress;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,11 +51,11 @@ public class MainActivity extends AppCompatActivity
          * To build this properly, you have to install the plugin named "Fabric for Android Studio" at Settings->Plugins
          */
         Fabric.with(this, new Crashlytics());
+
         setContentView(R.layout.activity_main);
 
         ServiceTAG = getResources().getString(R.string.scan_service);
         mSocket = new SocketIO();
-
         mSocket.connect();
 
         // BLE 관련 Permission 주기
@@ -75,6 +76,11 @@ public class MainActivity extends AppCompatActivity
                 builder.show();
             }
         }
+
+        // Go to EntryActivity, and check whether this smart phone is registered or not
+        mainActivity = this;
+        Intent intent = new Intent(this.getApplicationContext(), EntryActivity.class);
+        startActivity(intent);
 
         /** 2016. 6. 9
          * Init UI Elements including navigation view
@@ -104,8 +110,6 @@ public class MainActivity extends AppCompatActivity
         }catch (Exception e){
             e.printStackTrace();
         }
-
-        //mSocket.amIRegisted(CurrentTime.currentTime(), myMacAddress);
     }
 
     @Override
@@ -134,7 +138,7 @@ public class MainActivity extends AppCompatActivity
     }
 
 
-    /** 2016. 06. 09
+    /** 2016. 6. 9
      * Member variables and methods comes with implementing navigation view
      */
 
