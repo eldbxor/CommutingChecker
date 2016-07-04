@@ -1,6 +1,8 @@
-package com.example.taek.commutingchecker;
+package com.example.taek.commutingchecker.utils;
 
 import android.util.Log;
+
+import com.example.taek.commutingchecker.services.BLEScanService;
 
 /**
  * Created by Taek on 2016-06-08.

@@ -1,20 +1,19 @@
-package com.example.taek.commutingchecker;
+package com.example.taek.commutingchecker.utils;
 
-import android.annotation.SuppressLint;
 import android.bluetooth.le.ScanFilter;
 import android.os.Build;
 import android.util.Log;
-import android.widget.Toast;
+
+import com.example.taek.commutingchecker.services.BLEScanService;
+import com.example.taek.commutingchecker.ui.ChartFragment;
+import com.example.taek.commutingchecker.ui.EntryActivity;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.net.URISyntaxException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
 import io.socket.client.IO;
@@ -391,7 +390,7 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
         }
     }
 
-    enum ChartSignal {
+    public enum ChartSignal {
         POPULATION
     }
 

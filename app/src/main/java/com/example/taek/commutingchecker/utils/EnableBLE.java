@@ -1,4 +1,4 @@
-package com.example.taek.commutingchecker;
+package com.example.taek.commutingchecker.utils;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothManager;

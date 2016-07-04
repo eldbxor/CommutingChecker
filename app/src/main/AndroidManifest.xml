@@ -8,17 +8,17 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme.NoActionBar" >
-        <activity android:name=".MainActivity" >
+        <activity android:name=".ui.MainActivity" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".EntryActivity" />
+        <activity android:name=".ui.EntryActivity" />
 
         <service
-            android:name=".BLEScanService"
+            android:name=".services.BLEScanService"
             android:enabled="true"
             android:exported="true"
             android:process=":remote">

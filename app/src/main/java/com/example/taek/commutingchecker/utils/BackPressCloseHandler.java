@@ -1,4 +1,4 @@
-package com.example.taek.commutingchecker;
+package com.example.taek.commutingchecker.utils;
 
 /**
  * Created by Awesometic on 2016-07-03.

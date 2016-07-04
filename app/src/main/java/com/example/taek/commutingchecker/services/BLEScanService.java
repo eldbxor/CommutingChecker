@@ -1,4 +1,4 @@
-package com.example.taek.commutingchecker;
+package com.example.taek.commutingchecker.services;
 
 import android.annotation.SuppressLint;
 import android.app.Service;
@@ -18,8 +18,18 @@ import android.os.IBinder;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.example.taek.commutingchecker.utils.AddDeviceInfo;
+import com.example.taek.commutingchecker.utils.Calibration;
+import com.example.taek.commutingchecker.utils.CheckCallback;
+import com.example.taek.commutingchecker.utils.CheckTime;
+import com.example.taek.commutingchecker.utils.DeviceInfo;
+import com.example.taek.commutingchecker.utils.EnableBLE;
+import com.example.taek.commutingchecker.utils.GenerateNotification;
+import com.example.taek.commutingchecker.ui.MainActivity;
+import com.example.taek.commutingchecker.ui.SetupFragment;
+import com.example.taek.commutingchecker.utils.SocketIO;
+
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -234,7 +244,9 @@ public class BLEScanService extends Service {
             public void run() {
                 // To Wait for connecting
                 try{
-                    Thread.sleep(1000);
+                    do {
+                        Thread.sleep(100);
+                    } while (!mSocketIO.connected());
                 }catch (InterruptedException e){
                     e.printStackTrace();
                 }
@@ -243,7 +255,9 @@ public class BLEScanService extends Service {
                 mSocketIO.requestEssentialData();
 
                 try{
-                    Thread.sleep(500);
+                    do {
+                        Thread.sleep(100);
+                    }while(filterlist.size() == 0);
                 }catch (InterruptedException e){
                     e.printStackTrace();
                 }
@@ -255,12 +269,6 @@ public class BLEScanService extends Service {
 
                 // 스캔 시작
                 scanLeDevice(true);
-
-                try{
-                    Thread.sleep(5000);
-                }catch (InterruptedException e){
-                    e.printStackTrace();
-                }
 
                 while(ScanFlag) {
                     if (CalibrationFlag) {  // if you receive Calibration_Broadcast
@@ -285,7 +293,7 @@ public class BLEScanService extends Service {
                         }
 
                         // 3개의 비콘 정보가 없을 경우 continue
-                        if (mBLEDevices.size() != 3)
+                        if (mBLEDevices.size() < 3)
                             continue;
 
                         // 0.5초 동안 3번 Rssi 체크 후 2번 이상 적합하면 sendEvent() 메서드 실행

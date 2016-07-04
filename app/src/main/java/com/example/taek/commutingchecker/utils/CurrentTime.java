@@ -1,4 +1,4 @@
-package com.example.taek.commutingchecker;
+package com.example.taek.commutingchecker.utils;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;

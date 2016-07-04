@@ -1,4 +1,8 @@
-package com.example.taek.commutingchecker;
+package com.example.taek.commutingchecker.utils;
+
+import com.example.taek.commutingchecker.utils.CheckCallback;
+import com.example.taek.commutingchecker.utils.DeviceInfo;
+import com.example.taek.commutingchecker.services.BLEScanService;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -7,7 +11,7 @@ import java.util.Map;
  * Created by Taek on 2016-06-08.
  */
 public class SendEvent {
-    public synchronized static void sendEvent(DeviceInfo deviceInfo1, DeviceInfo deviceInfo2, DeviceInfo deviceInfo3,final boolean isComeToWork){
+    public synchronized static void sendEvent(DeviceInfo deviceInfo1, DeviceInfo deviceInfo2, DeviceInfo deviceInfo3, final boolean isComeToWork){
         //if((!BLEScanService.coolTime && comeToWork) || (BLEScanService.coolTime && !comeToWork)) {
         if((isComeToWork || (BLEScanService.coolTime && !isComeToWork))){
             Map<String, String> data = new HashMap<String, String>();

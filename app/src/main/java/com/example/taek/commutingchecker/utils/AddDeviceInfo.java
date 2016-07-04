@@ -1,4 +1,6 @@
-package com.example.taek.commutingchecker;
+package com.example.taek.commutingchecker.utils;
+
+import com.example.taek.commutingchecker.services.BLEScanService;
 
 /**
  * Created by Taek on 2016-04-15.

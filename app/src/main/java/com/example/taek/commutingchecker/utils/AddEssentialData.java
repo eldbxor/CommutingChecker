@@ -1,6 +1,7 @@
-package com.example.taek.commutingchecker;
+package com.example.taek.commutingchecker.utils;
 
-import java.util.List;
+import com.example.taek.commutingchecker.services.BLEScanService;
+
 import java.util.Map;
 
 /**

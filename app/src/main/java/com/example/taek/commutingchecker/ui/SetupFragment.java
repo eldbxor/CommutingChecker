@@ -1,4 +1,4 @@
-package com.example.taek.commutingchecker;
+package com.example.taek.commutingchecker.ui;
 
 import android.app.ActivityManager;
 import android.app.Fragment;
@@ -13,6 +13,9 @@ import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.Switch;
 import android.widget.Toast;
+
+import com.example.taek.commutingchecker.R;
+import com.example.taek.commutingchecker.services.BLEScanService;
 
 import java.util.List;
 

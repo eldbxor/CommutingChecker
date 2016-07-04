@@ -1,9 +1,8 @@
-package com.example.taek.commutingchecker;
+package com.example.taek.commutingchecker.utils;
 
-import android.util.Log;
+import com.example.taek.commutingchecker.services.BLEScanService;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 

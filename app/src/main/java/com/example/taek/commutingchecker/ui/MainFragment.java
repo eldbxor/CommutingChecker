@@ -1,4 +1,4 @@
-package com.example.taek.commutingchecker;
+package com.example.taek.commutingchecker.ui;
 
 import android.app.Fragment;
 import android.os.Bundle;
@@ -6,18 +6,21 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.example.taek.commutingchecker.R;
+
 /**
- * Created by Awesometic on 2016-07-02.
+ * Created by Awesometic on 2016-06-09.
  */
-public class WaitFragment extends Fragment {
+public class MainFragment extends Fragment {
+
     private View rootView;
 
-    public static WaitFragment newInstance() {
-        WaitFragment fragment = new WaitFragment();
+    public static MainFragment newInstance() {
+        MainFragment fragment = new MainFragment();
         return fragment;
     }
 
-    public WaitFragment() { }
+    public MainFragment() { }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -27,7 +30,7 @@ public class WaitFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        rootView = inflater.inflate(R.layout.fragment_wait, container, false);
+        rootView = inflater.inflate(R.layout.fragment_main, container, false);
 
         return rootView;
     }

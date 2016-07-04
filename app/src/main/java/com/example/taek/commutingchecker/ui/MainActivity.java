@@ -1,4 +1,4 @@
-package com.example.taek.commutingchecker;
+package com.example.taek.commutingchecker.ui;
 
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
@@ -21,6 +21,10 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.crashlytics.android.Crashlytics;
+import com.example.taek.commutingchecker.utils.BackPressCloseHandler;
+import com.example.taek.commutingchecker.R;
+import com.example.taek.commutingchecker.utils.SocketIO;
+
 import io.fabric.sdk.android.Fabric;
 
 public class MainActivity extends AppCompatActivity

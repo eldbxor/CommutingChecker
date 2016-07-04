@@ -1,9 +1,13 @@
-package com.example.taek.commutingchecker;
+package com.example.taek.commutingchecker.utils;
 
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+
+import com.example.taek.commutingchecker.R;
+import com.example.taek.commutingchecker.services.BLEScanService;
+import com.example.taek.commutingchecker.ui.MainActivity;
 
 /**
  * Created by Taek on 2016-05-17.

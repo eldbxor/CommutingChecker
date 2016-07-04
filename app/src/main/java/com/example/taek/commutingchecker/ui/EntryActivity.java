@@ -1,11 +1,11 @@
-package com.example.taek.commutingchecker;
+package com.example.taek.commutingchecker.ui;
 
 import android.app.FragmentManager;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 
-import io.socket.client.SocketIOException;
+import com.example.taek.commutingchecker.R;
+import com.example.taek.commutingchecker.utils.SocketIO;
 
 /**
  * Created by Awesometic on 2016-07-02.
