@@ -14,7 +14,7 @@ public class GenerateNotification {
                 .setTicker(ticker)
                 .setContentTitle(contentTitle)
                 .setContentText(contentText)
-                .setSmallIcon(R.drawable.ble)
+                .setSmallIcon(R.drawable.commuting)
                 .setWhen(System.currentTimeMillis());
 
         Intent notifyIntent = new Intent(context, MainActivity.class);
