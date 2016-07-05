@@ -10,45 +10,74 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="10dp"
+            android:paddingLeft="10dp"
+            android:paddingBottom="5dp"
+            android:textSize="15dp"
+            android:text="Settings"
+            android:textColor="@color/colorSetupText"/>
+
         <Switch
             android:id="@+id/BLEScanSwitch"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="50dp"
             android:layout_alignParentLeft="true"
             android:layout_alignParentRight="true"
             android:layout_alignParentTop="true"
             android:layout_gravity="right"
-            android:text="BLE SCAN"/>
+            android:paddingLeft="10dp"
+            android:paddingRight="20dp"
+            android:textSize="18dp"
+            android:typeface="normal"
+            android:text="Ble Scan"/>
 
         <Button
             android:id="@+id/Request"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:background="@drawable/button_selector"
+            android:gravity="center|left"
+            android:paddingLeft="10dp"
+            android:textSize="18dp"
             android:text="Request Data"/>
 
         <Button
             android:id="@+id/Show_EssentialData"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:background="@drawable/button_selector"
+            android:gravity="center|left"
+            android:paddingLeft="10dp"
+            android:textSize="18dp"
             android:text="Show data"/>
 
         <Button
             android:id="@+id/Calibration"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:background="@drawable/button_selector"
+            android:gravity="center|left"
+            android:paddingLeft="10dp"
+            android:textSize="18dp"
             android:text="CALIBRATION"/>
-
-        <Button
-            android:id="@+id/setValueOfRssi"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="SET VALUE OF RSSI: -1, -1, -1"/>
 
         <Button
             android:id="@+id/CheckRunning"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:background="@drawable/button_selector"
+            android:gravity="center|left"
+            android:paddingLeft="10dp"
+            android:textSize="18dp"
             android:text="Check Running"/>
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/colorContour"/>
     </LinearLayout>
 
 </FrameLayout>

@@ -4,6 +4,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.support.v4.app.NotificationCompat;
 
 import com.example.taek.commutingchecker.R;
 import com.example.taek.commutingchecker.services.BLEScanService;
@@ -20,6 +21,14 @@ public class GenerateNotification {
                 .setContentText(contentText)
                 .setSmallIcon(R.drawable.commuting)
                 .setWhen(System.currentTimeMillis());
+
+        NotificationCompat.InboxStyle inboxStyle = new NotificationCompat.InboxStyle();
+        String[] events = contentText.split(",");
+        inboxStyle.setBigContentTitle("details:");
+        for(int j = 0; j < events.length; j++){
+            inboxStyle.addLine(events[j]);
+        }
+        mBuilder.setStyle(inboxStyle);
 
         Intent notifyIntent = new Intent(context, MainActivity.class);
 

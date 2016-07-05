@@ -103,7 +103,6 @@ public class BLEScanService extends Service {
         IntentFilter StopSelfPkgFilter = new IntentFilter();
         IntentFilter RequestDataPkgFilter = new IntentFilter();
         IntentFilter ShowDataPkgFilter = new IntentFilter();
-        IntentFilter SetRssiPkgFilter = new IntentFilter();
         IntentFilter CalibrationPkgFilter = new IntentFilter();
         StopSelfPkgFilter.addAction("android.intent.action.STOP_SERVICE");
         StopSelfPkgFilter.addDataScheme("StopSelf");
@@ -111,8 +110,6 @@ public class BLEScanService extends Service {
         RequestDataPkgFilter.addDataScheme("RequestData");
         ShowDataPkgFilter.addAction("android.intent.action.SHOW_DATA");
         ShowDataPkgFilter.addDataScheme("ShowData");
-        SetRssiPkgFilter.addAction("android.intent.action.SET_RSSI");
-        SetRssiPkgFilter.addDataScheme("SetValueOfRssi");
         CalibrationPkgFilter.addAction("android.intent.action.CALIBRATION_SERVICE");
         CalibrationPkgFilter.addDataScheme("Calibration");
 
@@ -141,14 +138,14 @@ public class BLEScanService extends Service {
                 try{
                     if(BLEScanService.EssentialDataArray.size() > 0) {
                         GenerateNotification.generateNotification(BLEScanService.ServiceContext, "ShowData", "Data_Info",
-                                BLEScanService.EssentialDataArray.get(0).get("id_workplace").toString() + ", "
-                                        + BLEScanService.EssentialDataArray.get(0).get("coordinateX").toString() + ", "
+                                "사무실 총 수: " + + BLEScanService.EssentialDataArray.size() + ","
+                                        + "사무실 번호: " + BLEScanService.EssentialDataArray.get(0).get("id_workplace").toString() + ","
+                                        + BLEScanService.EssentialDataArray.get(0).get("beacon_address1").toString() + ": "
+                                        + BLEScanService.EssentialDataArray.get(0).get("coordinateX").toString() + ","
+                                        + BLEScanService.EssentialDataArray.get(0).get("beacon_address2").toString() + ": "
                                         + BLEScanService.EssentialDataArray.get(0).get("coordinateY").toString() + ", "
-                                        + BLEScanService.EssentialDataArray.get(0).get("coordinateZ").toString() + ", "
-                                        + BLEScanService.EssentialDataArray.get(0).get("beacon_address1").toString() + ", "
-                                        + BLEScanService.EssentialDataArray.get(0).get("beacon_address2").toString() + ", "
-                                        + BLEScanService.EssentialDataArray.get(0).get("beacon_address3").toString() + ", "
-                                        + BLEScanService.EssentialDataArray.size());
+                                        + BLEScanService.EssentialDataArray.get(0).get("beacon_address3").toString() + ": "
+                                        + BLEScanService.EssentialDataArray.get(0).get("coordinateZ").toString());
                     }else{
                         GenerateNotification.generateNotification(BLEScanService.ServiceContext, "ShowData", "No Data",
                                 "");
@@ -158,18 +155,6 @@ public class BLEScanService extends Service {
                     e.printStackTrace();
                     GenerateNotification.generateNotification(BLEScanService.ServiceContext, "ShowData", "ShowData failed", "");
                     //Toast.makeText(BLEScanService.ServiceContext, "서비스 실행상태가 아닙니다.", Toast.LENGTH_LONG).show();
-                }
-            }
-        };
-
-        SetRssiReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                try{
-                    BLEScanService.setValueOfRssi();
-                }catch (Exception e){
-                    e.printStackTrace();
-                    Toast.makeText(BLEScanService.ServiceContext, e.toString(), Toast.LENGTH_LONG).show();
                 }
             }
         };
@@ -185,7 +170,6 @@ public class BLEScanService extends Service {
         registerReceiver(RequestDataReceiver, RequestDataPkgFilter);
         registerReceiver(ShowDataReceiver, ShowDataPkgFilter);
         registerReceiver(CalibrationReceiver, CalibrationPkgFilter);
-        registerReceiver(SetRssiReceiver, SetRssiPkgFilter);
 
         EnableBLE mEnableBLE = new EnableBLE(getSystemService(this.BLUETOOTH_SERVICE)); // BLE 활성화 클래스 생성
         mBluetoothAdapter = mEnableBLE.enable(); // BLE 활성화
@@ -246,7 +230,7 @@ public class BLEScanService extends Service {
                 try{
                     do {
                         Thread.sleep(100);
-                    } while (!mSocketIO.connected());
+                    } while (mSocketIO.connected() == false);
                 }catch (InterruptedException e){
                     e.printStackTrace();
                 }
@@ -293,7 +277,7 @@ public class BLEScanService extends Service {
                         }
 
                         // 3개의 비콘 정보가 없을 경우 continue
-                        if (mBLEDevices.size() < 3)
+                        if (mBLEDevices.size() != 3)
                             continue;
 
                         // 0.5초 동안 3번 Rssi 체크 후 2번 이상 적합하면 sendEvent() 메서드 실행
@@ -311,10 +295,6 @@ public class BLEScanService extends Service {
         t = new Thread(r);
         t.start();
         return Service.START_STICKY;
-    }
-
-    public static void setValueOfRssi(){
-        mSocketIO.setValue();
     }
 
     @Override

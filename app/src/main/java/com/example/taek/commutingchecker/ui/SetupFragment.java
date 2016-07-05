@@ -26,7 +26,7 @@ import java.util.List;
 public class SetupFragment extends Fragment {
 
     Intent intent;
-    public static Button showData, request, calibration, setValueOfRssi, checkRunning;
+    public static Button showData, request, calibration, checkRunning;
     public static Switch bleScanSwitch;
 
     public static SetupFragment newInstance() {
@@ -51,7 +51,6 @@ public class SetupFragment extends Fragment {
         request = (Button) rootView.findViewById(R.id.Request);
         showData = (Button) rootView.findViewById(R.id.Show_EssentialData);
         calibration = (Button) rootView.findViewById(R.id.Calibration);
-        setValueOfRssi = (Button) rootView.findViewById(R.id.setValueOfRssi);
         checkRunning = (Button) rootView.findViewById(R.id.CheckRunning);
 
         // if service is running switch off
@@ -102,15 +101,6 @@ public class SetupFragment extends Fragment {
             public void onClick(View v) {
                 Intent intent = new Intent("android.intent.action.CALIBRATION_SERVICE");
                 intent.setData(Uri.parse("Calibration:"));
-                getActivity().sendBroadcast(intent);
-            }
-        });
-
-        setValueOfRssi.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent("android.intent.action.SET_RSSI");
-                intent.setData(Uri.parse("SetValueOfRssi:"));
                 getActivity().sendBroadcast(intent);
             }
         });
