@@ -173,10 +173,10 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
                                 map.put("beacon_address1", str_arr[0]);
                                 map.put("beacon_address2", str_arr[1]);
                                 map.put("beacon_address3", str_arr[2]);
-                                AddEssentialData.addEssentialData(map);
-                                AddFilterList.addFilterList(str_arr[0]);
-                                AddFilterList.addFilterList(str_arr[1]);
-                                AddFilterList.addFilterList(str_arr[2]);
+                                BLEServiceUtils.addEssentialData(map);
+                                BLEServiceUtils.addFilterList(str_arr[0]);
+                                BLEServiceUtils.addFilterList(str_arr[1]);
+                                BLEServiceUtils.addFilterList(str_arr[2]);
                                 Log.d("addFilterList", str_arr[0] + ", " + str_arr[1] + ", " + str_arr[2]);
                                 Log.d("FilterSizeInSocketIO", String.valueOf(BLEScanService.filterlist.size()));
                                 if(Build.VERSION.SDK_INT >= 21) {
@@ -212,12 +212,11 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
                 obj.put("BeaconData2", data.get("BeaconData2"));
                 obj.put("BeaconData3", data.get("BeaconData3"));
                 obj.put("SmartphoneAddress", data.get("SmartphoneAddress"));
-                //obj.put("DateTime", data.get("DateTime"));
+                obj.put("DateTime", data.get("DateTime"));
                 obj.put("CoordinateX", data.get("CoordinateX"));
                 obj.put("CoordinateY", data.get("CoordinateY"));
                 obj.put("CoordinateZ", data.get("CoordinateZ"));
                 mSocket.emit("calibration", obj);
-                Log.d("calibration", "success");
 
                 // 서버에 등록이 되었는지 확인
                 mSocket.on("answer", new Emitter.Listener() {

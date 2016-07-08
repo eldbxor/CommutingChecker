@@ -18,10 +18,9 @@ import android.os.IBinder;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.example.taek.commutingchecker.utils.AddDeviceInfo;
+import com.example.taek.commutingchecker.utils.BLEServiceUtils;
 import com.example.taek.commutingchecker.utils.Calibration;
 import com.example.taek.commutingchecker.utils.CheckCallback;
-import com.example.taek.commutingchecker.utils.CheckTime;
 import com.example.taek.commutingchecker.utils.DeviceInfo;
 import com.example.taek.commutingchecker.utils.EnableBLE;
 import com.example.taek.commutingchecker.utils.GenerateNotification;
@@ -138,14 +137,17 @@ public class BLEScanService extends Service {
                 try{
                     if(BLEScanService.EssentialDataArray.size() > 0) {
                         GenerateNotification.generateNotification(BLEScanService.ServiceContext, "ShowData", "Data_Info",
-                                "사무실 총 수: " + + BLEScanService.EssentialDataArray.size() + ","
-                                        + "사무실 번호: " + BLEScanService.EssentialDataArray.get(0).get("id_workplace").toString() + ","
-                                        + BLEScanService.EssentialDataArray.get(0).get("beacon_address1").toString() + ": "
+                                "사무실 총 수: " + + BLEScanService.EssentialDataArray.size() + ", 좌표 값: "
+                                        //+ "사무실 번호: " + BLEScanService.EssentialDataArray.get(0).get("id_workplace").toString() + ","
+                                        //+ BLEScanService.EssentialDataArray.get(0).get("beacon_address1").toString() + ": "
                                         + BLEScanService.EssentialDataArray.get(0).get("coordinateX").toString() + ","
-                                        + BLEScanService.EssentialDataArray.get(0).get("beacon_address2").toString() + ": "
+                                       // + BLEScanService.EssentialDataArray.get(0).get("beacon_address2").toString() + ": "
                                         + BLEScanService.EssentialDataArray.get(0).get("coordinateY").toString() + ", "
-                                        + BLEScanService.EssentialDataArray.get(0).get("beacon_address3").toString() + ": "
+                                        //+ BLEScanService.EssentialDataArray.get(0).get("beacon_address3").toString() + ": "
                                         + BLEScanService.EssentialDataArray.get(0).get("coordinateZ").toString());
+                        Log.d("ShowData", BLEScanService.EssentialDataArray.get(0).get("coordinateX").toString() + ", " +
+                                BLEScanService.EssentialDataArray.get(0).get("coordinateY").toString() + ", " +
+                                BLEScanService.EssentialDataArray.get(0).get("coordinateZ").toString());
                     }else{
                         GenerateNotification.generateNotification(BLEScanService.ServiceContext, "ShowData", "No Data",
                                 "");
@@ -282,7 +284,7 @@ public class BLEScanService extends Service {
 
                         // 0.5초 동안 3번 Rssi 체크 후 2번 이상 적합하면 sendEvent() 메서드 실행
                         if(!coolTime)
-                            CheckTime.checkTime();
+                            BLEServiceUtils.checkTime();
 
                         //mSocketIO.sendEvent(new HashMap<String, String>());
                         //scanLeDevice(false);
@@ -327,7 +329,8 @@ public class BLEScanService extends Service {
         Log.i(TAG, "Service onDestroy");
         ScanFlag = false;
         scanLeDevice(false); // 스캔 중지
-        mSocketIO.close();
+        if(mSocketIO.connected() == true)
+            mSocketIO.close();
         try{
             SetupFragment.bleScanSwitch.setChecked(false);
         }catch (Exception e){
@@ -382,7 +385,7 @@ public class BLEScanService extends Service {
 
             List<String> separatedData = separate(result.getScanRecord().getBytes());
 
-            AddDeviceInfo.addDeviceInfo(new DeviceInfo(result.getDevice(), result.getDevice().getAddress(), separatedData.get(0),
+            BLEServiceUtils.addDeviceInfo(new DeviceInfo(result.getDevice(), result.getDevice().getAddress(), separatedData.get(0),
                     separatedData.get(1), separatedData.get(2), separatedData.get(3), result.getRssi()));
         }
 
@@ -446,7 +449,7 @@ public class BLEScanService extends Service {
 
             Log.d("AllOfScanRecord", all + ", " + uuid + ", " + String.valueOf(major_int) + ", " + String.valueOf(minor_int));
 
-            AddDeviceInfo.addDeviceInfo(new DeviceInfo(device, device.getAddress(), all,
+            BLEServiceUtils.addDeviceInfo(new DeviceInfo(device, device.getAddress(), all,
                     uuid, String.valueOf(major_int), String.valueOf(minor_int), rssi));
         }
     };

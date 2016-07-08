@@ -40,7 +40,7 @@ public class EntryActivity extends AppCompatActivity {
 
             do {
                 Thread.sleep(100);
-            } while (!mSocket.connected());
+            } while (mSocket.connected() == false);
 
             smartphoneAddr = MainActivity.myMacAddress;
             mSocket.amIRegistered(smartphoneAddr);
@@ -49,7 +49,7 @@ public class EntryActivity extends AppCompatActivity {
             e.printStackTrace();
         }
 
-        if (!amIRegistered) {
+        if (amIRegistered == false) {
             // If not registered
             fragmentManager.beginTransaction()
                     .replace(R.id.content_entry_frame, fragSignup)
@@ -57,7 +57,7 @@ public class EntryActivity extends AppCompatActivity {
                     .commit();
             MainActivity.mainActivity.finish();
 
-        } else if (!permitted) {
+        } else if (permitted == false) {
             // If registered but not permitted
             fragmentManager.beginTransaction()
                     .replace(R.id.content_entry_frame, fragWait)
@@ -74,7 +74,7 @@ public class EntryActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy(){
-        if (mSocket.connected())
+        if (mSocket.connected() == true)
             mSocket.close();
         super.onDestroy();
     }

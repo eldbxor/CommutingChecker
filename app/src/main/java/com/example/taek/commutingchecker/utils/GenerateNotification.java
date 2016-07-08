@@ -22,13 +22,14 @@ public class GenerateNotification {
                 .setSmallIcon(R.drawable.commuting)
                 .setWhen(System.currentTimeMillis());
 
+        /*
         NotificationCompat.InboxStyle inboxStyle = new NotificationCompat.InboxStyle();
         String[] events = contentText.split(",");
         inboxStyle.setBigContentTitle("details:");
         for(int j = 0; j < events.length; j++){
             inboxStyle.addLine(events[j]);
         }
-        mBuilder.setStyle(inboxStyle);
+        mBuilder.setStyle(inboxStyle); */
 
         Intent notifyIntent = new Intent(context, MainActivity.class);
 

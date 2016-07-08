@@ -30,18 +30,18 @@
         <dex dex="C:\Users\eldbx\Documents\Github\CommutingChecker\app\build\intermediates\pre-dexed\release\okio-1.6.0_6e4639171ee9ae092dea8f9147c737ea7ebf8cf1.jar" />
     </item>
     <item
-        jar="C:\Users\eldbx\Documents\Github\CommutingChecker\app\build\intermediates\exploded-aar\com.android.support\design\23.4.0\jars\classes.jar"
-        jumboMode="false"
-        revision="23.0.1"
-        sha1="5326d9a850d491714fef8cbfaa9ea3416f0bf0d2">
-        <dex dex="C:\Users\eldbx\Documents\Github\CommutingChecker\app\build\intermediates\pre-dexed\release\com.android.support-design-23.4.0_5e8f26eb2320fa3a695fa040a82ab9d0ae84fac6.jar" />
-    </item>
-    <item
         jar="C:\Users\eldbx\Documents\Github\CommutingChecker\app\build\intermediates\exploded-aar\com.android.support\appcompat-v7\23.4.0\jars\classes.jar"
         jumboMode="false"
         revision="23.0.1"
         sha1="548f06de403a9409f00554b3ee12a9fdea0e236c">
         <dex dex="C:\Users\eldbx\Documents\Github\CommutingChecker\app\build\intermediates\pre-dexed\release\com.android.support-appcompat-v7-23.4.0_32f79608510c5ab1ad4959c6822c7479afc4fd82.jar" />
+    </item>
+    <item
+        jar="C:\Users\eldbx\Documents\Github\CommutingChecker\app\build\intermediates\exploded-aar\com.android.support\design\23.4.0\jars\classes.jar"
+        jumboMode="false"
+        revision="23.0.1"
+        sha1="5326d9a850d491714fef8cbfaa9ea3416f0bf0d2">
+        <dex dex="C:\Users\eldbx\Documents\Github\CommutingChecker\app\build\intermediates\pre-dexed\release\com.android.support-design-23.4.0_5e8f26eb2320fa3a695fa040a82ab9d0ae84fac6.jar" />
     </item>
     <item
         jar="C:\Users\eldbx\Documents\Github\CommutingChecker\app\build\intermediates\exploded-aar\io.fabric.sdk.android\fabric\1.3.12\jars\classes.jar"

@@ -3,13 +3,77 @@ package com.example.taek.commutingchecker.utils;
 import com.example.taek.commutingchecker.services.BLEScanService;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 /**
- * Created by Taek on 2016-04-15.
+ * Created by Taek on 2016-07-07.
  */
-public class CheckTime {
+public class BLEServiceUtils {
+    public static void addDeviceInfo(DeviceInfo deviceInfo){
+        boolean isExisted = false;
+        int index = 0;
+
+        for(DeviceInfo mInfo : BLEScanService.mBLEDevices){
+            if(mInfo.Address.equals(deviceInfo.Address)){
+                isExisted = true;
+                index = BLEScanService.mBLEDevices.indexOf(mInfo);
+                break;
+            }
+        }
+
+        if(isExisted == true){
+            BLEScanService.mBLEDevices.add(index, deviceInfo);
+            BLEScanService.mBLEDevices.remove(index + 1);
+        }else{
+            BLEScanService.mBLEDevices.add(deviceInfo);
+        }
+    }
+
+    public static void addEssentialData(Map<String, String> essentialData){
+        boolean isExisted = false;
+        int index = 0;
+
+        for(Map<String, String> map : BLEScanService.EssentialDataArray){
+            if(essentialData.get("id_workplace").equals(map.get("id_workplace"))){
+                isExisted = true;
+                index = BLEScanService.EssentialDataArray.indexOf(map);
+                break;
+            }
+        }
+
+        if(isExisted == true){
+            BLEScanService.EssentialDataArray.add(index, essentialData);
+            BLEScanService.EssentialDataArray.remove(index + 1);
+        }else{
+            BLEScanService.EssentialDataArray.add(essentialData);
+        }
+    }
+
+    public static void addFilterList(String beaconAddress){
+        boolean isExisted = false;
+        int index = 0;
+
+        if(beaconAddress.equals(""))
+            return;
+
+        for(String mac : BLEScanService.filterlist){
+            if(mac.equals(beaconAddress)){
+                isExisted = true;
+                index = BLEScanService.filterlist.indexOf(mac);
+                break;
+            }
+        }
+
+        if(isExisted == true){
+            BLEScanService.filterlist.add(index, beaconAddress);
+            BLEScanService.filterlist.remove(index + 1);
+        }else{
+            BLEScanService.filterlist.add(beaconAddress);
+        }
+    }
+
     public static void checkTime(){
         Runnable r = new Runnable() {
             @Override
@@ -85,7 +149,7 @@ public class CheckTime {
                     }
 
                     if(times >= 2){
-                        SendEvent.sendEvent(mDeviceInfo1, mDeviceInfo2, mDeviceInfo3, true);
+                        BLEServiceUtils.sendEvent(mDeviceInfo1, mDeviceInfo2, mDeviceInfo3, true);
                         break;
                     }
 
@@ -95,50 +159,34 @@ public class CheckTime {
                         e.printStackTrace();
                     }
                 }
-                /*
-                for(int i = 0; i < 3; i++){
-                    mBLEDevice = BLEScanService.mBLEDevices;
-                    for(DeviceInfo deviceInfo : mBLEDevice){ // update deviceInfo1, 2, 3
-                        if(deviceInfo.Address.equals(mDeviceInfo1.Address))
-                            mDeviceInfo1 = deviceInfo;
-                        else if(deviceInfo.Address.equals(mDeviceInfo2.Address))
-                            mDeviceInfo2 = deviceInfo;
-                        else if(deviceInfo.Address.equals(mDeviceInfo3.Address))
-                            mDeviceInfo3 = deviceInfo;
-                    }
-                    int count_for = 0;
-
-                    if(mDeviceInfo1.Rssi > (coordinateX - 5) && mDeviceInfo1.Rssi < (coordinateX + 5)){
-                        count_for++;
-                    }
-                    if(mDeviceInfo2.Rssi > (coordinateY - 5) && mDeviceInfo2.Rssi < (coordinateY + 5)){
-                        count_for++;
-                    }
-                    if(mDeviceInfo3.Rssi > (coordinateZ - 5) && mDeviceInfo3.Rssi < (coordinateZ + 5)){
-                        count_for++;
-                    }
-
-                    if(count_for >= 2)
-                        count++;
-
-                    if(count >= 2)
-                        break;
-
-                    try {
-                        Thread.sleep(300);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-
-                if(count >= 2){
-                    SendEvent.sendEvent(mDeviceInfo1, mDeviceInfo2, mDeviceInfo3, true);
-                    //BLEScanService.checkCallbackThread = new CheckCallback(mDeviceInfo1, mDeviceInfo2, mDeviceInfo3);
-                } */
             }
         };
 
         Thread thread = new Thread(r);
         thread.start();
+    }
+
+    public synchronized static void sendEvent(DeviceInfo deviceInfo1, DeviceInfo deviceInfo2, DeviceInfo deviceInfo3, final boolean isComeToWork){
+        //if((!BLEScanService.coolTime && comeToWork) || (BLEScanService.coolTime && !comeToWork)) {
+        if((isComeToWork || (BLEScanService.coolTime && !isComeToWork))){
+            Map<String, String> data = new HashMap<String, String>();
+            data.put("BeaconDeviceAddress1", deviceInfo1.Address);
+            data.put("BeaconDeviceAddress2", deviceInfo2.Address);
+            data.put("BeaconDeviceAddress3", deviceInfo3.Address);
+            data.put("BeaconData1", deviceInfo1.ScanRecord);
+            data.put("BeaconData2", deviceInfo2.ScanRecord);
+            data.put("BeaconData3", deviceInfo3.ScanRecord);
+            data.put("SmartphoneAddress", BLEScanService.myMacAddress);
+            //data.put("DateTime", CurrentTime.currentTime());
+
+            BLEScanService.mSocketIO.sendEvent(data, isComeToWork);
+            if (isComeToWork) {
+                BLEScanService.coolTime = true;
+                BLEScanService.checkCallbackThread = new CheckCallback(deviceInfo1, deviceInfo2, deviceInfo3);
+            } else {
+                BLEScanService.coolTime = false;
+                BLEScanService.mBLEDevices.clear();
+            }
+        }
     }
 }

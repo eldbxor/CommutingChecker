@@ -15,12 +15,27 @@ public class Calibration {
     private static ArrayList<Integer> rssi1, rssi2, rssi3;
     private static DeviceInfo mDeviceInfo1, mDeviceInfo2, mDeviceInfo3;
     private static int sumOfRssi1, sumOfRssi2, sumOfRssi3;
+    private static int count_error = 0;
 
     public static void calibration(){
-        if(BLEScanService.mBLEDevices.size() < 3){
-            GenerateNotification.generateNotification(BLEScanService.ServiceContext, "Calibration Error", "비콘 데이터가 없습니다 잠시후 재시도 해주십시오.", "");
-            BLEScanService.CalibrationFlag = false;
-            return;
+        while(true) {
+            try{
+                Thread.sleep(500);
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+            if (BLEScanService.mBLEDevices.size() < 3) {
+                if (count_error == 10) {
+                    GenerateNotification.generateNotification(BLEScanService.ServiceContext, "Calibration Error", "비콘 데이터가 없습니다 잠시후 재시도 해주십시오.", "");
+                    BLEScanService.CalibrationFlag = false;
+                    return;
+                }else{
+                    count_error++;
+                    continue;
+                }
+            }else{
+                break;
+            }
         }
         rssi1 = new ArrayList<Integer>();
         rssi2 = new ArrayList<Integer>();
