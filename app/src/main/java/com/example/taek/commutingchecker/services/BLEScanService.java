@@ -39,15 +39,14 @@ public class BLEScanService extends Service {
     public static List<DeviceInfo> mBLEDevices; // 비콘 디바이스 정보를 갖는 ArrayList
     private ScanSettings settings; // BLE 스캔 옵션 세팅
     public static List<ScanFilter> filters; // BLE 스캔 필터
+    public static List<String> filterlist; // Api21 이하 버전용 BLE 스캔 필터
     public static String myMacAddress; // 스마트폰 블루투스 Mac 주소
-    // private static String sendTime; // 서버에 데이터를 보낸 시간
     String TAG = MainActivity.ServiceTAG;
     Thread t; // 출퇴근 등록 쓰레드
     public static boolean ScanFlag, CalibrationFlag; // 출퇴근등록 쓰레드 실행 플래그, Rssi 측정 플래그
     // Notification ID
     public static final int NOTIFICATION_ID = 1;
-    BroadcastReceiver StopSelfReceiver, RequestDataReceiver, ShowDataReceiver, CalibrationReceiver, SetRssiReceiver;
-    public static List<String> filterlist;
+    BroadcastReceiver StopSelfReceiver, RequestDataReceiver, ShowDataReceiver, CalibrationReceiver;
     public static List<Map<String, String>> EssentialDataArray;
     public static Context ServiceContext;
     public static boolean coolTime, isCallbackRunning;
@@ -123,7 +122,7 @@ public class BLEScanService extends Service {
             @Override
             public void onReceive(Context context, Intent intent) {
                 try{
-                    BLEScanService.mSocketIO.requestEssentialData();
+                    BLEScanService.mSocketIO.requestEssentialData(SocketIO.SERVICE_CALLBACK);
                 }catch (Exception e){
                     e.printStackTrace();
                     Toast.makeText(BLEScanService.ServiceContext, "서비스 실행상태가 아닙니다.", Toast.LENGTH_LONG).show();
@@ -190,12 +189,6 @@ public class BLEScanService extends Service {
                             .build();
                 }
                 filters = new ArrayList<ScanFilter>();
-
-                // 스캔 필터 리스트 추가
-                for(String deviceMacAddress : filterlist){
-                    ScanFilter filter = new ScanFilter.Builder().setDeviceAddress(deviceMacAddress).build();
-                    filters.add(filter);
-                }
             }
 
             myMacAddress = android.provider.Settings.Secure.getString(this.getContentResolver(), "bluetooth_address");
@@ -238,20 +231,21 @@ public class BLEScanService extends Service {
                 }
 
                 // 서버에 Rssi 제한 값 요청 후 데이터 받기
-                mSocketIO.requestEssentialData();
-
+                mSocketIO.requestEssentialData(SocketIO.SERVICE_CALLBACK);
                 try{
                     do {
                         Thread.sleep(100);
-                    }while(filterlist.size() == 0);
+                    }while(EssentialDataArray.size() == 0);
                 }catch (InterruptedException e){
                     e.printStackTrace();
                 }
 
+                Log.d("EssentialData's size", EssentialDataArray.size() + "");
+                /*
                 Log.d("FilterListSize", String.valueOf(filterlist.size()));
                 for(int i = 0; i < filterlist.size(); i++) {
                     Log.d("FilterList", String.valueOf(i) + ": " + filterlist.get(i));
-                }
+                } */
 
                 // 스캔 시작
                 scanLeDevice(true);
@@ -266,7 +260,6 @@ public class BLEScanService extends Service {
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
-                        // mSocketIO.requestEssentialData();
 
                         stopSelf();
                         break;
@@ -312,6 +305,11 @@ public class BLEScanService extends Service {
                 // 롤리팝 이전버전
                 mBluetoothAdapter.startLeScan(mLeScanCallback);
             }else{
+                for(Map<String, String> map : EssentialDataArray){
+                    filters.add(new ScanFilter.Builder().setDeviceAddress(map.get("beacon_address1")).build());
+                    filters.add(new ScanFilter.Builder().setDeviceAddress(map.get("beacon_address2")).build());
+                    filters.add(new ScanFilter.Builder().setDeviceAddress(map.get("beacon_address3")).build());
+                }
                 mBLEScanner.startScan(filters, settings, mScanCallback);
             }
         }else{
@@ -409,6 +407,7 @@ public class BLEScanService extends Service {
             Log.d("Essential Data's size", String.valueOf(EssentialDataArray.size()));
             // 비콘 Mac 주소 필터링
             boolean filtering = false;
+
             for(String deviceMacAddress : filterlist){
                 if((String.valueOf(deviceMacAddress)).equals(device.getAddress())){
                     filtering = true;

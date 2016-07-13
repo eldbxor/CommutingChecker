@@ -13,7 +13,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import io.socket.client.IO;
@@ -23,8 +25,9 @@ import io.socket.emitter.Emitter;
  * Created by Taek on 2016-04-15.
  */
 public class SocketIO {
-    //com.github.nkzawa.socketio.client.Socket mSocket;
-    //io.socket.client.Socket mSocket;
+    public static final int SERVICE_CALLBACK = 1;
+    public static final int ACTIVITY_CALLBACK = 2;
+
     io.socket.client.Socket mSocket;
 
     // 생성자
@@ -138,7 +141,11 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
 
     // More than api ver.19
     //@SuppressLint("NewApi")
-    public void requestEssentialData(){
+    public void requestEssentialData(final int callbackType){
+        /*
+        component
+
+         */
         JSONObject obj = new JSONObject();
         try{
             if(mSocket.connected()){
@@ -173,18 +180,15 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
                                 map.put("beacon_address1", str_arr[0]);
                                 map.put("beacon_address2", str_arr[1]);
                                 map.put("beacon_address3", str_arr[2]);
-                                BLEServiceUtils.addEssentialData(map);
-                                BLEServiceUtils.addFilterList(str_arr[0]);
-                                BLEServiceUtils.addFilterList(str_arr[1]);
-                                BLEServiceUtils.addFilterList(str_arr[2]);
-                                Log.d("addFilterList", str_arr[0] + ", " + str_arr[1] + ", " + str_arr[2]);
-                                Log.d("FilterSizeInSocketIO", String.valueOf(BLEScanService.filterlist.size()));
-                                if(Build.VERSION.SDK_INT >= 21) {
-                                    BLEScanService.filters.clear();
-                                    for (String deviceMacAddress : BLEScanService.filterlist) {
-                                        ScanFilter filter = new ScanFilter.Builder().setDeviceAddress(deviceMacAddress).build();
-                                        BLEScanService.filters.add(filter);
-                                    }
+                                switch (callbackType) {
+                                    case SERVICE_CALLBACK:
+                                        BLEServiceUtils.addEssentialData(map);
+                                        for (int j = 0; j < 3; j++)
+                                            BLEServiceUtils.addFilterList(str_arr[j]);
+                                        break;
+
+                                    case ACTIVITY_CALLBACK:
+                                        break;
                                 }
                             }
                         } catch (JSONException e) {
