@@ -25,9 +25,12 @@ import java.util.ArrayList;
 public class ChartFragment extends Fragment {
 
     public static JSONArray chartData = new JSONArray();
+    public static boolean chartDataReceived;
 
     public static ChartFragment newInstance() {
         ChartFragment fragment = new ChartFragment();
+        chartDataReceived = false;
+
         return fragment;
     }
 
@@ -51,7 +54,6 @@ public class ChartFragment extends Fragment {
             default:
                 return inflater.inflate(R.layout.fragment_chart, container, false);
         }
-
     }
 
     private View populationOfEachDepartment(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState, SocketIO.ChartSignal signal) {
@@ -61,6 +63,14 @@ public class ChartFragment extends Fragment {
 
         try {
             MainActivity.mSocket.requestChartData(signal);
+            do {
+                try {
+                    Thread.sleep(100);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            } while (chartDataReceived == false);
+            chartDataReceived = false;
 
             if (chartData != null) {
                 ArrayList<Entry> entries = new ArrayList<>();

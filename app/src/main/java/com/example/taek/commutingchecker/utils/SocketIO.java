@@ -391,6 +391,7 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
                                     Log.d("Awesometic", result.toString());
                                     JSONObject chartData = new JSONObject(result.toString());
                                     ChartFragment.chartData = chartData.getJSONArray("data");
+                                    ChartFragment.chartDataReceived = true;
                                 } catch (JSONException e) {
                                     e.printStackTrace();
                                 }

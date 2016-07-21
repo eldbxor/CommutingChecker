@@ -82,14 +82,14 @@
         jar="C:\Users\eldbx\Documents\Github\CommutingChecker\app\build\intermediates\incremental-classes\debug\instant-run-bootstrap.jar"
         jumboMode="true"
         revision="23.0.1"
-        sha1="0dcb1ede04a2042755cc4bcfd1c5a9cc22a7142c">
+        sha1="7ab8a60bf3a95088ae1effcda3599060f15e47d8">
         <dex dex="C:\Users\eldbx\Documents\Github\CommutingChecker\app\build\intermediates\transforms\dex\debug\folders\1000\10\instant-run-bootstrap_e00195c56c33503e779600a471878db8c82a1717\classes.dex" />
     </item>
     <item
         jar="C:\Users\eldbx\Documents\Github\CommutingChecker\app\build\intermediates\incremental-runtime-classes\debug\instant-run.jar"
         jumboMode="true"
         revision="23.0.1"
-        sha1="7af2fb288f2ff7e818a1aa014f562fd72b04b690">
+        sha1="5bd91ba81722ac415ef55afcb1db66ba693fafc8">
         <dex dex="C:\Users\eldbx\Documents\Github\CommutingChecker\app\build\intermediates\transforms\dex\debug\folders\1000\10\instant-run_d9211e36f842282e5332e9c4a1a4a2d4a3ee6207\classes.dex" />
     </item>
     <item

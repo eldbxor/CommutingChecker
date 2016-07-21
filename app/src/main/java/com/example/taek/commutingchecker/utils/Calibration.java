@@ -94,7 +94,7 @@ public class Calibration {
         data.put("BeaconData2", mDeviceInfo2.ScanRecord);
         data.put("BeaconData3", mDeviceInfo3.ScanRecord);
         data.put("SmartphoneAddress", BLEScanService.myMacAddress);
-        data.put("DateTime", CurrentTime.currentTime());
+        //data.put("DateTime", CurrentTime.currentTime());
         data.put("CoordinateX", String.valueOf(sumOfRssi1));
         data.put("CoordinateY", String.valueOf(sumOfRssi2));
         data.put("CoordinateZ", String.valueOf(sumOfRssi3));
