@@ -13,10 +13,17 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.net.URISyntaxException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 
 import io.socket.client.IO;
 import io.socket.emitter.Emitter;
@@ -30,10 +37,27 @@ public class SocketIO {
 
     io.socket.client.Socket mSocket;
 
+    /** 2016. 7. 21
+     * Awesometic
+     * It's not be updated this class, but SocketIO.java will do that
+     * If the key continuously has value "null", then any socket data will not be send to server without RSA encryption
+     */
+    // A RSA manager that has RSA key pair itself and to do such as encrypt, decrypt using RSA
+    private RSA rsaCrypto;
+    // RSA public key from server, it will be updated once a day at midnight
+    private PublicKey serversPublicKey;
+
     // 생성자
     public SocketIO(){
         try{
             mSocket = IO.socket(Constants.SERVER_URL);
+
+            try {
+                // Initialize the RSA manager
+                rsaCrypto = new RSA();
+            } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | IllegalBlockSizeException | BadPaddingException e) {
+                e.printStackTrace();
+            }
         }catch (URISyntaxException e){
             e.printStackTrace();
             Log.d("connectSocket", "Error");
@@ -156,7 +180,17 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
                      DateTime: '0000/00/00 00:00:00'
                 }
                  */
-                obj.put("SmartphoneAddress", BLEScanService.myMacAddress);
+                try {
+                    if (serversPublicKey != null) {
+                        String encryptedSmartphoneAddressJsonKey = rsaCrypto.encryptWithServersPublicKey("SmartphoneAddress", serversPublicKey);
+                        String encryptedSmartphoneAddress = rsaCrypto.encryptWithServersPublicKey(BLEScanService.myMacAddress, serversPublicKey);
+                        obj.put(encryptedSmartphoneAddressJsonKey, encryptedSmartphoneAddress);
+                    }
+                    else
+                        Log.d("Awesometic", "requestEssentialData - Server's public key is not initialized");
+                } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | IllegalBlockSizeException | BadPaddingException e) {
+                    e.printStackTrace();
+                }
                 //obj.put("DateTime", CurrentTime.currentTime());
                 mSocket.emit("requestEssentialData", obj);
                 Log.d("requestEssentialData", "success");
@@ -199,6 +233,66 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
                 });
             }
         }catch (JSONException e){
+            e.printStackTrace();
+        }
+    }
+
+    // Get RSA public key from the server
+    public void getServersRsaPublicKey() {
+            if (mSocket.connected()) {
+                mSocket.emit("requestRsaPublicKeyWithoutSmartphoneAddress");
+
+                mSocket.on("rsaPublicKey", new Emitter.Listener() {
+                    @Override
+                    public void call(Object... args) {
+                        try {
+                            JSONObject receiveJsonObject = (JSONObject) args[0];
+                            Log.d("Awesometic", "getServerRsaPublicKey - receive: \n" + String.valueOf(receiveJsonObject.get("publicKey")));
+
+                            serversPublicKey = rsaCrypto.stringToPublicKey(String.valueOf(receiveJsonObject.get("publicKey")));
+                            Log.d("Awesometic", "getServerRsaPublicKey - receive success");
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            Log.d("Awesometic", "getServerRsaPublicKey - receive fail");
+                        }
+                    }
+                });
+
+            } else {
+                Log.d("Awesometic", "getServerRsaPublicKey - socket isn't connected");
+            }
+    }
+
+    // Get RSA public key from the server
+    public void getServersRsaPublicKey(String smartphoneAddress) {
+        try {
+            JSONObject obj = new JSONObject();
+
+            if (mSocket.connected()) {
+                obj.put("SmartphoneAddress", smartphoneAddress);
+
+                mSocket.emit("requestRsaPublicKey", obj);
+
+                mSocket.on("rsaPublicKey", new Emitter.Listener() {
+                    @Override
+                    public void call(Object... args) {
+                        try {
+                            JSONObject receiveJsonObject = (JSONObject) args[0];
+                            Log.d("Awesometic", "getServerRsaPublicKey - receive: \n" + String.valueOf(receiveJsonObject.get("publicKey")));
+
+                            serversPublicKey = rsaCrypto.stringToPublicKey(String.valueOf(receiveJsonObject.get("publicKey")));
+                            Log.d("Awesometic", "getServerRsaPublicKey - receive success");
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            Log.d("Awesometic", "getServerRsaPublicKey - receive fail");
+                        }
+                    }
+                });
+
+            } else {
+                Log.d("Awesometic", "getServerRsaPublicKey - socket isn't connected");
+            }
+        } catch (JSONException e) {
             e.printStackTrace();
         }
     }
@@ -408,6 +502,13 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
         } catch (JSONException e) {
             e.printStackTrace();
         }
+    }
+
+    public boolean isServersPublicKeyInitialized() {
+        if (this.serversPublicKey != null)
+            return true;
+        else
+            return false;
     }
 
     public boolean connected() {
