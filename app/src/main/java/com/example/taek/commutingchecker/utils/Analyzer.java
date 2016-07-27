@@ -103,15 +103,17 @@ public class Analyzer {
         }
     }
 
-    public JSONObject extractContentFromReceivedJson(JSONObject receivedJson) {
+    public String extractContentFromReceivedJson(JSONObject receivedJson) {
         try {
             JSONObject keyIvJson = new JSONObject(rsaCipher.decrypt(receivedJson.getString("aesKeyIv")));
 
             byte[] serversAesCryptKey = hexToBytes(keyIvJson.getString("aesCryptKey"));
             byte[] serversAesCryptIv = hexToBytes(keyIvJson.getString("aesCryptIv"));
 
-            return new JSONObject(AES256Cipher.decrypt(serversAesCryptKey, serversAesCryptIv,
-                    receivedJson.getString("content")).replace("[", "").replace("]", ""));
+            String contentJsonString = AES256Cipher.decrypt(serversAesCryptKey, serversAesCryptIv, receivedJson.getString("content"));
+            Log.d("Awesometic", contentJsonString);
+
+            return contentJsonString;
 
         } catch (JSONException |
                 NoSuchAlgorithmException |
@@ -128,5 +130,4 @@ public class Analyzer {
             return null;
         }
     }
-
 }

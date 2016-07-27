@@ -162,7 +162,7 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
                 public void call(Object... args) {
                     try {
                         JSONObject resultJson = (JSONObject) args[0];
-                        JSONObject contentJson = analyzer.extractContentFromReceivedJson(resultJson);
+                        JSONObject contentJson = new JSONObject(analyzer.extractContentFromReceivedJson(resultJson));
 
                         String isSuccess = String.valueOf(contentJson.get("isSuccess"));
                         if(isSuccess.equals("true")) {
@@ -195,7 +195,7 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
                     }
                 }
             });
-            
+
                             /*
                 GenerateNotification.generateNotification(BLEScanService.ServiceContext, "서버에 데이터 전송", "서버에 데이터를 전송하였습니다.",
                         data.get("BeaconDeviceAddress1") + ", "
@@ -208,7 +208,7 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
                         //+ ", " + data.get("DateTime")); */
 
             //this.close();
-            
+
         } else {
             Log.d("Awesometic", "sendEvent - socket isn't connected");
         }
@@ -238,33 +238,36 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
                 public void call(Object... args) {
                     try {
                         JSONObject resultJson = (JSONObject) args[0];
-                        JSONObject contentJson = analyzer.extractContentFromReceivedJson(resultJson);
+                        JSONArray contentJsonArray = new JSONArray(analyzer.extractContentFromReceivedJson(resultJson));
 
-                        String[] beaconAddress = {
-                                contentJson.getString("beacon_address").split("-")[0],
-                                contentJson.getString("beacon_address").split("-")[1],
-                                contentJson.getString("beacon_address").split("-")[2]
-                        };
+                        // If workplace count is more than 1, is it can deal with properly?
+                        for (int i = 0; i < contentJsonArray.length(); i++) {
+                            String[] beaconAddress = {
+                                    contentJsonArray.getJSONObject(i).getString("beacon_address").split("-")[0],
+                                    contentJsonArray.getJSONObject(i).getString("beacon_address").split("-")[1],
+                                    contentJsonArray.getJSONObject(i).getString("beacon_address").split("-")[2]
+                            };
 
-                        Map<String, String> map = new HashMap<>();
-                        map.put("id_workplace", contentJson.getString("id_workplace"));
-                        map.put("coordinateX", contentJson.getString("coordinateX"));
-                        map.put("coordinateY", contentJson.getString("coordinateY"));
-                        map.put("coordinateZ", contentJson.getString("coordinateZ"));
-                        map.put("beacon_address1", beaconAddress[0]);
-                        map.put("beacon_address2", beaconAddress[1]);
-                        map.put("beacon_address3", beaconAddress[2]);
+                            Map<String, String> map = new HashMap<>();
+                            map.put("id_workplace", contentJsonArray.getJSONObject(i).getString("id_workplace"));
+                            map.put("coordinateX", contentJsonArray.getJSONObject(i).getString("coordinateX"));
+                            map.put("coordinateY", contentJsonArray.getJSONObject(i).getString("coordinateY"));
+                            map.put("coordinateZ", contentJsonArray.getJSONObject(i).getString("coordinateZ"));
+                            map.put("beacon_address1", beaconAddress[0]);
+                            map.put("beacon_address2", beaconAddress[1]);
+                            map.put("beacon_address3", beaconAddress[2]);
 
-                        switch (callbackType) {
-                            case SERVICE_CALLBACK:
-                                BLEServiceUtils.addEssentialData(map);
-                                for (int i = 0; i < 3; i++) {
-                                    BLEServiceUtils.addFilterList(beaconAddress[i]);
-                                }
-                                break;
+                            switch (callbackType) {
+                                case SERVICE_CALLBACK:
+                                    BLEServiceUtils.addEssentialData(map);
+                                    for (int j = 0; j < 3; j++) {
+                                        BLEServiceUtils.addFilterList(beaconAddress[j]);
+                                    }
+                                    break;
 
-                            case ACTIVITY_CALLBACK:
-                                break;
+                                case ACTIVITY_CALLBACK:
+                                    break;
+                            }
                         }
 
                     } catch (JSONException e) {
@@ -310,7 +313,7 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
                 public void call(Object... args) {
                     try {
                         JSONObject resultJson = (JSONObject) args[0];
-                        JSONObject contentJson = analyzer.extractContentFromReceivedJson(resultJson);
+                        JSONObject contentJson = new JSONObject(analyzer.extractContentFromReceivedJson(resultJson));
 
                         boolean isSuccess = Boolean.valueOf(contentJson.getString("isSuccess"));
 
@@ -376,13 +379,13 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
             } else {
                 Log.d("Awesometic", "amIRegistered - server's public key is not initialized");
             }
-            
+
             mSocket.on("data", new Emitter.Listener() {
                 @Override
                 public void call(Object... args) {
                     try {
                         JSONObject resultJson = (JSONObject) args[0];
-                        JSONObject contentJson = analyzer.extractContentFromReceivedJson(resultJson);
+                        JSONObject contentJson = new JSONObject(analyzer.extractContentFromReceivedJson(resultJson));
 
                         boolean registered = Boolean.valueOf(String.valueOf(contentJson.get("registered")));
                         if (registered) {
@@ -405,7 +408,7 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
                     }
                 }
             });
-            
+
         } else {
             Log.d("Awesometic", "amIRegistered - socket isn't connected");
         }
@@ -440,7 +443,7 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
                 public void call(Object... args) {
                     try {
                         JSONObject resultJson = (JSONObject) args[0];
-                        JSONObject contentJson = analyzer.extractContentFromReceivedJson(resultJson);
+                        JSONObject contentJson = new JSONObject(analyzer.extractContentFromReceivedJson(resultJson));
 
                         boolean requestSuccess = contentJson.getBoolean("requestSuccess");
 
@@ -496,15 +499,18 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
                 public void call(Object... args) {
                     try {
                         JSONObject resultJson = (JSONObject) args[0];
-                        JSONObject contentJson = analyzer.extractContentFromReceivedJson(resultJson);
-
+                        JSONArray contentJsonArray = new JSONArray(analyzer.extractContentFromReceivedJson(resultJson));
+/*
+                        Log.d("Awesometic", contentJson.toString());
                         StringBuilder result = new StringBuilder(contentJson.toString());
-                        result.toString().replace("\"", "\\\"");
                         result.insert(0, "{ \"data\":");
                         result.insert(result.length(), "}");
+*/
 
-                        JSONObject chartData = new JSONObject(result.toString());
-                        ChartFragment.chartData = chartData.getJSONArray("data");
+//                        Log.d("Awesometic", result.toString());
+
+//                        JSONObject chartData = new JSONObject(result.toString());
+                        ChartFragment.chartData = contentJsonArray;
                         ChartFragment.chartDataReceived = true;
                     } catch (JSONException e) {
                         e.printStackTrace();
