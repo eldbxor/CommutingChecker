@@ -2,6 +2,7 @@ package com.example.taek.commutingchecker.utils;
 
 import android.bluetooth.le.ScanFilter;
 import android.os.Build;
+import android.util.Base64;
 import android.util.Log;
 
 import com.example.taek.commutingchecker.services.BLEScanService;
@@ -12,7 +13,12 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.ByteArrayOutputStream;
+import java.io.UnsupportedEncodingException;
+import java.math.BigInteger;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
+import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
@@ -37,28 +43,23 @@ public class SocketIO {
 
     io.socket.client.Socket mSocket;
 
-    /** 2016. 7. 21
+    /** 2016. 7. 27
      * Awesometic
-     * It's not be updated this class, but SocketIO.java will do that
-     * If the key continuously has value "null", then any socket data will not be send to server without RSA encryption
+     * Declaration Anaylzer instance
+     * When socket.io data communicating,
+     * It helps encrypt, decrypt JSON data and analyze received JSON from server
      */
-    // A RSA manager that has RSA key pair itself and to do such as encrypt, decrypt using RSA
-    private RSA rsaCrypto;
-    // RSA public key from server, it will be updated once a day at midnight
-    private PublicKey serversPublicKey;
+    Analyzer analyzer;
 
     // 생성자
     public SocketIO(){
-        try{
+        try {
             mSocket = IO.socket(Constants.SERVER_URL);
 
-            try {
-                // Initialize the RSA manager
-                rsaCrypto = new RSA();
-            } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | IllegalBlockSizeException | BadPaddingException e) {
-                e.printStackTrace();
-            }
-        }catch (URISyntaxException e){
+            // Initialize anlayzer instance
+            analyzer = new Analyzer();
+
+        } catch (URISyntaxException e){
             e.printStackTrace();
             Log.d("connectSocket", "Error");
         }
@@ -67,6 +68,51 @@ public class SocketIO {
     // 소켓 연결
     public void connect(){
         mSocket.connect();
+    }
+
+    // Get RSA public key from the server
+    public void getServersRsaPublicKey(Object... args) {
+        if (mSocket.connected()) {
+
+            switch (args.length) {
+                case 0:
+                    mSocket.emit("requestRsaPublicKeyWithoutSmartphoneAddress");
+
+                    break;
+                case 1:
+                    try {
+                        JSONObject content = new JSONObject();
+                        content.put("SmartphoneAddress", BLEScanService.myMacAddress);
+
+                        mSocket.emit("requestRsaPublicKey", analyzer.encryptSendJson(content));
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+
+                    break;
+
+                default:
+                    break;
+            }
+
+            mSocket.on("rsaPublicKey", new Emitter.Listener() {
+                @Override
+                public void call(Object... args) {
+                    try {
+                        JSONObject receiveJsonObject = (JSONObject) args[0];
+                        analyzer.serversPublicKey = RSACipher.stringToPublicKey(String.valueOf(receiveJsonObject.get("publicKey")));
+                        Log.d("Awesometic", "getServerRsaPublicKey - receive success \n" + String.valueOf(receiveJsonObject.get("publicKey")));
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        Log.d("Awesometic", "getServerRsaPublicKey - receive fail");
+                    }
+                }
+            });
+
+        } else {
+            Log.d("Awesometic", "getServerRsaPublicKey - socket isn't connected");
+        }
     }
 
     // 이벤트 보내기
@@ -165,135 +211,63 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
 
     // More than api ver.19
     //@SuppressLint("NewApi")
-    public void requestEssentialData(final int callbackType){
-        /*
-        component
-
-         */
-        JSONObject obj = new JSONObject();
-        try{
-            if(mSocket.connected()){
-                /*
-                requestEssentialData
-                {
-                     SmartphoneAddress: '00:00:00:00:00:00',
-                     DateTime: '0000/00/00 00:00:00'
-                }
-                 */
+    public void requestEssentialData(final int callbackType) {
+        if (mSocket.connected()) {
+            if (analyzer.serversPublicKey != null) {
                 try {
-                    if (serversPublicKey != null) {
-                        String encryptedSmartphoneAddressJsonKey = rsaCrypto.encryptWithServersPublicKey("SmartphoneAddress", serversPublicKey);
-                        String encryptedSmartphoneAddress = rsaCrypto.encryptWithServersPublicKey(BLEScanService.myMacAddress, serversPublicKey);
-                        obj.put(encryptedSmartphoneAddressJsonKey, encryptedSmartphoneAddress);
-                    }
-                    else
-                        Log.d("Awesometic", "requestEssentialData - Server's public key is not initialized");
-                } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | IllegalBlockSizeException | BadPaddingException e) {
+                    JSONObject content = new JSONObject();
+                    content.put("SmartphoneAddress", BLEScanService.myMacAddress);
+
+                    mSocket.emit("requestEssentialData", analyzer.encryptSendJson(content));
+                } catch (JSONException e) {
                     e.printStackTrace();
+                    Log.d("Awesometic", "requestEssentialData - exception caught (JSON envelopment)");
                 }
-                //obj.put("DateTime", CurrentTime.currentTime());
-                mSocket.emit("requestEssentialData", obj);
-                Log.d("requestEssentialData", "success");
 
-                mSocket.on("data", new Emitter.Listener() {
-                    @Override
-                    public void call(Object... args) {
-                        try {
-                            final JSONArray jarray = new JSONArray(args[0].toString());
-                            Log.d("jarray's length", String.valueOf(jarray.length()));
-                            Log.d("request", args[0].toString());
-                            for (int i = 0; i < jarray.length(); i++) {
-                                JSONObject obj_listen = jarray.getJSONObject(i);
-                                String str = obj_listen.getString("beacon_address");
-                                String[] str_arr = str.split("-");
-                                Map<String, String> map = new HashMap<String, String>();
-                                map.put("id_workplace", obj_listen.getString("id_workplace"));
-                                map.put("coordinateX", obj_listen.getString("coordinateX"));
-                                map.put("coordinateY", obj_listen.getString("coordinateY"));
-                                map.put("coordinateZ", obj_listen.getString("coordinateZ"));
-                                map.put("beacon_address1", str_arr[0]);
-                                map.put("beacon_address2", str_arr[1]);
-                                map.put("beacon_address3", str_arr[2]);
-                                switch (callbackType) {
-                                    case SERVICE_CALLBACK:
-                                        BLEServiceUtils.addEssentialData(map);
-                                        for (int j = 0; j < 3; j++)
-                                            BLEServiceUtils.addFilterList(str_arr[j]);
-                                        break;
+            } else {
+                Log.d("Awesometic", "requestEssentialData - server's public key is not initialized");
+            }
 
-                                    case ACTIVITY_CALLBACK:
-                                        break;
+            mSocket.on("data", new Emitter.Listener() {
+                @Override
+                public void call(Object... args) {
+                    try {
+                        JSONObject resultJson = (JSONObject) args[0];
+                        JSONObject contentJson = analyzer.extractContentFromReceivedJson(resultJson);
+
+                        String[] beaconAddress = {
+                                contentJson.getString("beacon_address").split("-")[0],
+                                contentJson.getString("beacon_address").split("-")[1],
+                                contentJson.getString("beacon_address").split("-")[2]
+                        };
+
+                        Map<String, String> map = new HashMap<>();
+                        map.put("id_workplace", contentJson.getString("id_workplace"));
+                        map.put("coordinateX", contentJson.getString("coordinateX"));
+                        map.put("coordinateY", contentJson.getString("coordinateY"));
+                        map.put("coordinateZ", contentJson.getString("coordinateZ"));
+                        map.put("beacon_address1", beaconAddress[0]);
+                        map.put("beacon_address2", beaconAddress[1]);
+                        map.put("beacon_address3", beaconAddress[2]);
+
+                        switch (callbackType) {
+                            case SERVICE_CALLBACK:
+                                BLEServiceUtils.addEssentialData(map);
+                                for (int i = 0; i < 3; i++) {
+                                    BLEServiceUtils.addFilterList(beaconAddress[i]);
                                 }
-                            }
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                            Log.d("Receive Request_data", "fail");
+                                break;
+
+                            case ACTIVITY_CALLBACK:
+                                break;
                         }
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        Log.d("Awesometic", "requestEssentialData - exception caught (result analyze)");
                     }
-                });
-            }
-        }catch (JSONException e){
-            e.printStackTrace();
-        }
-    }
-
-    // Get RSA public key from the server
-    public void getServersRsaPublicKey() {
-            if (mSocket.connected()) {
-                mSocket.emit("requestRsaPublicKeyWithoutSmartphoneAddress");
-
-                mSocket.on("rsaPublicKey", new Emitter.Listener() {
-                    @Override
-                    public void call(Object... args) {
-                        try {
-                            JSONObject receiveJsonObject = (JSONObject) args[0];
-                            Log.d("Awesometic", "getServerRsaPublicKey - receive: \n" + String.valueOf(receiveJsonObject.get("publicKey")));
-
-                            serversPublicKey = rsaCrypto.stringToPublicKey(String.valueOf(receiveJsonObject.get("publicKey")));
-                            Log.d("Awesometic", "getServerRsaPublicKey - receive success");
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                            Log.d("Awesometic", "getServerRsaPublicKey - receive fail");
-                        }
-                    }
-                });
-
-            } else {
-                Log.d("Awesometic", "getServerRsaPublicKey - socket isn't connected");
-            }
-    }
-
-    // Get RSA public key from the server
-    public void getServersRsaPublicKey(String smartphoneAddress) {
-        try {
-            JSONObject obj = new JSONObject();
-
-            if (mSocket.connected()) {
-                obj.put("SmartphoneAddress", smartphoneAddress);
-
-                mSocket.emit("requestRsaPublicKey", obj);
-
-                mSocket.on("rsaPublicKey", new Emitter.Listener() {
-                    @Override
-                    public void call(Object... args) {
-                        try {
-                            JSONObject receiveJsonObject = (JSONObject) args[0];
-                            Log.d("Awesometic", "getServerRsaPublicKey - receive: \n" + String.valueOf(receiveJsonObject.get("publicKey")));
-
-                            serversPublicKey = rsaCrypto.stringToPublicKey(String.valueOf(receiveJsonObject.get("publicKey")));
-                            Log.d("Awesometic", "getServerRsaPublicKey - receive success");
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                            Log.d("Awesometic", "getServerRsaPublicKey - receive fail");
-                        }
-                    }
-                });
-
-            } else {
-                Log.d("Awesometic", "getServerRsaPublicKey - socket isn't connected");
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
+                }
+            });
         }
     }
 
@@ -505,7 +479,7 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
     }
 
     public boolean isServersPublicKeyInitialized() {
-        if (this.serversPublicKey != null)
+        if (analyzer.serversPublicKey != null)
             return true;
         else
             return false;
