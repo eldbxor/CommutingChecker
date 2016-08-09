@@ -28,6 +28,7 @@ import com.example.taek.commutingchecker.ui.MainActivity;
 import com.example.taek.commutingchecker.ui.SetupFragment;
 import com.example.taek.commutingchecker.utils.SocketIO;
 
+import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -122,6 +123,9 @@ public class BLEScanService extends Service {
             @Override
             public void onReceive(Context context, Intent intent) {
                 try{
+                    // Getting a public key from server
+                    mSocketIO.getServersRsaPublicKey(myMacAddress);
+
                     BLEScanService.mSocketIO.requestEssentialData(SocketIO.SERVICE_CALLBACK);
                 }catch (Exception e){
                     e.printStackTrace();
@@ -226,6 +230,17 @@ public class BLEScanService extends Service {
                     do {
                         Thread.sleep(100);
                     } while (mSocketIO.connected() == false);
+                }catch (InterruptedException e){
+                    e.printStackTrace();
+                }
+
+                // Getting a public key from server
+                mSocketIO.getServersRsaPublicKey();
+
+                try{
+                    do {
+                        Thread.sleep(100);
+                    } while(!mSocketIO.isServersPublicKeyInitialized());
                 }catch (InterruptedException e){
                     e.printStackTrace();
                 }

@@ -62,6 +62,15 @@ public class ChartFragment extends Fragment {
         PieChart pieChart = (PieChart) rootView.findViewById(R.id.chart_population_of_each_department);
 
         try {
+            MainActivity.mSocket.getServersRsaPublicKey();
+            do {
+                try {
+                    Thread.sleep(100);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            } while (MainActivity.mSocket.isServersPublicKeyInitialized() == false);
+
             MainActivity.mSocket.requestChartData(signal);
             do {
                 try {
