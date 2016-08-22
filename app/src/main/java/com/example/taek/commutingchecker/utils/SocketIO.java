@@ -8,6 +8,7 @@ import android.util.Log;
 import com.example.taek.commutingchecker.services.BLEScanService;
 import com.example.taek.commutingchecker.ui.ChartFragment;
 import com.example.taek.commutingchecker.ui.EntryActivity;
+import com.example.taek.commutingchecker.ui.MainActivity;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -117,6 +118,16 @@ public class SocketIO {
 
     // 이벤트 보내기
     public void sendEvent(final Map<String, String> data, final boolean isComeToWork) {
+
+        try {
+//            mSocket.connect();
+            do {
+                Thread.sleep(100);
+            } while (mSocket.connected() == false);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         if (mSocket.connected()) {
             if (analyzer.serversPublicKey != null) {
                 try {
@@ -157,15 +168,15 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
                 Log.d("Awesometic", "sendEvent - server's public key is not initialized");
             }
 
-            mSocket.on("data", new Emitter.Listener() {
+            mSocket.on("answer", new Emitter.Listener() {
                 @Override
                 public void call(Object... args) {
                     try {
                         JSONObject resultJson = (JSONObject) args[0];
                         JSONObject contentJson = new JSONObject(analyzer.extractContentFromReceivedJson(resultJson));
 
-                        String isSuccess = String.valueOf(contentJson.get("isSuccess"));
-                        if(isSuccess.equals("true")) {
+                        Boolean isSuccess = Boolean.valueOf(contentJson.getBoolean("requestSuccess"));
+                        if(isSuccess) {
                             BLEScanService.failureCount_SendEv = 0;
                             Log.d("SendEvent", "Success");
                             if(isComeToWork == true) {
