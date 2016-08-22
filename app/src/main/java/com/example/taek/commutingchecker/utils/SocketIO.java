@@ -175,7 +175,7 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
                         JSONObject resultJson = (JSONObject) args[0];
                         JSONObject contentJson = new JSONObject(analyzer.extractContentFromReceivedJson(resultJson));
 
-                        Boolean isSuccess = Boolean.valueOf(contentJson.getBoolean("requestSuccess"));
+                        Boolean isSuccess = contentJson.getBoolean("requestSuccess");
                         if(isSuccess) {
                             BLEScanService.failureCount_SendEv = 0;
                             Log.d("SendEvent", "Success");
@@ -319,20 +319,22 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
                 Log.d("Awesometic", "calibration - server's public key is not initialized");
             }
 
-            mSocket.on("data", new Emitter.Listener() {
+            mSocket.on("answer", new Emitter.Listener() {
                 @Override
                 public void call(Object... args) {
                     try {
                         JSONObject resultJson = (JSONObject) args[0];
                         JSONObject contentJson = new JSONObject(analyzer.extractContentFromReceivedJson(resultJson));
 
-                        boolean isSuccess = Boolean.valueOf(contentJson.getString("isSuccess"));
-
+                        Boolean isSuccess = contentJson.getBoolean("requestSuccess");
                         if(isSuccess) {
                             BLEScanService.failureCount_Cali = 0;
                             Log.d("Calibration", "Success");
 
-                            GenerateNotification.generateNotification(BLEScanService.ServiceContext, "Calibration 성공", "새로운 좌표 값이 등록되었습니다.", "");
+//                            GenerateNotification.generateNotification(BLEScanService.ServiceContext, "Calibration 성공", "새로운 좌표 값이 등록되었습니다.", "");
+                            GenerateNotification.generateNotification(BLEScanService.ServiceContext, "Calibration", "Rssi 평균 값을 서버에 전송하였습니다." +
+                                            ".",
+                                    "rss1: " + data.get("CoordinateX") + ", " + "rssi2: " + data.get("CoordinateY") + ", " + "rss3: " + data.get("CoordinateZ"));
                         } else {
                             if(BLEScanService.failureCount_Cali < 2) {
                                 BLEScanService.failureCount_Cali++;
@@ -351,10 +353,6 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
                     }
                 }
             });
-
-            GenerateNotification.generateNotification(BLEScanService.ServiceContext, "Calibration", "Rssi 평균 값을 서버에 전송하였습니다." +
-                            ".",
-                    "rss1: " + data.get("CoordinateX") + ", " + "rssi2: " + data.get("CoordinateY") + ", " + "rss3: " + data.get("CoordinateZ"));
             Log.d("calibration data", data.get("BeaconDeviceAddress1") + ", " +
                     data.get("BeaconDeviceAddress2") + ", " +
                     data.get("BeaconDeviceAddress3") + ", " +
