@@ -244,7 +244,7 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
                 Log.d("Awesometic", "requestEssentialData - server's public key is not initialized");
             }
 
-            mSocket.on("data", new Emitter.Listener() {
+            mSocket.on("answer", new Emitter.Listener() {
                 @Override
                 public void call(Object... args) {
                     try {
@@ -389,7 +389,7 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
                 Log.d("Awesometic", "amIRegistered - server's public key is not initialized");
             }
 
-            mSocket.on("data", new Emitter.Listener() {
+            mSocket.on("answer", new Emitter.Listener() {
                 @Override
                 public void call(Object... args) {
                     try {
@@ -503,7 +503,7 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
                 Log.d("Awesometic", "requestChartData - server's public key is not initialized");
             }
 
-            mSocket.on("data", new Emitter.Listener() {
+            mSocket.on("answer", new Emitter.Listener() {
                 @Override
                 public void call(Object... args) {
                     try {
@@ -540,10 +540,7 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
     }
 
     public boolean connected() {
-        if (mSocket.connected())
-            return true;
-        else
-            return false;
+        return mSocket.connected();
     }
 
     // 소켓 닫기

@@ -2,6 +2,8 @@ package com.example.taek.commutingchecker.ui;
 
 import android.app.ActivityManager;
 import android.app.Fragment;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -99,9 +101,11 @@ public class SetupFragment extends Fragment {
         calibration.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent("android.intent.action.CALIBRATION_SERVICE");
-                intent.setData(Uri.parse("Calibration:"));
-                getActivity().sendBroadcast(intent);
+                CalibrationFragment calibrationFragment = new CalibrationFragment();
+                FragmentManager fragmentManager = getFragmentManager();
+                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+                fragmentTransaction.replace(R.id.content_frame, calibrationFragment);
+                fragmentTransaction.commit();
             }
         });
 
