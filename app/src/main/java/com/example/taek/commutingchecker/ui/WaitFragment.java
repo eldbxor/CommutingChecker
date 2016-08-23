@@ -12,6 +12,7 @@ import com.example.taek.commutingchecker.R;
  * Created by Awesometic on 2016-07-02.
  */
 public class WaitFragment extends Fragment {
+
     private View rootView;
 
     public static WaitFragment newInstance() {

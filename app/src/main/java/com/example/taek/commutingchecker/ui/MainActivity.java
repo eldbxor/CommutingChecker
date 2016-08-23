@@ -157,7 +157,7 @@ public class MainActivity extends AppCompatActivity
     /* Fragments objects */
     private MainFragment fragMain;
     private ChartFragment fragChart;
-    private SetupFragment fragSetup;
+    public SetupFragment fragSetup;
 
     /* Navigation View object */
     private NavigationView navigationView;
