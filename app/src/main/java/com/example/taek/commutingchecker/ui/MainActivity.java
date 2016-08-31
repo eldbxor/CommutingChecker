@@ -1,12 +1,21 @@
 package com.example.taek.commutingchecker.ui;
 
 import android.annotation.TargetApi;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.FragmentManager;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.os.Build;
+import android.os.Handler;
+import android.os.IBinder;
+import android.os.Message;
+import android.os.Messenger;
+import android.os.RemoteException;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -21,8 +30,10 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.crashlytics.android.Crashlytics;
+import com.example.taek.commutingchecker.services.BLEScanService;
 import com.example.taek.commutingchecker.utils.BackPressCloseHandler;
 import com.example.taek.commutingchecker.R;
+import com.example.taek.commutingchecker.utils.IncomingHandler;
 import com.example.taek.commutingchecker.utils.SocketIO;
 
 import io.fabric.sdk.android.Fabric;
@@ -42,9 +53,37 @@ public class MainActivity extends AppCompatActivity
     // Close the app when back button twice pressed
     private BackPressCloseHandler backPressCloseHandler;
 
+    public static Context MainActivityContext;
     public static String ServiceTAG;
     public static SocketIO mSocket;
     public static String myMacAddress;
+    public static Messenger messenger;
+    public static Activity activity;
+
+    // Target we publish for clients to send messages to IncomingHandler.
+    public static final Messenger incomingMessenger = new Messenger(new IncomingHandler());
+
+    public static void connectMessenger(){
+        Log.d("MainActivity method", "call connectMessenger");
+        ComponentName cn = new ComponentName(MainActivity.MainActivityContext, BLEScanService.class);
+        Intent intent = new Intent();
+        intent.setComponent(cn);
+
+        ServiceConnection conn = new ServiceConnection() {
+            @Override
+            public void onServiceConnected(ComponentName name, IBinder service) {
+                MainActivity.messenger = new Messenger(service);
+                CalibrationFragment.timerStart();
+            }
+
+            @Override
+            public void onServiceDisconnected(ComponentName name) {
+
+            }
+        };
+
+        MainActivity.MainActivityContext.bindService(intent, conn, Context.BIND_AUTO_CREATE);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,9 +100,13 @@ public class MainActivity extends AppCompatActivity
 
         setContentView(R.layout.activity_main);
 
+        MainActivityContext = this;
         ServiceTAG = getResources().getString(R.string.scan_service);
         mSocket = new SocketIO();
         mSocket.connect();
+        messenger = null;
+        activity = MainActivity.this;
+        // connectMessenger();
 
         // BLE 관련 Permission 주기
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){

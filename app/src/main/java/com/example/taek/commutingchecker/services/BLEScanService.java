@@ -14,21 +14,23 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Build;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
+import android.os.Messenger;
 import android.util.Log;
 import android.widget.Toast;
 
 import com.example.taek.commutingchecker.utils.BLEServiceUtils;
 import com.example.taek.commutingchecker.utils.Calibration;
 import com.example.taek.commutingchecker.utils.CheckCallback;
+import com.example.taek.commutingchecker.utils.Constants;
 import com.example.taek.commutingchecker.utils.DeviceInfo;
 import com.example.taek.commutingchecker.utils.EnableBLE;
 import com.example.taek.commutingchecker.utils.GenerateNotification;
-import com.example.taek.commutingchecker.ui.MainActivity;
 import com.example.taek.commutingchecker.ui.SetupFragment;
 import com.example.taek.commutingchecker.utils.SocketIO;
 
-import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -42,38 +44,69 @@ public class BLEScanService extends Service {
     public static List<ScanFilter> filters; // BLE 스캔 필터
     public static List<String> filterlist; // Api21 이하 버전용 BLE 스캔 필터
     public static String myMacAddress; // 스마트폰 블루투스 Mac 주소
-    String TAG = MainActivity.ServiceTAG;
+    String TAG = "BLEScanService";
     Thread t; // 출퇴근 등록 쓰레드
-    public static boolean ScanFlag, CalibrationFlag; // 출퇴근등록 쓰레드 실행 플래그, Rssi 측정 플래그
     // Notification ID
     public static final int NOTIFICATION_ID = 1;
     BroadcastReceiver StopSelfReceiver, RequestDataReceiver, ShowDataReceiver, CalibrationReceiver;
     public static List<Map<String, String>> EssentialDataArray;
     public static Context ServiceContext;
-    public static boolean coolTime, isCallbackRunning;
-    public static CheckCallback checkCallbackThread;
+    public static boolean ScanFlag, CalibrationFlag, CompleteCalibraton; // 출퇴근등록 쓰레드 실행 플래그, Rssi 측정 플래그
+    public static boolean coolTime, isCallbackRunning, calibrationResetFlag;
+    public static CheckCallback checkCallbackThread, checkCallbackThread_standByAttendance;
     public static int failureCount_SendEv; // sendEvent's Failure Count
     public static int failureCount_Cali; // Calibration's Failure Count
-    /**
-     * Trigger a callback for every Bluetooth advertisement found that matches the filter criteria.
-     * If no filter is active, all advertisement packets are reported.
-     */
-    public static final int CALLBACK_TYPE_ALL_MATCHES = 1;
-
-    /**
-     * A result callback is only triggered for the first advertisement packet received that matches
-     * the filter criteria.
-     */
-    public static final int CALLBACK_TYPE_FIRST_MATCH = 2;
-
-    /**
-     * Receive a callback when advertisements are no longer received from a device that has been
-     * previously reported by a first match callback.
-     */
-    public static final int CALLBACK_TYPE_MATCH_LOST = 4;
+    public static Map<String, String> temporaryCalibrationData;
+    public static Messenger replyToActivityMessenger;
+    public static Handler timerHandler;
 
     public BLEScanService() {
     }
+
+    class IncomingHandler extends Handler{
+        @Override
+        public void handleMessage(Message msg){
+            switch (msg.what){
+                case Constants.HANDLE_MESSAGE_TYPE_CALIBRATION:
+                    Log.d("MessengerCommunication", "Service receive 1");
+                    calibrationResetFlag = false;
+                    CalibrationFlag = true;
+                    CompleteCalibraton = false;
+                    replyToActivityMessenger = msg.replyTo;
+
+                    try{
+                        do {
+                            Thread.sleep(100);
+                        } while (mSocketIO.connected() == false);
+                    }catch (InterruptedException e){
+                        e.printStackTrace();
+                    }
+                    scanLeDevice(true);
+                    Calibration.calibration();
+                    break;
+                case Constants.HANDLE_MESSAGE_TYPE_CALIBRATION_RESET:
+                    Log.d("MessengerCommunication", "Service receive 2");
+                    calibrationResetFlag = true;
+                    Log.d("ServHandler_ResetFlag", String.valueOf(calibrationResetFlag));
+                    break;
+                case Constants.HANDLE_MESSAGE_TYPE_CEHCK_THRESHOLD:
+                    Log.d("MessengerCommunication", "Service receive 3");
+                    BLEServiceUtils.checkTime();
+                    break;
+                case Constants.HANDLE_MESSAGE_TYPE_COMPLETE_CALIBRATION:
+                    Log.d("MessengerCommunication", "Service receive 4");
+                    CompleteCalibraton = true;
+                    break;
+                case Constants.HANDLE_MESSAGE_TYPE_SEEKBAR_VALUE_CHANGED:
+                    Log.d("MessengerCommunication", "Service receive 5");
+                    BLEServiceUtils.threshold_Calibration = msg.arg1;
+                    break;
+            }
+        }
+    }
+
+    // Target we publish for clients to send messages to IncomingHandler.
+    final Messenger incomingMessenger = new Messenger(new IncomingHandler());
 
     @Override
     public void onCreate(){
@@ -83,6 +116,7 @@ public class BLEScanService extends Service {
         coolTime = false;
         ServiceContext = this;
         isCallbackRunning = false;
+        calibrationResetFlag = false;
         failureCount_SendEv = 0;
         failureCount_Cali = 0;
 
@@ -185,7 +219,7 @@ public class BLEScanService extends Service {
                 if(Build.VERSION.SDK_INT == Build.VERSION_CODES.M){
                     settings = new ScanSettings.Builder()
                             .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
-                            .setCallbackType(CALLBACK_TYPE_ALL_MATCHES)
+                            .setCallbackType(Constants.CALLBACK_TYPE_ALL_MATCHES)
                             .build();
                 }else if(Build.VERSION.SDK_INT >= 21 && Build.VERSION.SDK_INT < 23) {
                     settings = new ScanSettings.Builder()
@@ -216,8 +250,37 @@ public class BLEScanService extends Service {
         */
         this.mSocketIO.connect();
 
+        // To Wait for connecting
+        try{
+            do {
+                Thread.sleep(100);
+            } while (mSocketIO.connected() == false);
+        }catch (InterruptedException e){
+            e.printStackTrace();
+        }
+
+        // Getting a public key from server
+        mSocketIO.getServersRsaPublicKey();
+
+        try{
+            do {
+                Thread.sleep(100);
+            } while(!mSocketIO.isServersPublicKeyInitialized());
+        }catch (InterruptedException e){
+            e.printStackTrace();
+        }
+
         // 서버에 Rssi 제한 값 요청 후 데이터 받기
-        //mSocketIO.requestEssentialData();
+        mSocketIO.requestEssentialData(SocketIO.SERVICE_CALLBACK);
+        try{
+            do {
+                Thread.sleep(100);
+            }while(EssentialDataArray.size() == 0);
+        }catch (InterruptedException e){
+            e.printStackTrace();
+        }
+
+        Log.d("EssentialData's size", EssentialDataArray.size() + "");
     }
 
     @Override
@@ -225,37 +288,9 @@ public class BLEScanService extends Service {
         Runnable r = new Runnable() {
             @Override
             public void run() {
-                // To Wait for connecting
-                try{
-                    do {
-                        Thread.sleep(100);
-                    } while (mSocketIO.connected() == false);
-                }catch (InterruptedException e){
-                    e.printStackTrace();
-                }
+                Log.d(TAG, "Service onStartCommand");
 
-                // Getting a public key from server
-                mSocketIO.getServersRsaPublicKey();
 
-                try{
-                    do {
-                        Thread.sleep(100);
-                    } while(!mSocketIO.isServersPublicKeyInitialized());
-                }catch (InterruptedException e){
-                    e.printStackTrace();
-                }
-
-                // 서버에 Rssi 제한 값 요청 후 데이터 받기
-                mSocketIO.requestEssentialData(SocketIO.SERVICE_CALLBACK);
-                try{
-                    do {
-                        Thread.sleep(100);
-                    }while(EssentialDataArray.size() == 0);
-                }catch (InterruptedException e){
-                    e.printStackTrace();
-                }
-
-                Log.d("EssentialData's size", EssentialDataArray.size() + "");
                 /*
                 Log.d("FilterListSize", String.valueOf(filterlist.size()));
                 for(int i = 0; i < filterlist.size(); i++) {
@@ -266,52 +301,37 @@ public class BLEScanService extends Service {
                 scanLeDevice(true);
 
                 while(ScanFlag) {
-                    if (CalibrationFlag) {  // if you receive Calibration_Broadcast
-                        Calibration.calibration();
-                        CalibrationFlag = false;
-
-                        try {
-                            Thread.sleep(3000);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-
-                        stopSelf();
-                        break;
+                    try {
+                        Thread.sleep(300);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
                     }
-                    else {
-                        try {
-                            Thread.sleep(300);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
 
-                        // 3개의 비콘 정보가 없을 경우 continue
-                        if (mBLEDevices.size() != 3)
-                            continue;
+                    // 3개의 비콘 정보가 없을 경우 continue
+                    if (mBLEDevices.size() != 3)
+                        continue;
 
-                        // 0.5초 동안 3번 Rssi 체크 후 2번 이상 적합하면 sendEvent() 메서드 실행
-                        if(!coolTime)
-                            BLEServiceUtils.checkTime();
+                    // 0.5초 동안 3번 Rssi 체크 후 2번 이상 적합하면 sendEvent() 메서드 실행
+                    if(!coolTime)
+                        BLEServiceUtils.checkTime();
 
-                        //mSocketIO.sendEvent(new HashMap<String, String>());
-                        //scanLeDevice(false);
-                        //ScanFlag = false;
-                    }
-                } // End of while
-            }
+                    //mSocketIO.sendEvent(new HashMap<String, String>());
+                    //scanLeDevice(false);
+                    //ScanFlag = false;
+                }
+            } // End of while
         };
 
         t = new Thread(r);
         t.start();
-        return Service.START_STICKY;
+        // return Service.START_STICKY;
+        return Service.START_NOT_STICKY;
     }
 
     @Override
     public IBinder onBind(Intent intent) {
-        // TODO: Return the communication channel to the service.
-        //throw new UnsupportedOperationException("Not yet implemented");
-        return null; // 바운드 서비스가 아니라는 것을 안드로이드 시스템에 알려주기 위함
+        Log.d(TAG, "BLEScanService onBind()");
+        return incomingMessenger.getBinder();
     }
 
     private void scanLeDevice(final boolean enable){
@@ -393,9 +413,10 @@ public class BLEScanService extends Service {
         public void onScanResult(int callbackType, ScanResult result) {
             super.onScanResult(callbackType, result);
             isCallbackRunning = true;
+            /*
             Log.d("ScanRecord", "Running");
             Log.d("ScanRecord", result.getScanRecord().toString());
-
+*/
             List<String> separatedData = separate(result.getScanRecord().getBytes());
 
             BLEServiceUtils.addDeviceInfo(new DeviceInfo(result.getDevice(), result.getDevice().getAddress(), separatedData.get(0),
@@ -417,9 +438,11 @@ public class BLEScanService extends Service {
     BluetoothAdapter.LeScanCallback mLeScanCallback = new BluetoothAdapter.LeScanCallback() {
         @Override
         public void onLeScan(BluetoothDevice device, int rssi, byte[] scanRecord) {
+            /*
             Log.d("ScanRecord", "Running");
             Log.d("filterList's size", String.valueOf(filterlist.size()));
             Log.d("Essential Data's size", String.valueOf(EssentialDataArray.size()));
+*/
             // 비콘 Mac 주소 필터링
             boolean filtering = false;
 
@@ -460,9 +483,9 @@ public class BLEScanService extends Service {
 
             major_int = (scanRecord[25] & 0xff) * 0x100 + (scanRecord[26] & 0xff);
             minor_int = (scanRecord[27] & 0xff) * 0x100 + (scanRecord[28] & 0xff);
-
+/*
             Log.d("AllOfScanRecord", all + ", " + uuid + ", " + String.valueOf(major_int) + ", " + String.valueOf(minor_int));
-
+*/
             BLEServiceUtils.addDeviceInfo(new DeviceInfo(device, device.getAddress(), all,
                     uuid, String.valueOf(major_int), String.valueOf(minor_int), rssi));
         }

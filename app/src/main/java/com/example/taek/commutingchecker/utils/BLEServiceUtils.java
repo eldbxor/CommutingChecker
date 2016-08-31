@@ -1,16 +1,27 @@
 package com.example.taek.commutingchecker.utils;
 
+import android.os.Handler;
+import android.os.Message;
+import android.os.RemoteException;
+import android.util.Log;
+
 import com.example.taek.commutingchecker.services.BLEScanService;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * Created by Taek on 2016-07-07.
  */
 public class BLEServiceUtils {
+    public static int threshold_Calibration = 1;
+    private static Timer timer;
+    private static int timerSecond = 0;
+
     public static void addDeviceInfo(DeviceInfo deviceInfo){
         boolean isExisted = false;
         int index = 0;
@@ -81,7 +92,7 @@ public class BLEServiceUtils {
                 List<DeviceInfo> mBLEDevice;
                 List<Boolean> checkThreeTime = new ArrayList<Boolean>();
                 DeviceInfo mDeviceInfo1 = null, mDeviceInfo2 = null, mDeviceInfo3 = null;
-                int coordinateX = 0, coordinateY = 0, coordinateZ = 0, count = 0;
+                int coordinateX = 0, coordinateY = 0, coordinateZ = 0, count = 0, threshold = 0;
                 mBLEDevice = BLEScanService.mBLEDevices;
                 BLEScanService.coolTime = true;
 
@@ -100,11 +111,37 @@ public class BLEServiceUtils {
                             coordinateX = Integer.valueOf(map.get("coordinateX"));
                             coordinateY = Integer.valueOf(map.get("coordinateY"));
                             coordinateZ = Integer.valueOf(map.get("coordinateZ"));
+                            threshold = Integer.valueOf(map.get("thresholdX"));
                         }
                     }
                 }
 
                 while(true){
+                    if(BLEScanService.CompleteCalibraton) {
+                        /* 서버에 전송하는 내용
+                        data.put("BeaconDeviceAddress1", mDeviceInfo1.Address);
+                        data.put("BeaconDeviceAddress2", mDeviceInfo2.Address);
+                        data.put("BeaconDeviceAddress3", mDeviceInfo3.Address);
+                        data.put("BeaconData1", mDeviceInfo1.ScanRecord);
+                        data.put("BeaconData2", mDeviceInfo2.ScanRecord);
+                        data.put("BeaconData3", mDeviceInfo3.ScanRecord);
+                        data.put("SmartphoneAddress", BLEScanService.myMacAddress);
+                        //data.put("DateTime", CurrentTime.currentTime());
+                        data.put("CoordinateX", String.valueOf(sumOfRssi1));
+                        data.put("CoordinateY", String.valueOf(sumOfRssi2));
+                        data.put("CoordinateZ", String.valueOf(sumOfRssi3));
+                        BLEScanService.temporaryCalibrationData.put("ThresholdX", String.valueOf(threshold_Calibration));
+                        BLEScanService.temporaryCalibrationData.put("ThresholdY", String.valueOf(threshold_Calibration));
+                        BLEScanService.temporaryCalibrationData.put("ThresholdZ", String.valueOf(threshold_Calibration));
+                         */
+                        BLEScanService.temporaryCalibrationData.put("ThresholdX", String.valueOf(threshold_Calibration));
+                        BLEScanService.temporaryCalibrationData.put("ThresholdY", String.valueOf(threshold_Calibration));
+                        BLEScanService.temporaryCalibrationData.put("ThresholdZ", String.valueOf(threshold_Calibration));
+                        BLEScanService.mSocketIO.calibration(BLEScanService.temporaryCalibrationData);
+
+                        return;
+                    }
+
                     mBLEDevice = BLEScanService.mBLEDevices;
                     for(DeviceInfo deviceInfo : mBLEDevice){
                         if(deviceInfo.Address.equals(mDeviceInfo1.Address))
@@ -116,14 +153,26 @@ public class BLEServiceUtils {
                     }
                     int count_for = 0;
 
-                    if(mDeviceInfo1.Rssi > (coordinateX - 5) && mDeviceInfo1.Rssi < (coordinateX + 5)){
-                        count_for++;
-                    }
-                    if(mDeviceInfo2.Rssi > (coordinateY - 5) && mDeviceInfo2.Rssi < (coordinateY + 5)){
-                        count_for++;
-                    }
-                    if(mDeviceInfo3.Rssi > (coordinateZ - 5) && mDeviceInfo3.Rssi < (coordinateZ + 5)){
-                        count_for++;
+                    if(BLEScanService.CalibrationFlag){ // Calibration 중일 때
+                        if (mDeviceInfo1.Rssi > (coordinateX - threshold_Calibration) && mDeviceInfo1.Rssi < (coordinateX + threshold_Calibration)) {
+                            count_for++;
+                        }
+                        if (mDeviceInfo2.Rssi > (coordinateY - threshold_Calibration) && mDeviceInfo2.Rssi < (coordinateY + threshold_Calibration)) {
+                            count_for++;
+                        }
+                        if (mDeviceInfo3.Rssi > (coordinateZ - threshold_Calibration) && mDeviceInfo3.Rssi < (coordinateZ + threshold_Calibration)) {
+                            count_for++;
+                        }
+                    }else {
+                        if (mDeviceInfo1.Rssi > (coordinateX - threshold) && mDeviceInfo1.Rssi < (coordinateX + threshold)) {
+                            count_for++;
+                        }
+                        if (mDeviceInfo2.Rssi > (coordinateY - threshold) && mDeviceInfo2.Rssi < (coordinateY + threshold)) {
+                            count_for++;
+                        }
+                        if (mDeviceInfo3.Rssi > (coordinateZ - threshold) && mDeviceInfo3.Rssi < (coordinateZ + threshold)) {
+                            count_for++;
+                        }
                     }
 
                     if(count_for >= 2){
@@ -148,9 +197,29 @@ public class BLEServiceUtils {
                             times++;
                     }
 
-                    if(times >= 2){
-                        BLEServiceUtils.sendEvent(mDeviceInfo1, mDeviceInfo2, mDeviceInfo3, true);
-                        break;
+                    if(BLEScanService.CalibrationFlag){ // Calibration 중일 때
+                        if(times >= 2){
+                            try {
+                                BLEScanService.replyToActivityMessenger.send(Message.obtain(null, Constants.HANDLE_MESSAGE_TYPE_SETTEXT_ATTENDANCE_ZONE));
+                                Log.d("MessengerCommunication", "Service send 3");
+                            }catch(RemoteException e){
+                                Log.d("replyToActivity", e.toString());
+                            }
+                        }else{
+                            try {
+                                BLEScanService.replyToActivityMessenger.send(Message.obtain(null, Constants.HANDLE_MESSAGE_TYPE_SETTEXT_NOT_ATTENDANCE_ZONE));
+                                Log.d("MessengerCommunication", "Service send 4");
+                            }catch(RemoteException e){
+                                Log.d("replyToActivity", e.toString());
+                            }
+                        }
+                    }else {
+                        if (times >= 2) {
+                            // BLEServiceUtils.sendEvent(mDeviceInfo1, mDeviceInfo2, mDeviceInfo3, true);
+                            GenerateNotification.generateNotification(BLEScanService.ServiceContext, "출근대기 중", "", "");
+                            timerStart(mDeviceInfo1, mDeviceInfo2, mDeviceInfo3);
+                            break;
+                        }
                     }
 
                     try {
@@ -164,6 +233,41 @@ public class BLEServiceUtils {
 
         Thread thread = new Thread(r);
         thread.start();
+    }
+
+    private static void timerStart(final DeviceInfo deviceInfo1, final DeviceInfo deviceInfo2, final DeviceInfo deviceInfo3) {
+        timerSecond = 0;
+
+        timer = new Timer();
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                timerTextUpdate(deviceInfo1, deviceInfo2, deviceInfo3);
+                timerSecond++;
+            }
+        }, 0, 1000);
+    }
+
+    private static void timerStop() {
+        timer.cancel();
+        timer = null;
+    }
+
+    private static void timerTextUpdate(final DeviceInfo deviceInfo1, final DeviceInfo deviceInfo2, final DeviceInfo deviceInfo3) {
+        Runnable updater = new Runnable() {
+            @Override
+            public void run() {
+                //timerText.setText(timerSecond + " 초");
+
+                if (timerSecond == 30) {
+                    timerStop();
+
+                    BLEScanService.checkCallbackThread_standByAttendance = new CheckCallback(deviceInfo1, deviceInfo2, deviceInfo3, true);
+                    //btnCalibrationStart.setText("NEXT");
+                }
+            }
+        };
+        BLEScanService.timerHandler.post(updater);
     }
 
     public synchronized static void sendEvent(DeviceInfo deviceInfo1, DeviceInfo deviceInfo2, DeviceInfo deviceInfo3, final boolean isComeToWork){
@@ -182,7 +286,7 @@ public class BLEServiceUtils {
             BLEScanService.mSocketIO.sendEvent(data, isComeToWork);
             if (isComeToWork) {
                 BLEScanService.coolTime = true;
-                BLEScanService.checkCallbackThread = new CheckCallback(deviceInfo1, deviceInfo2, deviceInfo3);
+                BLEScanService.checkCallbackThread = new CheckCallback(deviceInfo1, deviceInfo2, deviceInfo3, false);
             } else {
                 BLEScanService.coolTime = false;
                 BLEScanService.mBLEDevices.clear();

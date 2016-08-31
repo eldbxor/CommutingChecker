@@ -7,6 +7,8 @@
     <color name="colorContour">#DDDDDD</color>
     <color name="colorWhite">#FFFFFF</color>
     <color name="colorBlue">#2196F3</color>
+    <color name="colorRed">#F44336</color>
+    <color name="colorGreen">#4CAF50</color>
     <drawable name="bg_select">#2196F3</drawable>
     <drawable name="bg">#EEEEEE</drawable>
 </resources>

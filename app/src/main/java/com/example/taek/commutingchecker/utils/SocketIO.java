@@ -2,6 +2,8 @@ package com.example.taek.commutingchecker.utils;
 
 import android.bluetooth.le.ScanFilter;
 import android.os.Build;
+import android.os.Message;
+import android.os.RemoteException;
 import android.util.Base64;
 import android.util.Log;
 
@@ -258,6 +260,11 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
                                     contentJsonArray.getJSONObject(i).getString("beacon_address").split("-")[1],
                                     contentJsonArray.getJSONObject(i).getString("beacon_address").split("-")[2]
                             };
+                            int[] threshold = {
+                                    contentJsonArray.getJSONObject(i).getInt("thresholdX"),
+                                    contentJsonArray.getJSONObject(i).getInt("thresholdY"),
+                                    contentJsonArray.getJSONObject(i).getInt("thresholdZ")
+                            };
 
                             Map<String, String> map = new HashMap<>();
                             map.put("id_workplace", contentJsonArray.getJSONObject(i).getString("id_workplace"));
@@ -267,6 +274,9 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
                             map.put("beacon_address1", beaconAddress[0]);
                             map.put("beacon_address2", beaconAddress[1]);
                             map.put("beacon_address3", beaconAddress[2]);
+                            map.put("thresholdX", String.valueOf(threshold[0]));
+                            map.put("thresholdY", String.valueOf(threshold[1]));
+                            map.put("thresholdZ", String.valueOf(threshold[2]));
 
                             switch (callbackType) {
                                 case SERVICE_CALLBACK:
@@ -308,6 +318,9 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
                     content.put("CoordinateX", data.get("CoordinateX"));
                     content.put("CoordinateY", data.get("CoordinateY"));
                     content.put("CoordinateZ", data.get("CoordinateZ"));
+                    content.put("ThresholdX", data.get("ThresholdX"));
+                    content.put("ThresholdY", data.get("ThresholdY"));
+                    content.put("ThresholdZ", data.get("ThresholdZ"));
 
                     mSocket.emit("calibration", analyzer.encryptSendJson(content));
                 } catch (JSONException e) {
@@ -347,6 +360,14 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
                                 GenerateNotification.generateNotification(BLEScanService.ServiceContext, "Calibration 실패", "새로운 좌표 값 등록을 실패하였습니다.", "");
                             }
                         }
+
+                        // 앱 종료
+                        try {
+                            BLEScanService.replyToActivityMessenger.send(Message.obtain(null, Constants.HANDLE_MESSAGE_TYPE_REGISTER_CALIBRATION));
+                            Log.d("MessengerCommunication", "Service send 5");
+                        }catch(RemoteException e){
+                            Log.d("replyToActivity", e.toString());
+                        }
                     } catch (Exception e) {
                         e.printStackTrace();
                         Log.d("Request answer(Cali)", "failed");
@@ -363,7 +384,10 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
                     //data.get("DateTime") + ", " +
                     data.get("CoordinateX") + ", " +
                     data.get("CoordinateY") + ", " +
-                    data.get("CoordinateZ"));
+                    data.get("CoordinateZ") + ", " +
+                    data.get("ThresholdX") + ", " +
+                    data.get("ThresholdY") + ", " +
+                    data.get("ThresholdZ"));
             //MainActivity.sendData = true;
 
             //this.close();
