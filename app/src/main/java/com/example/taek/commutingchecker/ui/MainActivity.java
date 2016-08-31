@@ -59,6 +59,7 @@ public class MainActivity extends AppCompatActivity
     public static String myMacAddress;
     public static Messenger messenger;
     public static Activity activity;
+    public static ServiceConnection conn;
 
     // Target we publish for clients to send messages to IncomingHandler.
     public static final Messenger incomingMessenger = new Messenger(new IncomingHandler());
@@ -69,9 +70,10 @@ public class MainActivity extends AppCompatActivity
         Intent intent = new Intent();
         intent.setComponent(cn);
 
-        ServiceConnection conn = new ServiceConnection() {
+        conn = new ServiceConnection() {
             @Override
             public void onServiceConnected(ComponentName name, IBinder service) {
+                Log.d("MessengerCommunication", "connected to service");
                 MainActivity.messenger = new Messenger(service);
                 CalibrationFragment.timerStart();
             }
@@ -332,5 +334,6 @@ public class MainActivity extends AppCompatActivity
     public void onDestroy(){
         super.onDestroy();
         mSocket.close();
+        unbindService(conn);
     }
 }

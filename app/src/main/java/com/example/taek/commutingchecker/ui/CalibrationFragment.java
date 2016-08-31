@@ -123,7 +123,9 @@ public class CalibrationFragment extends Fragment {
 
     public static void timerStart() {
         try{
-            MainActivity.messenger.send(Message.obtain(null, Constants.HANDLE_MESSAGE_TYPE_CALIBRATION));
+            Message msg = Message.obtain(null, Constants.HANDLE_MESSAGE_TYPE_CALIBRATION);
+            msg.replyTo = MainActivity.messenger;
+            MainActivity.messenger.send(msg);
             Log.d("MessengerCommunication", "Activity send 1");
         }catch (RemoteException e){
             Log.d("ServiceConnection", e.toString());

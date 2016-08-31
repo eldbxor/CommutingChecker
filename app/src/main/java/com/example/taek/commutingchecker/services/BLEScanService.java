@@ -52,7 +52,7 @@ public class BLEScanService extends Service {
     public static List<Map<String, String>> EssentialDataArray;
     public static Context ServiceContext;
     public static boolean ScanFlag, CalibrationFlag, CompleteCalibraton; // 출퇴근등록 쓰레드 실행 플래그, Rssi 측정 플래그
-    public static boolean coolTime, isCallbackRunning, calibrationResetFlag;
+    public static boolean coolTime, isCallbackRunning, calibrationResetFlag, standByFlag;
     public static CheckCallback checkCallbackThread, checkCallbackThread_standByAttendance;
     public static int failureCount_SendEv; // sendEvent's Failure Count
     public static int failureCount_Cali; // Calibration's Failure Count
@@ -117,6 +117,7 @@ public class BLEScanService extends Service {
         ServiceContext = this;
         isCallbackRunning = false;
         calibrationResetFlag = false;
+        standByFlag = true;
         failureCount_SendEv = 0;
         failureCount_Cali = 0;
 
@@ -362,6 +363,10 @@ public class BLEScanService extends Service {
         Log.i(TAG, "Service onDestroy");
         ScanFlag = false;
         scanLeDevice(false); // 스캔 중지
+        unregisterReceiver(StopSelfReceiver);
+        unregisterReceiver(RequestDataReceiver);
+        unregisterReceiver(ShowDataReceiver);
+        unregisterReceiver(CalibrationReceiver);
         if(mSocketIO.connected() == true)
             mSocketIO.close();
         try{

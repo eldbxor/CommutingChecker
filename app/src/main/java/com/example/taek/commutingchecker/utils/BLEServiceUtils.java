@@ -18,7 +18,7 @@ import java.util.TimerTask;
  * Created by Taek on 2016-07-07.
  */
 public class BLEServiceUtils {
-    public static int threshold_Calibration = 1;
+    public static int threshold_Calibration = 6;
     private static Timer timer;
     private static int timerSecond = 0;
 
@@ -198,7 +198,7 @@ public class BLEServiceUtils {
                     }
 
                     if(BLEScanService.CalibrationFlag){ // Calibration 중일 때
-                        if(times >= 2){
+                        if(times >= 2){ // 출근존을 지났을 때
                             try {
                                 BLEScanService.replyToActivityMessenger.send(Message.obtain(null, Constants.HANDLE_MESSAGE_TYPE_SETTEXT_ATTENDANCE_ZONE));
                                 Log.d("MessengerCommunication", "Service send 3");
@@ -214,10 +214,12 @@ public class BLEServiceUtils {
                             }
                         }
                     }else {
-                        if (times >= 2) {
+                        if (times >= 2) { // 출근존을 지났을 때
                             // BLEServiceUtils.sendEvent(mDeviceInfo1, mDeviceInfo2, mDeviceInfo3, true);
-                            GenerateNotification.generateNotification(BLEScanService.ServiceContext, "출근대기 중", "", "");
-                            timerStart(mDeviceInfo1, mDeviceInfo2, mDeviceInfo3);
+                            if(!BLEScanService.coolTime) {
+                                GenerateNotification.generateNotification(BLEScanService.ServiceContext, "출근 대기 중", "출근 대기 중입니다.", "");
+                                timerStart(mDeviceInfo1, mDeviceInfo2, mDeviceInfo3);
+                            }
                             break;
                         }
                     }
@@ -237,8 +239,9 @@ public class BLEServiceUtils {
 
     private static void timerStart(final DeviceInfo deviceInfo1, final DeviceInfo deviceInfo2, final DeviceInfo deviceInfo3) {
         timerSecond = 0;
-
         timer = new Timer();
+
+        BLEScanService.checkCallbackThread_standByAttendance = new CheckCallback(deviceInfo1, deviceInfo2, deviceInfo3, true); // 출근 범위 검사 스레드 실행
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
@@ -258,11 +261,16 @@ public class BLEServiceUtils {
             @Override
             public void run() {
                 //timerText.setText(timerSecond + " 초");
+                if(!BLEScanService.standByFlag){ // 출근 범위를 벗어났을 경우 - 출근 조건을 만족하지 못함
+                    timerStop();
+                    GenerateNotification.generateNotification(BLEScanService.ServiceContext, "출근 실패", "출근대기 중 범위를 벗어났습니다.", "");
+                    BLEScanService.coolTime = false;
+                }
 
-                if (timerSecond == 30) {
+                if (timerSecond == 30) { // 출근 조건을 만족했을 경우
                     timerStop();
 
-                    BLEScanService.checkCallbackThread_standByAttendance = new CheckCallback(deviceInfo1, deviceInfo2, deviceInfo3, true);
+                    sendEvent(deviceInfo1, deviceInfo2, deviceInfo3, true);
                     //btnCalibrationStart.setText("NEXT");
                 }
             }
@@ -271,7 +279,7 @@ public class BLEServiceUtils {
     }
 
     public synchronized static void sendEvent(DeviceInfo deviceInfo1, DeviceInfo deviceInfo2, DeviceInfo deviceInfo3, final boolean isComeToWork){
-        //if((!BLEScanService.coolTime && comeToWork) || (BLEScanService.coolTime && !comeToWork)) {
+        // if((!BLEScanService.coolTime && isComeToWork) || (BLEScanService.coolTime && !isComeToWork)) {
         if((isComeToWork || (BLEScanService.coolTime && !isComeToWork))){
             Map<String, String> data = new HashMap<String, String>();
             data.put("BeaconDeviceAddress1", deviceInfo1.Address);
@@ -285,7 +293,7 @@ public class BLEServiceUtils {
 
             BLEScanService.mSocketIO.sendEvent(data, isComeToWork);
             if (isComeToWork) {
-                BLEScanService.coolTime = true;
+                // BLEScanService.coolTime = true;
                 BLEScanService.checkCallbackThread = new CheckCallback(deviceInfo1, deviceInfo2, deviceInfo3, false);
             } else {
                 BLEScanService.coolTime = false;

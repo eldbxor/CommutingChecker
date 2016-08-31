@@ -134,7 +134,7 @@ public class Calibration {
                 data.put("CoordinateY", String.valueOf(sumOfRssi2));
                 data.put("CoordinateZ", String.valueOf(sumOfRssi3));
                 BLEScanService.temporaryCalibrationData = data;
-        // BLEScanService.mSocketIO.calibration(data);
+              // BLEScanService.mSocketIO.calibration(data);
             }
         });
 
