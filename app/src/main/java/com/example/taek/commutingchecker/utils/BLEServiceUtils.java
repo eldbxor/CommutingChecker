@@ -1,6 +1,5 @@
 package com.example.taek.commutingchecker.utils;
 
-import android.os.Handler;
 import android.os.Message;
 import android.os.RemoteException;
 import android.util.Log;
@@ -21,6 +20,7 @@ public class BLEServiceUtils {
     public static int threshold_Calibration = 6;
     private static Timer timer;
     private static int timerSecond = 0;
+    private static Runnable updater;
 
     public static void addDeviceInfo(DeviceInfo deviceInfo){
         boolean isExisted = false;
@@ -85,7 +85,7 @@ public class BLEServiceUtils {
         }
     }
 
-    public static void checkTime(){
+    public static void comeToWorkCheckTime(){
         Runnable r = new Runnable() {
             @Override
             public void run() {
@@ -94,10 +94,12 @@ public class BLEServiceUtils {
                 DeviceInfo mDeviceInfo1 = null, mDeviceInfo2 = null, mDeviceInfo3 = null;
                 int coordinateX = 0, coordinateY = 0, coordinateZ = 0, count = 0, threshold = 0;
                 mBLEDevice = BLEScanService.mBLEDevices;
-                BLEScanService.coolTime = true;
+
+                BLEScanService.commuteCycle = true;
+                BLEScanService.commuteStatus = false;
 
                 if(!BLEScanService.CalibrationFlag)
-                    Log.d("ComeToWork", "start checkTime");
+                    Log.d("ComeToWork", "start comeToWorkCheckTime");
 
                 if(BLEScanService.mBLEDevices.size() != 3)
                     return;
@@ -239,53 +241,118 @@ public class BLEServiceUtils {
         thread.start();
     }
 
-    private static void timerStart(final DeviceInfo deviceInfo1, final DeviceInfo deviceInfo2, final DeviceInfo deviceInfo3) {
-        timerSecond = 0;
-        timer = new Timer();
-        Log.d("ComeToWork", "start timer");
+    private static HashMap<String, Boolean> currentBeacons = new HashMap<>();
 
-        BLEScanService.checkCallbackThread_standByAttendance = new CheckCallback(deviceInfo1, deviceInfo2, deviceInfo3, true); // 출근 범위 검사 스레드 실행
+    /**
+     * Input the beacon's bluetooth address to the map
+     * @param bluetoothAddress
+     */
+    public static void setCurrentBeacons(String bluetoothAddress) {
+        if (!currentBeacons.containsKey(bluetoothAddress))
+            currentBeacons.put(bluetoothAddress, true);
+    }
+
+    private static void leaveWorkTimerStart(final DeviceInfo deviceInfo1, final DeviceInfo deviceInfo2, final DeviceInfo deviceInfo3) {
+        timer = new Timer();
+        Log.d("Awesometic", "leaveWorkTimerStart(): Timer start and clear the map which has current beacons at each second");
+
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
-                timerTextUpdate(deviceInfo1, deviceInfo2, deviceInfo3);
-                timerSecond++;
+                try {
+                    Thread.sleep(3000);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                leaveWorkChecker(deviceInfo1, deviceInfo2, deviceInfo3);
             }
-        }, 0, 1000);
+        }, 0, 3000);
     }
 
-    private static void timerStop() {
+    private static void leaveWorkTimerStop() {
         timer.cancel();
         timer = null;
+
+        BLEScanService.timerHandler.removeCallbacks(updater);
+        updater = null;
     }
 
-    private static void timerTextUpdate(final DeviceInfo deviceInfo1, final DeviceInfo deviceInfo2, final DeviceInfo deviceInfo3) {
-        Runnable updater = new Runnable() {
+    private static void leaveWorkChecker(final DeviceInfo deviceInfo1, final DeviceInfo deviceInfo2, final DeviceInfo deviceInfo3) {
+        updater = new Runnable() {
             @Override
             public void run() {
-                //timerText.setText(timerSecond + " 초");
-                if(!BLEScanService.standByFlag){ // 출근 범위를 벗어났을 경우 - 출근 조건을 만족하지 못함
-                    Log.d("ComeToWork", "comeToWork is failed(StandByAttendance))");
-                    timerStop();
-                    GenerateNotification.generateNotification(BLEScanService.ServiceContext, "출근 실패", "출근대기 중 범위를 벗어났습니다.", "");
-                    BLEScanService.coolTime = false;
-                }
+                Log.d("Awesometic", "leaveWorkChecker(): currentBeacons size(): " + currentBeacons.size());
+                if (BLEScanService.commuteStatus && currentBeacons.size() != 3) {
+                    leaveWorkTimerStop();
+                    sendEvent(deviceInfo1, deviceInfo2, deviceInfo3, false);
 
-                if (timerSecond == 30) { // 출근 조건을 만족했을 경우
-                    Log.d("ComeToWork", "comeToWork success");
-                    timerStop();
-
-                    sendEvent(deviceInfo1, deviceInfo2, deviceInfo3, true);
-                    //btnCalibrationStart.setText("NEXT");
+                    Log.d("Awesometic", "leaveWorkChecker(): Get off the office success");
+                } else {
+                    currentBeacons.clear();
                 }
             }
         };
         BLEScanService.timerHandler.post(updater);
     }
 
+    private static void timerStart(final DeviceInfo deviceInfo1, final DeviceInfo deviceInfo2, final DeviceInfo deviceInfo3) {
+        timerSecond = 0;
+        timer = new Timer();
+        Log.d("ComeToWork", "start timer");
+
+//        BLEScanService.checkCallbackThread_standByAttendance = new CheckCallback(deviceInfo1, deviceInfo2, deviceInfo3, true); // 출근 범위 검사 스레드 실행
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                timerSecond++;
+
+                try {
+                    Thread.sleep(3000);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                timerTextUpdate(deviceInfo1, deviceInfo2, deviceInfo3);
+            }
+        }, 0, 3000);
+    }
+
+    private static void timerStop() {
+        timer.cancel();
+        timer = null;
+
+        BLEScanService.timerHandler.removeCallbacks(updater);
+        updater = null;
+    }
+
+    private static void timerTextUpdate(final DeviceInfo deviceInfo1, final DeviceInfo deviceInfo2, final DeviceInfo deviceInfo3) {
+        updater = new Runnable() {
+            @Override
+            public void run() {
+                //timerText.setText(timerSecond + " 초");
+                if(currentBeacons.size() != 3){ // 출근 범위를 벗어났을 경우 - 출근 조건을 만족하지 못함
+                    Log.d("ComeToWork", "comeToWork is failed(StandByAttendance))");
+                    timerStop();
+                    GenerateNotification.generateNotification(BLEScanService.ServiceContext, "출근 실패", "출근대기 중 범위를 벗어났습니다.", "");
+                    BLEScanService.commuteStatus = false;
+                    BLEScanService.commuteCycle = false;
+
+                } else if (timerSecond == 10) { // 출근 조건을 만족했을 경우 ( real second == timerSecond * 3 )
+                    Log.d("ComeToWork", "comeToWork success");
+                    timerStop();
+
+                    sendEvent(deviceInfo1, deviceInfo2, deviceInfo3, true);
+                    leaveWorkTimerStart(deviceInfo1, deviceInfo2, deviceInfo3);
+                }
+
+                currentBeacons.clear();
+            }
+        };
+        BLEScanService.timerHandler.post(updater);
+    }
+
     public synchronized static void sendEvent(DeviceInfo deviceInfo1, DeviceInfo deviceInfo2, DeviceInfo deviceInfo3, final boolean isComeToWork){
-        // if((!BLEScanService.coolTime && isComeToWork) || (BLEScanService.coolTime && !isComeToWork)) {
-        if((isComeToWork || (BLEScanService.coolTime && !isComeToWork))){
+        // if((!BLEScanService.commuteCycle && isComeToWork) || (BLEScanService.commuteCycle && !isComeToWork)) {
+        if (BLEScanService.commuteCycle) {
             Map<String, String> data = new HashMap<String, String>();
             data.put("BeaconDeviceAddress1", deviceInfo1.Address);
             data.put("BeaconDeviceAddress2", deviceInfo2.Address);
@@ -298,10 +365,12 @@ public class BLEServiceUtils {
 
             BLEScanService.mSocketIO.sendEvent(data, isComeToWork);
             if (isComeToWork) {
-                // BLEScanService.coolTime = true;
-                BLEScanService.checkCallbackThread = new CheckCallback(deviceInfo1, deviceInfo2, deviceInfo3, false);
+                BLEScanService.commuteStatus = true;
+                BLEScanService.commuteCycle = true;
+//                BLEScanService.checkCallbackThread = new CheckCallback(deviceInfo1, deviceInfo2, deviceInfo3, false);
             } else {
-                BLEScanService.coolTime = false;
+                BLEScanService.commuteStatus = false;
+                BLEScanService.commuteCycle = false;
                 BLEScanService.mBLEDevices.clear();
             }
         }

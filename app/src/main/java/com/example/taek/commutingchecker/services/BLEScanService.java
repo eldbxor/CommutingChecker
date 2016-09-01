@@ -23,7 +23,7 @@ import android.widget.Toast;
 
 import com.example.taek.commutingchecker.utils.BLEServiceUtils;
 import com.example.taek.commutingchecker.utils.Calibration;
-import com.example.taek.commutingchecker.utils.CheckCallback;
+//import com.example.taek.commutingchecker.utils.CheckCallback;
 import com.example.taek.commutingchecker.utils.Constants;
 import com.example.taek.commutingchecker.utils.DeviceInfo;
 import com.example.taek.commutingchecker.utils.EnableBLE;
@@ -52,8 +52,9 @@ public class BLEScanService extends Service {
     public static List<Map<String, String>> EssentialDataArray;
     public static Context ServiceContext;
     public static boolean ScanFlag, CalibrationFlag, CompleteCalibraton; // 출퇴근등록 쓰레드 실행 플래그, Rssi 측정 플래그
-    public static boolean coolTime, isCallbackRunning, calibrationResetFlag, standByFlag;
-    public static CheckCallback checkCallbackThread, checkCallbackThread_standByAttendance;
+    public static boolean commuteCycle, calibrationResetFlag, commuteStatus;
+//    public static boolean isCallbackRunning;
+//    public static CheckCallback checkCallbackThread, checkCallbackThread_standByAttendance;
     public static int failureCount_SendEv; // sendEvent's Failure Count
     public static int failureCount_Cali; // Calibration's Failure Count
     public static Map<String, String> temporaryCalibrationData;
@@ -91,7 +92,7 @@ public class BLEScanService extends Service {
                     break;
                 case Constants.HANDLE_MESSAGE_TYPE_CEHCK_THRESHOLD:
                     Log.d("MessengerCommunication", "Service receive 3");
-                    BLEServiceUtils.checkTime();
+                    BLEServiceUtils.comeToWorkCheckTime();
                     break;
                 case Constants.HANDLE_MESSAGE_TYPE_COMPLETE_CALIBRATION:
                     Log.d("MessengerCommunication", "Service receive 4");
@@ -113,11 +114,10 @@ public class BLEScanService extends Service {
         Log.i(TAG, "Service onCreate");
         ScanFlag = true;
         CalibrationFlag = false;
-        coolTime = false;
+        commuteCycle = false;
         ServiceContext = this;
-        isCallbackRunning = false;
+//        isCallbackRunning = false;
         calibrationResetFlag = false;
-        standByFlag = true;
         failureCount_SendEv = 0;
         failureCount_Cali = 0;
 
@@ -315,8 +315,8 @@ public class BLEScanService extends Service {
                         continue;
 
                     // 0.5초 동안 3번 Rssi 체크 후 2번 이상 적합하면 sendEvent() 메서드 실행
-                    if(!coolTime)
-                        BLEServiceUtils.checkTime();
+                    if (!commuteCycle && !commuteStatus)
+                        BLEServiceUtils.comeToWorkCheckTime();
 
                     //mSocketIO.sendEvent(new HashMap<String, String>());
                     //scanLeDevice(false);
@@ -419,15 +419,18 @@ public class BLEScanService extends Service {
         @Override
         public void onScanResult(int callbackType, ScanResult result) {
             super.onScanResult(callbackType, result);
-            isCallbackRunning = true;
+//            isCallbackRunning = true;
             /*
             Log.d("ScanRecord", "Running");
             Log.d("ScanRecord", result.getScanRecord().toString());
 */
             List<String> separatedData = separate(result.getScanRecord().getBytes());
 
+            // public DeviceInfo(BluetoothDevice device, String address, String scanRecord, String uuid, String major, String minor, int rssi)
             BLEServiceUtils.addDeviceInfo(new DeviceInfo(result.getDevice(), result.getDevice().getAddress(), separatedData.get(0),
                     separatedData.get(1), separatedData.get(2), separatedData.get(3), result.getRssi()));
+
+            BLEServiceUtils.setCurrentBeacons(result.getDevice().getAddress());
         }
 
         @Override
@@ -466,7 +469,7 @@ public class BLEScanService extends Service {
             }
             if(!filtering) return;
 
-            isCallbackRunning = true;
+//            isCallbackRunning = true;
 
             String all = "";
             String uuid = "";
