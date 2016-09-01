@@ -333,7 +333,11 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onDestroy(){
         super.onDestroy();
-        mSocket.close();
-        unbindService(conn);
+        try {
+            mSocket.close();
+            // unbindService(conn);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 }

@@ -46,7 +46,7 @@ public class CheckCallback {
                         break;
                     }else{
                         if(standBy){ // 출근 대기 중 - 출근 범위 내에 있음
-                            BLEScanService.standByFlag = true;
+                            // BLEScanService.standByFlag = true;
                             /*
                             BLEServiceUtils.sendEvent(deviceInfo1, deviceInfo2, deviceInfo3, true);
                             standBy = false;

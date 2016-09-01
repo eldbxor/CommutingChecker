@@ -133,6 +133,8 @@ public class BLEScanService extends Service {
         // 소켓 생성
         this.mSocketIO = new SocketIO();
 
+        timerHandler = new Handler();
+
         // 리시버 등록
         IntentFilter StopSelfPkgFilter = new IntentFilter();
         IntentFilter RequestDataPkgFilter = new IntentFilter();

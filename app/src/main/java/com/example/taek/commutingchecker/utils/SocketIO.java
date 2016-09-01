@@ -182,6 +182,7 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
                             BLEScanService.failureCount_SendEv = 0;
                             Log.d("SendEvent", "Success");
                             if(isComeToWork == true) {
+                                Log.d("ComeToWork", "comeToWork is registered");
                                 GenerateNotification.generateNotification(BLEScanService.ServiceContext, "출근 등록", "출근이 등록되었습니다.", "");
                             }else{
                                 GenerateNotification.generateNotification(BLEScanService.ServiceContext, "퇴근 등록", "퇴근이 등록되었습니다.", "");
@@ -196,6 +197,7 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
                                 Log.d("SendEvent", "failed");
                                 BLEScanService.failureCount_SendEv = 0;
                                 if(isComeToWork == true) {
+                                    Log.d("ComeToWork", "comeToWork isn't registered");
                                     GenerateNotification.generateNotification(BLEScanService.ServiceContext, "출근 등록 실패", "출근 등록을 실패하였습니다.", "");
                                 }else{
                                     GenerateNotification.generateNotification(BLEScanService.ServiceContext, "퇴근 등록 실패", "퇴근 등록을 실패하였습니다.", "");
