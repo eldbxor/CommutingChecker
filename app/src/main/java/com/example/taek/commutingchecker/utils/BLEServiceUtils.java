@@ -242,15 +242,15 @@ public class BLEServiceUtils {
         thread.start();
     }
 
-    private static HashMap<String, Boolean> currentBeacons = new HashMap<>();
+    private static HashMap<String, Integer> currentBeacons = new HashMap<>();
 
     /**
      * Input the beacon's bluetooth address to the map
      * @param bluetoothAddress
      */
-    public static void setCurrentBeacons(String bluetoothAddress) {
+    public static void setCurrentBeacons(String bluetoothAddress, int rssi) {
         if (!currentBeacons.containsKey(bluetoothAddress))
-            currentBeacons.put(bluetoothAddress, true);
+            currentBeacons.put(bluetoothAddress, rssi);
     }
 
     private static void leaveWorkTimerStart(final DeviceInfo deviceInfo1, final DeviceInfo deviceInfo2, final DeviceInfo deviceInfo3) {
@@ -289,10 +289,23 @@ public class BLEServiceUtils {
                     if(leaveWorkCount > 2) {
                         leaveWorkTimerStop();
                         sendEvent(deviceInfo1, deviceInfo2, deviceInfo3, false);
+                        Log.d("Awesometic", "leaveWorkChecker(): Get off the office success");
                     }else{
                         leaveWorkCount++;
                     }
-                    Log.d("Awesometic", "leaveWorkChecker(): Get off the office success");
+                } else if (currentBeacons.size() == 3){
+                    if(currentBeacons.get(deviceInfo1.Address) < -90 || currentBeacons.get(deviceInfo2.Address) < -90 || currentBeacons.get(deviceInfo3.Address) < -90){
+                        if(leaveWorkCount > 2) {
+                            leaveWorkTimerStop();
+                            sendEvent(deviceInfo1, deviceInfo2, deviceInfo3, false);
+                            Log.d("Awesometic", "leaveWorkChecker(): Get off the office success");
+                        }else{
+                            leaveWorkCount++;
+                        }
+                    }else{
+                        leaveWorkCount = 0;
+                        currentBeacons.clear();
+                    }
                 } else {
                     leaveWorkCount = 0;
                     currentBeacons.clear();

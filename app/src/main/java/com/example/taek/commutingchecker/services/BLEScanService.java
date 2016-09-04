@@ -436,7 +436,7 @@ public class BLEScanService extends Service {
             BLEServiceUtils.addDeviceInfo(new DeviceInfo(result.getDevice(), result.getDevice().getAddress(), separatedData.get(0),
                     separatedData.get(1), separatedData.get(2), separatedData.get(3), result.getRssi()));
 
-            BLEServiceUtils.setCurrentBeacons(result.getDevice().getAddress());
+            BLEServiceUtils.setCurrentBeacons(result.getDevice().getAddress(), result.getRssi());
         }
 
         @Override
@@ -505,7 +505,7 @@ public class BLEScanService extends Service {
             BLEServiceUtils.addDeviceInfo(new DeviceInfo(device, device.getAddress(), all,
                     uuid, String.valueOf(major_int), String.valueOf(minor_int), rssi));
 
-            BLEServiceUtils.setCurrentBeacons(device.getAddress());
+            BLEServiceUtils.setCurrentBeacons(device.getAddress(), rssi);
         }
     };
 }
