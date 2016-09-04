@@ -8,6 +8,7 @@ import com.example.taek.commutingchecker.services.BLEScanService;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -16,6 +17,7 @@ import java.util.Map;
 public class Calibration {
     private static ArrayList<Integer> rssi1, rssi2, rssi3;
     private static DeviceInfo mDeviceInfo1, mDeviceInfo2, mDeviceInfo3;
+    private static List<DeviceInfo> mBLEDevices_Calibration;
     private static int sumOfRssi1, sumOfRssi2, sumOfRssi3;
     private static int count_error = 0;
 
@@ -51,10 +53,11 @@ public class Calibration {
                 sumOfRssi2 = 0;
                 sumOfRssi3 = 0;
                 rssi1.clear(); rssi2.clear(); rssi3.clear();
+                mBLEDevices_Calibration = BLEScanService.mBLEDevices;
 
-                mDeviceInfo1 = BLEScanService.mBLEDevices.get(0);
-                mDeviceInfo2 = BLEScanService.mBLEDevices.get(1);
-                mDeviceInfo3 = BLEScanService.mBLEDevices.get(2);
+                mDeviceInfo1 = mBLEDevices_Calibration.get(0);
+                mDeviceInfo2 = mBLEDevices_Calibration.get(1);
+                mDeviceInfo3 = mBLEDevices_Calibration.get(2);
 
                 // GenerateNotification.generateNotification(BLEScanService.ServiceContext, "Calibration", "Calibration start" ,"");
 
@@ -70,8 +73,9 @@ public class Calibration {
                         return;
                     // Log.d("calibrationResetFlag", String.valueOf(BLEScanService.calibrationResetFlag));
 
-
-                    for(DeviceInfo deviceInfo : BLEScanService.mBLEDevices){
+                    mBLEDevices_Calibration = null;
+                    mBLEDevices_Calibration = BLEScanService.mBLEDevices;
+                    for(DeviceInfo deviceInfo : mBLEDevices_Calibration){
                         if(deviceInfo.Address.equals(mDeviceInfo1.Address)) {
                             rssi1.add(deviceInfo.Rssi);
                             sumOfRssi1 += deviceInfo.Rssi;

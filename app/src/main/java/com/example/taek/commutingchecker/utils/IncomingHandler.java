@@ -1,5 +1,6 @@
 package com.example.taek.commutingchecker.utils;
 
+import android.content.ComponentName;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
@@ -44,8 +45,12 @@ public class IncomingHandler extends Handler{
             case Constants.HANDLE_MESSAGE_TYPE_REGISTER_CALIBRATION:
                 Log.d("MessengerCommunication", "Activity receive 5");
                 Toast.makeText(MainActivity.MainActivityContext, "Calibration을 완료하였습니다. 앱을 재실행하세요.", Toast.LENGTH_SHORT).show();
-                MainActivity.mainActivity.unbindService(MainActivity.conn);
-                MainActivity.mainActivity.finish();
+                try {
+                    MainActivity.mainActivity.unbindService(MainActivity.conn);
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
+                MainActivity.conn.onServiceDisconnected(MainActivity.serviceComponentName);
         }
     }
 }

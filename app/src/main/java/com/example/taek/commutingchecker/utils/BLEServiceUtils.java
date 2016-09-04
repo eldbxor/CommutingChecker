@@ -20,6 +20,7 @@ public class BLEServiceUtils {
     public static int threshold_Calibration = 6;
     private static Timer timer;
     private static int timerSecond = 0;
+    private static int leaveWorkCount = 0;
     private static Runnable updater;
 
     public static void addDeviceInfo(DeviceInfo deviceInfo){
@@ -254,16 +255,14 @@ public class BLEServiceUtils {
 
     private static void leaveWorkTimerStart(final DeviceInfo deviceInfo1, final DeviceInfo deviceInfo2, final DeviceInfo deviceInfo3) {
         timer = new Timer();
+        timerSecond = 0;
         Log.d("Awesometic", "leaveWorkTimerStart(): Timer start and clear the map which has current beacons at each second");
 
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
-                try {
-                    Thread.sleep(3000);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+                timerSecond++;
+
                 leaveWorkChecker(deviceInfo1, deviceInfo2, deviceInfo3);
             }
         }, 0, 3000);
@@ -281,13 +280,21 @@ public class BLEServiceUtils {
         updater = new Runnable() {
             @Override
             public void run() {
+                if(timerSecond <= 1){
+                    return;
+                    // Thread.interrupted();
+                }
                 Log.d("Awesometic", "leaveWorkChecker(): currentBeacons size(): " + currentBeacons.size());
                 if (BLEScanService.commuteStatus && currentBeacons.size() != 3) {
-                    leaveWorkTimerStop();
-                    sendEvent(deviceInfo1, deviceInfo2, deviceInfo3, false);
-
+                    if(leaveWorkCount > 2) {
+                        leaveWorkTimerStop();
+                        sendEvent(deviceInfo1, deviceInfo2, deviceInfo3, false);
+                    }else{
+                        leaveWorkCount++;
+                    }
                     Log.d("Awesometic", "leaveWorkChecker(): Get off the office success");
                 } else {
+                    leaveWorkCount = 0;
                     currentBeacons.clear();
                 }
             }
@@ -306,11 +313,6 @@ public class BLEServiceUtils {
             public void run() {
                 timerSecond++;
 
-                try {
-                    Thread.sleep(3000);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
                 timerTextUpdate(deviceInfo1, deviceInfo2, deviceInfo3);
             }
         }, 0, 3000);
@@ -328,6 +330,11 @@ public class BLEServiceUtils {
         updater = new Runnable() {
             @Override
             public void run() {
+                if(timerSecond <= 1){
+                    return;
+                    // Thread.interrupted();
+                }
+
                 //timerText.setText(timerSecond + " 초");
                 if(currentBeacons.size() != 3){ // 출근 범위를 벗어났을 경우 - 출근 조건을 만족하지 못함
                     Log.d("ComeToWork", "comeToWork is failed(StandByAttendance))");

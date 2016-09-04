@@ -216,6 +216,16 @@ public class BLEScanService extends Service {
         EnableBLE mEnableBLE = new EnableBLE(getSystemService(this.BLUETOOTH_SERVICE)); // BLE 활성화 클래스 생성
         mBluetoothAdapter = mEnableBLE.enable(); // BLE 활성화
 
+        // waiting for stating bluetooth on
+        try{
+            do {
+                Log.d("BLEScan", "BLEScanService onCreate(): waiting for stating bluetooth on");
+                Thread.sleep(100);
+            } while (mBluetoothAdapter.getState() != mBluetoothAdapter.STATE_ON);
+        }catch (InterruptedException e){
+            e.printStackTrace();
+        }
+
         if(mBluetoothAdapter != null){ // && mBluetoothAdapter.isEnabled()){
             if(Build.VERSION.SDK_INT >= 21){
                 mBLEScanner = mBluetoothAdapter.getBluetoothLeScanner();
@@ -237,6 +247,7 @@ public class BLEScanService extends Service {
 
             // BLEScanner 객체 확인
             if(mBLEScanner == null && Build.VERSION.SDK_INT >= 21){
+                Log.d("BLEScan", "BLEScanService onCreate(): mBLEScanner is null");
                 Toast.makeText(this, "Can not find BLE Scanner", Toast.LENGTH_SHORT).show();
                 return;
             }
@@ -371,11 +382,6 @@ public class BLEScanService extends Service {
         unregisterReceiver(CalibrationReceiver);
         if(mSocketIO.connected() == true)
             mSocketIO.close();
-        try{
-            SetupFragment.bleScanSwitch.setChecked(false);
-        }catch (Exception e){
-            e.printStackTrace();
-        }
         GenerateNotification.generateNotification(this, "서비스 종료", "서비스가 종료되었습니다.", "");
     }
 

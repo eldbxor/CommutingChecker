@@ -6,6 +6,7 @@ import android.os.Message;
 import android.os.RemoteException;
 import android.util.Base64;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.example.taek.commutingchecker.services.BLEScanService;
 import com.example.taek.commutingchecker.ui.ChartFragment;
@@ -158,8 +159,13 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
                     content.put("BeaconData2", data.get("BeaconData2"));
                     content.put("BeaconData3", data.get("BeaconData3"));
                     content.put("SmartphoneAddress", data.get("SmartphoneAddress"));
+                    if (isComeToWork) {
+                        content.put("Commute", "true");
+                    } else {
+                        content.put("Commute", "false");
+                    }
                     //content.put("DateTime", data.get("DateTime"));
-
+                    Log.d("Awesometic", "sendEvent - send message to server");
                     mSocket.emit("circumstance", analyzer.encryptSendJson(content));
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -170,7 +176,7 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
                 Log.d("Awesometic", "sendEvent - server's public key is not initialized");
             }
 
-            mSocket.on("answer", new Emitter.Listener() {
+            mSocket.on("circumstance_answer", new Emitter.Listener() {
                 @Override
                 public void call(Object... args) {
                     try {
@@ -238,6 +244,7 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
                     JSONObject content = new JSONObject();
                     content.put("SmartphoneAddress", BLEScanService.myMacAddress);
 
+                    Log.d("Awesometic", "requestEseentialData: send message to server");
                     mSocket.emit("requestEssentialData", analyzer.encryptSendJson(content));
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -248,7 +255,7 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
                 Log.d("Awesometic", "requestEssentialData - server's public key is not initialized");
             }
 
-            mSocket.on("answer", new Emitter.Listener() {
+            mSocket.on("requestEssentialData_answer", new Emitter.Listener() {
                 @Override
                 public void call(Object... args) {
                     try {
@@ -334,7 +341,7 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
                 Log.d("Awesometic", "calibration - server's public key is not initialized");
             }
 
-            mSocket.on("answer", new Emitter.Listener() {
+            mSocket.on("calibration_answer", new Emitter.Listener() {
                 @Override
                 public void call(Object... args) {
                     try {
@@ -345,11 +352,12 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
                         if(isSuccess) {
                             BLEScanService.failureCount_Cali = 0;
                             Log.d("Calibration", "Success");
-
+                            // Toast.makeText(BLEScanService.ServiceContext, "Calibration: (" + data.get("CoordinateX") + ", "
+                            //        + data.get("CoordinateY") + ", " + data.get("CoordinateZ"), Toast.LENGTH_SHORT).show();
 //                            GenerateNotification.generateNotification(BLEScanService.ServiceContext, "Calibration 성공", "새로운 좌표 값이 등록되었습니다.", "");
-                            GenerateNotification.generateNotification(BLEScanService.ServiceContext, "Calibration", "Rssi 평균 값을 서버에 전송하였습니다." +
-                                            ".",
-                                    "rss1: " + data.get("CoordinateX") + ", " + "rssi2: " + data.get("CoordinateY") + ", " + "rss3: " + data.get("CoordinateZ"));
+                            /*
+                            GenerateNotification.generateNotification(BLEScanService.ServiceContext, "Calibration", "Rssi 평균 값을 서버에 전송하였습니다." + ".",
+                                    "rss1: " + data.get("CoordinateX") + ", " + "rssi2: " + data.get("CoordinateY") + ", " + "rss3: " + data.get("CoordinateZ")); */
                         } else {
                             if(BLEScanService.failureCount_Cali < 2) {
                                 BLEScanService.failureCount_Cali++;
@@ -359,14 +367,15 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
                             else{
                                 Log.d("Calibration", "failed");
                                 BLEScanService.failureCount_Cali = 0;
-                                GenerateNotification.generateNotification(BLEScanService.ServiceContext, "Calibration 실패", "새로운 좌표 값 등록을 실패하였습니다.", "");
+                                // Toast.makeText(BLEScanService.ServiceContext, "새로운 좌표 값 등록을 실패하였습니다.", Toast.LENGTH_SHORT).show();
+                                // GenerateNotification.generateNotification(BLEScanService.ServiceContext, "Calibration 실패", "새로운 좌표 값 등록을 실패하였습니다.", "");
                             }
                         }
 
                         // 앱 종료
                         try {
-                            BLEScanService.replyToActivityMessenger.send(Message.obtain(null, Constants.HANDLE_MESSAGE_TYPE_REGISTER_CALIBRATION));
                             Log.d("MessengerCommunication", "Service send 5");
+                            BLEScanService.replyToActivityMessenger.send(Message.obtain(null, Constants.HANDLE_MESSAGE_TYPE_REGISTER_CALIBRATION));
                         }catch(RemoteException e){
                             Log.d("replyToActivity", e.toString());
                         }
@@ -376,20 +385,6 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
                     }
                 }
             });
-            Log.d("calibration data", data.get("BeaconDeviceAddress1") + ", " +
-                    data.get("BeaconDeviceAddress2") + ", " +
-                    data.get("BeaconDeviceAddress3") + ", " +
-                    data.get("BeaconData1") + ", " +
-                    data.get("BeaconData2") + ", " +
-                    data.get("BeaconData3") + ", " +
-                    data.get("SmartphoneAddress") + ", " +
-                    //data.get("DateTime") + ", " +
-                    data.get("CoordinateX") + ", " +
-                    data.get("CoordinateY") + ", " +
-                    data.get("CoordinateZ") + ", " +
-                    data.get("ThresholdX") + ", " +
-                    data.get("ThresholdY") + ", " +
-                    data.get("ThresholdZ"));
             //MainActivity.sendData = true;
 
             //this.close();
@@ -415,7 +410,7 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
                 Log.d("Awesometic", "amIRegistered - server's public key is not initialized");
             }
 
-            mSocket.on("answer", new Emitter.Listener() {
+            mSocket.on("amIRegistered_answer", new Emitter.Listener() {
                 @Override
                 public void call(Object... args) {
                     try {
@@ -473,7 +468,7 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
                 Log.d("Awesometic", "signupRequest - server's public key is not initialized");
             }
 
-            mSocket.on("answer", new Emitter.Listener() {
+            mSocket.on("signupRequest_answer", new Emitter.Listener() {
                 @Override
                 public void call(Object... args) {
                     try {
@@ -529,7 +524,7 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
                 Log.d("Awesometic", "requestChartData - server's public key is not initialized");
             }
 
-            mSocket.on("answer", new Emitter.Listener() {
+            mSocket.on("requestChartData_answer", new Emitter.Listener() {
                 @Override
                 public void call(Object... args) {
                     try {

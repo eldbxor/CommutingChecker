@@ -60,6 +60,7 @@ public class MainActivity extends AppCompatActivity
     public static Messenger messenger;
     public static Activity activity;
     public static ServiceConnection conn;
+    public static ComponentName serviceComponentName;
 
     // Target we publish for clients to send messages to IncomingHandler.
     public static final Messenger incomingMessenger = new Messenger(new IncomingHandler());
@@ -80,7 +81,7 @@ public class MainActivity extends AppCompatActivity
 
             @Override
             public void onServiceDisconnected(ComponentName name) {
-
+                MainActivity.mainActivity.finish();
             }
         };
 
