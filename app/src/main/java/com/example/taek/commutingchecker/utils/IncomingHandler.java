@@ -32,21 +32,31 @@ public class IncomingHandler extends Handler{
                 break;
             case Constants.HANDLE_MESSAGE_TYPE_SETTEXT_ATTENDANCE_ZONE:
                 Log.d("MessengerCommunication", "Activity receive 3");
-                ThresholdAdjustmentFragment.tvCheckThreshold.setText("출근존");
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
-                    ThresholdAdjustmentFragment.tvCheckThreshold.setTextColor(MainActivity.MainActivityContext.getResources().getColor(R.color.colorGreen, null));
-                else {
-                    ThresholdAdjustmentFragment.tvCheckThreshold.setTextColor(MainActivity.MainActivityContext.getResources().getColor(R.color.colorGreen));
-                }
+                ThresholdAdjustmentFragment.fragment.getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        ThresholdAdjustmentFragment.tvCheckThreshold.setText("출근존");
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+                            ThresholdAdjustmentFragment.tvCheckThreshold.setTextColor(MainActivity.MainActivityContext.getResources().getColor(R.color.colorGreen, null));
+                        else {
+                            ThresholdAdjustmentFragment.tvCheckThreshold.setTextColor(MainActivity.MainActivityContext.getResources().getColor(R.color.colorGreen));
+                        }
+                    }
+                });
                 break;
             case Constants.HANDLE_MESSAGE_TYPE_SETTEXT_NOT_ATTENDANCE_ZONE:
                 Log.d("MessengerCommunication", "Activity receive 4");
-                ThresholdAdjustmentFragment.tvCheckThreshold.setText("출근존이 아님");
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
-                    ThresholdAdjustmentFragment.tvCheckThreshold.setTextColor(MainActivity.MainActivityContext.getResources().getColor(R.color.colorRed, null));
-                else {
-                    ThresholdAdjustmentFragment.tvCheckThreshold.setTextColor(MainActivity.MainActivityContext.getResources().getColor(R.color.colorRed));
-                }
+                ThresholdAdjustmentFragment.fragment.getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        ThresholdAdjustmentFragment.tvCheckThreshold.setText("출근존이 아님");
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+                            ThresholdAdjustmentFragment.tvCheckThreshold.setTextColor(MainActivity.MainActivityContext.getResources().getColor(R.color.colorRed, null));
+                        else {
+                            ThresholdAdjustmentFragment.tvCheckThreshold.setTextColor(MainActivity.MainActivityContext.getResources().getColor(R.color.colorRed));
+                        }
+                    }
+                });
                 break;
             case Constants.HANDLE_MESSAGE_TYPE_REGISTER_CALIBRATION:
                 Log.d("MessengerCommunication", "Activity receive 5");

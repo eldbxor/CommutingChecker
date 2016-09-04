@@ -294,7 +294,7 @@ public class BLEServiceUtils {
                         leaveWorkCount++;
                     }
                 } else if (currentBeacons.size() == 3){
-                    if(currentBeacons.get(deviceInfo1.Address) < -90 || currentBeacons.get(deviceInfo2.Address) < -90 || currentBeacons.get(deviceInfo3.Address) < -90){
+                    if(currentBeacons.get(deviceInfo1.Address) < -100 || currentBeacons.get(deviceInfo2.Address) < -100 || currentBeacons.get(deviceInfo3.Address) < -100){
                         if(leaveWorkCount > 2) {
                             leaveWorkTimerStop();
                             sendEvent(deviceInfo1, deviceInfo2, deviceInfo3, false);

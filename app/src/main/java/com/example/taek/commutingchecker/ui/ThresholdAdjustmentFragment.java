@@ -29,6 +29,7 @@ public class ThresholdAdjustmentFragment extends Fragment {
     TextView tvThreshold;
     public static TextView tvCheckThreshold;
     SeekBar sbThreshold;
+    public static Fragment fragment;
 
     public static ThresholdAdjustmentFragment newInstance() {
         ThresholdAdjustmentFragment fragment = new ThresholdAdjustmentFragment();
@@ -51,6 +52,7 @@ public class ThresholdAdjustmentFragment extends Fragment {
         tvThreshold = (TextView) rootView.findViewById(R.id.threshold);
         sbThreshold = (SeekBar) rootView.findViewById(R.id.seekBar);
         tvCheckThreshold = (TextView) rootView.findViewById(R.id.tvCheckThreshold);
+        fragment = this;
 
         btnCalibrationEnd.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -74,7 +76,13 @@ public class ThresholdAdjustmentFragment extends Fragment {
         sbThreshold.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                tvThreshold.setText(String.valueOf(progress + 1));
+                final int progress_final = progress;
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        tvThreshold.setText(String.valueOf(progress_final + 1));
+                    }
+                });
 
                 try{
                     MainActivity.messenger.send(Message.obtain(null, Constants.HANDLE_MESSAGE_TYPE_SEEKBAR_VALUE_CHANGED, progress + 6, 0));
