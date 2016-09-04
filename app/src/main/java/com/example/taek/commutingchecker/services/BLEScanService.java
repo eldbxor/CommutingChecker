@@ -504,6 +504,8 @@ public class BLEScanService extends Service {
 */
             BLEServiceUtils.addDeviceInfo(new DeviceInfo(device, device.getAddress(), all,
                     uuid, String.valueOf(major_int), String.valueOf(minor_int), rssi));
+
+            BLEServiceUtils.setCurrentBeacons(device.getAddress());
         }
     };
 }
