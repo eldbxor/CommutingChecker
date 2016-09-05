@@ -61,6 +61,7 @@ public class MainActivity extends AppCompatActivity
     public static Activity activity;
     public static ServiceConnection conn;
     public static ComponentName serviceComponentName;
+    public static Handler unbindHandler;
 
     // Target we publish for clients to send messages to IncomingHandler.
     public static final Messenger incomingMessenger = new Messenger(new IncomingHandler());
@@ -109,6 +110,7 @@ public class MainActivity extends AppCompatActivity
         mSocket.connect();
         messenger = null;
         activity = MainActivity.this;
+        unbindHandler = new Handler();
         // connectMessenger();
 
         // BLE 관련 Permission 주기

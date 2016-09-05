@@ -39,4 +39,15 @@ public class Constants {
     public static final int HANDLE_MESSAGE_TYPE_SETTEXT_ATTENDANCE_ZONE = 3;
     public static final int HANDLE_MESSAGE_TYPE_SETTEXT_NOT_ATTENDANCE_ZONE = 4;
     public static final int HANDLE_MESSAGE_TYPE_REGISTER_CALIBRATION = 5;
+
+    // BroadCastReceiver Type
+    public static final int BROADCAST_RECEIVER_TYPE_REQEUST_DATA = 1;
+    public static final int BROADCAST_RECEIVER_TYPE_SHOW_DATA = 2;
+    public static final int BROADCAST_RECEIVER_TYPE_NETWORK_CHANGE = 3;
+    public static final int BROADCAST_RECEIVER_TYPE_STOP_SERVICE = 4;
+
+    // NetworkStatus Type
+    public static final int NETWORK_TYPE_WIFI = 1;
+    public static final int NETWORK_TYPE_MOBILE = 2;
+    public static final int NETWORK_TYPE_NOT_CONNECTED = 0;
 }

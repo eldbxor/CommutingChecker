@@ -72,6 +72,7 @@ public class SocketIO {
     // 소켓 연결
     public void connect(){
         mSocket.connect();
+        Log.d("NetworkStatus", "connecting...");
     }
 
     // Get RSA public key from the server
@@ -331,6 +332,7 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
                     content.put("ThresholdY", data.get("ThresholdY"));
                     content.put("ThresholdZ", data.get("ThresholdZ"));
 
+                    Log.d("Awesometic", "calibration: send message to server");
                     mSocket.emit("calibration", analyzer.encryptSendJson(content));
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -379,6 +381,7 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
                         }catch(RemoteException e){
                             Log.d("replyToActivity", e.toString());
                         }
+
                     } catch (Exception e) {
                         e.printStackTrace();
                         Log.d("Request answer(Cali)", "failed");

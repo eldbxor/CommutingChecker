@@ -13,6 +13,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.net.ConnectivityManager;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
@@ -29,6 +30,8 @@ import com.example.taek.commutingchecker.utils.DeviceInfo;
 import com.example.taek.commutingchecker.utils.EnableBLE;
 import com.example.taek.commutingchecker.utils.GenerateNotification;
 import com.example.taek.commutingchecker.ui.SetupFragment;
+import com.example.taek.commutingchecker.utils.NetworkUtil;
+import com.example.taek.commutingchecker.utils.RegisterReceiver;
 import com.example.taek.commutingchecker.utils.SocketIO;
 
 import java.util.ArrayList;
@@ -48,7 +51,7 @@ public class BLEScanService extends Service {
     Thread t; // 출퇴근 등록 쓰레드
     // Notification ID
     public static final int NOTIFICATION_ID = 1;
-    BroadcastReceiver StopSelfReceiver, RequestDataReceiver, ShowDataReceiver, CalibrationReceiver;
+    BroadcastReceiver StopSelfReceiver, RequestDataReceiver, ShowDataReceiver, NetworkChnageReceiver;
     public static List<Map<String, String>> EssentialDataArray;
     public static Context ServiceContext;
     public static boolean ScanFlag, CalibrationFlag, CompleteCalibraton; // 출퇴근등록 쓰레드 실행 플래그, Rssi 측정 플래그
@@ -136,18 +139,7 @@ public class BLEScanService extends Service {
         timerHandler = new Handler();
 
         // 리시버 등록
-        IntentFilter StopSelfPkgFilter = new IntentFilter();
-        IntentFilter RequestDataPkgFilter = new IntentFilter();
-        IntentFilter ShowDataPkgFilter = new IntentFilter();
-        IntentFilter CalibrationPkgFilter = new IntentFilter();
-        StopSelfPkgFilter.addAction("android.intent.action.STOP_SERVICE");
-        StopSelfPkgFilter.addDataScheme("StopSelf");
-        RequestDataPkgFilter.addAction("android.intent.action.REQUEST_DATA");
-        RequestDataPkgFilter.addDataScheme("RequestData");
-        ShowDataPkgFilter.addAction("android.intent.action.SHOW_DATA");
-        ShowDataPkgFilter.addDataScheme("ShowData");
-        CalibrationPkgFilter.addAction("android.intent.action.CALIBRATION_SERVICE");
-        CalibrationPkgFilter.addDataScheme("Calibration");
+        RegisterReceiver mRegisterReceiver = new RegisterReceiver();
 
         StopSelfReceiver = new BroadcastReceiver() {
             @Override
@@ -156,62 +148,14 @@ public class BLEScanService extends Service {
             }
         };
 
-        RequestDataReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                try{
-                    // Getting a public key from server
-                    mSocketIO.getServersRsaPublicKey(myMacAddress);
+        RequestDataReceiver = mRegisterReceiver.createReceiver(Constants.BROADCAST_RECEIVER_TYPE_REQEUST_DATA);
+        ShowDataReceiver = mRegisterReceiver.createReceiver(Constants.BROADCAST_RECEIVER_TYPE_SHOW_DATA);
+        NetworkChnageReceiver = mRegisterReceiver.createReceiver(Constants.BROADCAST_RECEIVER_TYPE_NETWORK_CHANGE);
+        registerReceiver(StopSelfReceiver, mRegisterReceiver.createPackageFilter(Constants.BROADCAST_RECEIVER_TYPE_STOP_SERVICE));
+        registerReceiver(RequestDataReceiver, mRegisterReceiver.createPackageFilter(Constants.BROADCAST_RECEIVER_TYPE_REQEUST_DATA));
+        registerReceiver(ShowDataReceiver, mRegisterReceiver.createPackageFilter(Constants.BROADCAST_RECEIVER_TYPE_SHOW_DATA));
+        registerReceiver(NetworkChnageReceiver, mRegisterReceiver.createPackageFilter(Constants.BROADCAST_RECEIVER_TYPE_NETWORK_CHANGE));
 
-                    BLEScanService.mSocketIO.requestEssentialData(SocketIO.SERVICE_CALLBACK);
-                }catch (Exception e){
-                    e.printStackTrace();
-                    Toast.makeText(BLEScanService.ServiceContext, "서비스 실행상태가 아닙니다.", Toast.LENGTH_LONG).show();
-                }
-            }
-        };
-
-        ShowDataReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                try{
-                    if(BLEScanService.EssentialDataArray.size() > 0) {
-                        GenerateNotification.generateNotification(BLEScanService.ServiceContext, "ShowData", "Data_Info",
-                                "사무실 총 수: " + + BLEScanService.EssentialDataArray.size() + ", 좌표 값: "
-                                        //+ "사무실 번호: " + BLEScanService.EssentialDataArray.get(0).get("id_workplace").toString() + ","
-                                        //+ BLEScanService.EssentialDataArray.get(0).get("beacon_address1").toString() + ": "
-                                        + BLEScanService.EssentialDataArray.get(0).get("coordinateX").toString() + ","
-                                       // + BLEScanService.EssentialDataArray.get(0).get("beacon_address2").toString() + ": "
-                                        + BLEScanService.EssentialDataArray.get(0).get("coordinateY").toString() + ", "
-                                        //+ BLEScanService.EssentialDataArray.get(0).get("beacon_address3").toString() + ": "
-                                        + BLEScanService.EssentialDataArray.get(0).get("coordinateZ").toString());
-                        Log.d("ShowData", BLEScanService.EssentialDataArray.get(0).get("coordinateX").toString() + ", " +
-                                BLEScanService.EssentialDataArray.get(0).get("coordinateY").toString() + ", " +
-                                BLEScanService.EssentialDataArray.get(0).get("coordinateZ").toString());
-                    }else{
-                        GenerateNotification.generateNotification(BLEScanService.ServiceContext, "ShowData", "No Data",
-                                "");
-                        //Toast.makeText(BLEScanService.ServiceContext, "no data", Toast.LENGTH_SHORT).show();
-                    }
-                }catch (Exception e){
-                    e.printStackTrace();
-                    GenerateNotification.generateNotification(BLEScanService.ServiceContext, "ShowData", "ShowData failed", "");
-                    //Toast.makeText(BLEScanService.ServiceContext, "서비스 실행상태가 아닙니다.", Toast.LENGTH_LONG).show();
-                }
-            }
-        };
-
-        CalibrationReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                CalibrationFlag = true;
-            }
-        };
-
-        registerReceiver(StopSelfReceiver, StopSelfPkgFilter);
-        registerReceiver(RequestDataReceiver, RequestDataPkgFilter);
-        registerReceiver(ShowDataReceiver, ShowDataPkgFilter);
-        registerReceiver(CalibrationReceiver, CalibrationPkgFilter);
 
         EnableBLE mEnableBLE = new EnableBLE(getSystemService(this.BLUETOOTH_SERVICE)); // BLE 활성화 클래스 생성
         mBluetoothAdapter = mEnableBLE.enable(); // BLE 활성화
@@ -379,7 +323,7 @@ public class BLEScanService extends Service {
         unregisterReceiver(StopSelfReceiver);
         unregisterReceiver(RequestDataReceiver);
         unregisterReceiver(ShowDataReceiver);
-        unregisterReceiver(CalibrationReceiver);
+        unregisterReceiver(NetworkChnageReceiver);
         if(mSocketIO.connected() == true)
             mSocketIO.close();
         GenerateNotification.generateNotification(this, "서비스 종료", "서비스가 종료되었습니다.", "");

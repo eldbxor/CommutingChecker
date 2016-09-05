@@ -60,13 +60,21 @@ public class IncomingHandler extends Handler{
                 break;
             case Constants.HANDLE_MESSAGE_TYPE_REGISTER_CALIBRATION:
                 Log.d("MessengerCommunication", "Activity receive 5");
-                Toast.makeText(MainActivity.MainActivityContext, "Calibration을 완료하였습니다. 앱을 재실행하세요.", Toast.LENGTH_SHORT).show();
                 try {
                     MainActivity.mainActivity.unbindService(MainActivity.conn);
                 }catch (Exception e){
                     e.printStackTrace();
                 }
-                MainActivity.conn.onServiceDisconnected(MainActivity.serviceComponentName);
+                MainActivity.conn = null;
+
+                MainActivity.unbindHandler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(MainActivity.MainActivityContext, "Calibration을 완료하였습니다. 앱을 재실행하세요.", Toast.LENGTH_SHORT).show();
+
+                        MainActivity.conn.onServiceDisconnected(MainActivity.serviceComponentName);
+                    }
+                }, 2000);
         }
     }
 }
