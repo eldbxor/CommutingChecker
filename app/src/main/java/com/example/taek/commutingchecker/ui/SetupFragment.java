@@ -14,6 +14,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.Switch;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.taek.commutingchecker.R;
@@ -30,6 +31,7 @@ public class SetupFragment extends Fragment {
     Intent intent;
     public static Button showData, request, calibration, checkRunning;
     public static Switch bleScanSwitch;
+    public static TextView commutingState;
 
     public static SetupFragment newInstance() {
         SetupFragment fragment = new SetupFragment();
@@ -54,6 +56,7 @@ public class SetupFragment extends Fragment {
         showData = (Button) rootView.findViewById(R.id.Show_EssentialData);
         calibration = (Button) rootView.findViewById(R.id.Calibration);
         checkRunning = (Button) rootView.findViewById(R.id.CheckRunning);
+        commutingState = (TextView) rootView.findViewById(R.id.commutingState);
 
         // if service is running switch off
         if(isRunningProcess(getActivity(), "com.example.taek.commutingchecker:remote"))

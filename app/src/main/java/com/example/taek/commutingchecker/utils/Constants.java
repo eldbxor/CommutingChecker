@@ -45,6 +45,9 @@ public class Constants {
     public static final int BROADCAST_RECEIVER_TYPE_SHOW_DATA = 2;
     public static final int BROADCAST_RECEIVER_TYPE_NETWORK_CHANGE = 3;
     public static final int BROADCAST_RECEIVER_TYPE_STOP_SERVICE = 4;
+    public static final int BROADCAST_RECEIVER_TYPE_COME_TO_WORK_STATE = 5;
+    public static final int BROADCAST_RECEIVER_TYPE_LEAVE_WORK_STATE = 6;
+    public static final int BROADCAST_RECEIVER_TYPE_STAND_BY_COME_TO_WORK_STATE = 7;
 
     // NetworkStatus Type
     public static final int NETWORK_TYPE_WIFI = 1;

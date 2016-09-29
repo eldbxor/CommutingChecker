@@ -4,6 +4,7 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.FragmentManager;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -33,7 +34,9 @@ import com.crashlytics.android.Crashlytics;
 import com.example.taek.commutingchecker.services.BLEScanService;
 import com.example.taek.commutingchecker.utils.BackPressCloseHandler;
 import com.example.taek.commutingchecker.R;
+import com.example.taek.commutingchecker.utils.Constants;
 import com.example.taek.commutingchecker.utils.IncomingHandler;
+import com.example.taek.commutingchecker.utils.RegisterReceiver;
 import com.example.taek.commutingchecker.utils.SocketIO;
 
 import io.fabric.sdk.android.Fabric;
@@ -62,6 +65,7 @@ public class MainActivity extends AppCompatActivity
     public static ServiceConnection conn;
     public static ComponentName serviceComponentName;
     public static Handler unbindHandler;
+    BroadcastReceiver ComeToWorkStateReceiver, LeaveWorkStateReceiver, StandByComeToWorkStateReceiver;
 
     // Target we publish for clients to send messages to IncomingHandler.
     public static final Messenger incomingMessenger = new Messenger(new IncomingHandler());
@@ -112,6 +116,16 @@ public class MainActivity extends AppCompatActivity
         activity = MainActivity.this;
         unbindHandler = new Handler();
         // connectMessenger();
+
+        // 리시버 등록
+        RegisterReceiver mRegisterReceiver = new RegisterReceiver();
+        ComeToWorkStateReceiver = mRegisterReceiver.createReceiver(Constants.BROADCAST_RECEIVER_TYPE_COME_TO_WORK_STATE);
+        LeaveWorkStateReceiver = mRegisterReceiver.createReceiver(Constants.BROADCAST_RECEIVER_TYPE_LEAVE_WORK_STATE);
+        StandByComeToWorkStateReceiver = mRegisterReceiver.createReceiver(Constants.BROADCAST_RECEIVER_TYPE_STAND_BY_COME_TO_WORK_STATE);
+        registerReceiver(ComeToWorkStateReceiver, mRegisterReceiver.createPackageFilter(Constants.BROADCAST_RECEIVER_TYPE_COME_TO_WORK_STATE));
+        registerReceiver(LeaveWorkStateReceiver, mRegisterReceiver.createPackageFilter(Constants.BROADCAST_RECEIVER_TYPE_LEAVE_WORK_STATE));
+        registerReceiver(StandByComeToWorkStateReceiver, mRegisterReceiver.createPackageFilter(Constants.BROADCAST_RECEIVER_TYPE_STAND_BY_COME_TO_WORK_STATE));
+
 
         // BLE 관련 Permission 주기
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){

@@ -1,5 +1,7 @@
 package com.example.taek.commutingchecker.utils;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Message;
 import android.os.RemoteException;
 import android.util.Log;
@@ -256,6 +258,7 @@ public class BLEServiceUtils {
     private static void leaveWorkTimerStart(final DeviceInfo deviceInfo1, final DeviceInfo deviceInfo2, final DeviceInfo deviceInfo3) {
         timer = new Timer();
         timerSecond = 0;
+        leaveWorkCount = 0;
         Log.d("Awesometic", "leaveWorkTimerStart(): Timer start and clear the map which has current beacons at each second");
 
         timer.schedule(new TimerTask() {
@@ -268,12 +271,13 @@ public class BLEServiceUtils {
         }, 0, 3000);
     }
 
-    private static void leaveWorkTimerStop() {
+    private static void leaveWorkTimerStop(final DeviceInfo deviceInfo1, final DeviceInfo deviceInfo2, final DeviceInfo deviceInfo3) {
         timer.cancel();
         timer = null;
 
         BLEScanService.timerHandler.removeCallbacks(updater);
         updater = null;
+        sendEvent(deviceInfo1, deviceInfo2, deviceInfo3, false);
     }
 
     private static void leaveWorkChecker(final DeviceInfo deviceInfo1, final DeviceInfo deviceInfo2, final DeviceInfo deviceInfo3) {
@@ -287,17 +291,17 @@ public class BLEServiceUtils {
                 Log.d("Awesometic", "leaveWorkChecker(): currentBeacons size(): " + currentBeacons.size());
                 if (BLEScanService.commuteStatus && currentBeacons.size() != 3) {
                     if(leaveWorkCount > 2) {
-                        leaveWorkTimerStop();
-                        sendEvent(deviceInfo1, deviceInfo2, deviceInfo3, false);
+                        leaveWorkTimerStop(deviceInfo1, deviceInfo2, deviceInfo3);
+                        // sendEvent(deviceInfo1, deviceInfo2, deviceInfo3, false);
                         Log.d("Awesometic", "leaveWorkChecker(): Get off the office success");
                     }else{
                         leaveWorkCount++;
                     }
                 } else if (currentBeacons.size() == 3){
-                    if(currentBeacons.get(deviceInfo1.Address) < -100 || currentBeacons.get(deviceInfo2.Address) < -100 || currentBeacons.get(deviceInfo3.Address) < -100){
+                    if(currentBeacons.get(deviceInfo1.Address) < -100 && currentBeacons.get(deviceInfo2.Address) < -100 && currentBeacons.get(deviceInfo3.Address) < -100){
                         if(leaveWorkCount > 2) {
-                            leaveWorkTimerStop();
-                            sendEvent(deviceInfo1, deviceInfo2, deviceInfo3, false);
+                            leaveWorkTimerStop(deviceInfo1, deviceInfo2, deviceInfo3);
+                            // sendEvent(deviceInfo1, deviceInfo2, deviceInfo3, false);
                             Log.d("Awesometic", "leaveWorkChecker(): Get off the office success");
                         }else{
                             leaveWorkCount++;
@@ -319,6 +323,11 @@ public class BLEServiceUtils {
         timerSecond = 0;
         timer = new Timer();
         Log.d("ComeToWork", "start timer");
+
+        // 출근 대기 상태 알림
+        Intent intent = new Intent("android.intent.action.STAND_BY_COME_TO_WORK_STATE");
+        intent.setData(Uri.parse("standByComeToWork:"));
+        BLEScanService.ServiceContext.sendBroadcast(intent);
 
 //        BLEScanService.checkCallbackThread_standByAttendance = new CheckCallback(deviceInfo1, deviceInfo2, deviceInfo3, true); // 출근 범위 검사 스레드 실행
         timer.schedule(new TimerTask() {
@@ -387,11 +396,20 @@ public class BLEServiceUtils {
             if (isComeToWork) {
                 BLEScanService.commuteStatus = true;
                 BLEScanService.commuteCycle = true;
-//                BLEScanService.checkCallbackThread = new CheckCallback(deviceInfo1, deviceInfo2, deviceInfo3, false);
+
+                // 출근 상태 알림
+                Intent intent = new Intent("android.intent.action.COME_TO_WORK_STATE");
+                intent.setData(Uri.parse("comeToWork:"));
+                BLEScanService.ServiceContext.sendBroadcast(intent);
             } else {
                 BLEScanService.commuteStatus = false;
                 BLEScanService.commuteCycle = false;
                 BLEScanService.mBLEDevices.clear();
+
+                // 퇴근 상태 알림
+                Intent intent = new Intent("android.intent.action.LEAVE_WORK_STATE");
+                intent.setData(Uri.parse("leaveWork:"));
+                BLEScanService.ServiceContext.sendBroadcast(intent);
             }
         }
     }
