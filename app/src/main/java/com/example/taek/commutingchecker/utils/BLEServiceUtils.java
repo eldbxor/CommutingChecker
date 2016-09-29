@@ -365,6 +365,11 @@ public class BLEServiceUtils {
                     BLEScanService.commuteStatus = false;
                     BLEScanService.commuteCycle = false;
 
+                    // 퇴근 상태 알림
+                    Intent intent = new Intent("android.intent.action.LEAVE_WORK_STATE");
+                    intent.setData(Uri.parse("leaveWork:"));
+                    BLEScanService.ServiceContext.sendBroadcast(intent);
+
                 } else if (timerSecond == 10) { // 출근 조건을 만족했을 경우 ( real second == timerSecond * 3 )
                     Log.d("ComeToWork", "comeToWork success");
                     timerStop();
