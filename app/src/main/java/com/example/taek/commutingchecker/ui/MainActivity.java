@@ -11,9 +11,12 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
@@ -70,6 +73,12 @@ public class MainActivity extends AppCompatActivity
     // Target we publish for clients to send messages to IncomingHandler.
     public static final Messenger incomingMessenger = new Messenger(new IncomingHandler());
 
+    // Employee information
+    public static TextView tvNavHeadId;
+    public static TextView tvNavHeadAddr;
+    public static String employee_number;
+    public static String employee_name;
+
     public static void connectMessenger(){
         Log.d("MainActivity method", "call connectMessenger");
         ComponentName cn = new ComponentName(MainActivity.MainActivityContext, BLEScanService.class);
@@ -108,14 +117,25 @@ public class MainActivity extends AppCompatActivity
 
         setContentView(R.layout.activity_main);
 
+        /** 2016. 6. 9
+         * Init UI Elements including navigation view
+         */
+        initUIElements();
+
         MainActivityContext = this;
         ServiceTAG = getResources().getString(R.string.scan_service);
-        mSocket = new SocketIO();
-        mSocket.connect();
         messenger = null;
         activity = MainActivity.this;
         unbindHandler = new Handler();
         // connectMessenger();
+
+        // Go to EntryActivity, and check whether this smart phone is registered or not
+        mainActivity = this;
+        myMacAddress = android.provider.Settings.Secure.getString(this.getContentResolver(), "bluetooth_address");
+        Log.d("myMacAddress", myMacAddress);
+
+        Intent intent = new Intent(MainActivity.this.getApplicationContext(), EntryActivity.class);
+        startActivity(intent);
 
         // 리시버 등록
         RegisterReceiver mRegisterReceiver = new RegisterReceiver();
@@ -125,7 +145,6 @@ public class MainActivity extends AppCompatActivity
         registerReceiver(ComeToWorkStateReceiver, mRegisterReceiver.createPackageFilter(Constants.BROADCAST_RECEIVER_TYPE_COME_TO_WORK_STATE));
         registerReceiver(LeaveWorkStateReceiver, mRegisterReceiver.createPackageFilter(Constants.BROADCAST_RECEIVER_TYPE_LEAVE_WORK_STATE));
         registerReceiver(StandByComeToWorkStateReceiver, mRegisterReceiver.createPackageFilter(Constants.BROADCAST_RECEIVER_TYPE_STAND_BY_COME_TO_WORK_STATE));
-
 
         // BLE 관련 Permission 주기
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
@@ -146,17 +165,7 @@ public class MainActivity extends AppCompatActivity
             }
         }
 
-        // Go to EntryActivity, and check whether this smart phone is registered or not
-        mainActivity = this;
-        Intent intent = new Intent(this.getApplicationContext(), EntryActivity.class);
-        startActivity(intent);
-
         backPressCloseHandler = new BackPressCloseHandler(this);
-
-        /** 2016. 6. 9
-         * Init UI Elements including navigation view
-         */
-        initUiElements();
     }
 
     @Override
@@ -173,14 +182,11 @@ public class MainActivity extends AppCompatActivity
         // 서비스 실행
         //startService(intent);
 
-        myMacAddress = android.provider.Settings.Secure.getString(this.getContentResolver(), "bluetooth_address");
-        Log.d("myMacAddress", myMacAddress);
-
-        try{
-            Thread.sleep(1000);
-        }catch (Exception e){
-            e.printStackTrace();
-        }
+//        try{
+//            Thread.sleep(1000);
+//        }catch (Exception e){
+//            e.printStackTrace();
+//        }
     }
 
     @Override
@@ -224,7 +230,7 @@ public class MainActivity extends AppCompatActivity
     /* Navigation View object */
     private NavigationView navigationView;
 
-    private void initUiElements() {
+    private void initUIElements() {
         // Toolbar
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -247,10 +253,8 @@ public class MainActivity extends AppCompatActivity
 
         // Set the header of the Navigation View
         View navHeaderView = navigationView.inflateHeaderView(R.layout.nav_header);
-        TextView tvNavHeadId = (TextView) navHeaderView.findViewById(R.id.nav_head_id);
-        TextView tvNavHeadAddr = (TextView) navHeaderView.findViewById(R.id.nav_head_bluetooth_addr);
-        tvNavHeadId.setText("employee id here");
-        tvNavHeadAddr.setText("employee bluetooth address here");
+        tvNavHeadId = (TextView) navHeaderView.findViewById(R.id.nav_head_id);
+        tvNavHeadAddr = (TextView) navHeaderView.findViewById(R.id.nav_head_bluetooth_addr);
 
         // Set the menu of the Navigation View
         navigationView.inflateMenu(R.menu.nav_menu);
@@ -315,19 +319,13 @@ public class MainActivity extends AppCompatActivity
                         .detach(fragSetup).attach(fragSetup)
                         .commit();
                 break;
-            case R.id.nav_population_of_each_department:
+            case R.id.nav_chart_movement:
                 fragmentManager.beginTransaction()
                         .replace(R.id.content_frame, fragChart)
                         .detach(fragChart).attach(fragChart)
                         .commit();
                 break;
-            case R.id.nav_chart2:
-                fragmentManager.beginTransaction()
-                        .replace(R.id.content_frame, fragChart)
-                        .detach(fragChart).attach(fragChart)
-                        .commit();
-                break;
-            case R.id.nav_chart3:
+            case R.id.nav_chart_work:
                 fragmentManager.beginTransaction()
                         .replace(R.id.content_frame, fragChart)
                         .detach(fragChart).attach(fragChart)

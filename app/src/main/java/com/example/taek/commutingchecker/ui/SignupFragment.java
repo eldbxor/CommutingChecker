@@ -49,7 +49,7 @@ public class SignupFragment extends Fragment {
         et_position = (EditText) rootView.findViewById(R.id.signup_position);
         btn_send = (Button) rootView.findViewById(R.id.signup_signupButton);
 
-        et_smartphoneAddr.setText(EntryActivity.smartphoneAddr);
+        et_smartphoneAddr.setText(MainActivity.myMacAddress);
         et_smartphoneAddr.setEnabled(false);
 
         btn_send.setOnClickListener(new Button.OnClickListener() {
@@ -73,7 +73,7 @@ public class SignupFragment extends Fragment {
                     btn_send.setEnabled(false);
 
                     try {
-                        EntryActivity.mSocket.signupRequest(EntryActivity.smartphoneAddr, employee_number, name, password, department, position);
+                        MainActivity.mSocket.signupRequest(MainActivity.myMacAddress, employee_number, name, password, department, position);
                         Thread.sleep(500);
 
                         Toast.makeText(getActivity().getApplicationContext(), "가입 신청이 완료되었습니다. 앱을 종료하세요", Toast.LENGTH_LONG).show();

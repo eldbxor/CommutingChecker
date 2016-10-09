@@ -15,13 +15,10 @@ public class EntryActivity extends AppCompatActivity {
     private SignupFragment fragSignup;
     private WaitFragment fragWait;
 
-    public static SocketIO mSocket;
-
-    public static String smartphoneAddr;
     public static boolean amIRegistered;
     public static boolean permitted;
-    public static String employee_number;
-    public static String employee_name;
+
+    public static boolean isGettingEmployeeDataFinished;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,22 +31,33 @@ public class EntryActivity extends AppCompatActivity {
 
         FragmentManager fragmentManager = getFragmentManager();
 
+        isGettingEmployeeDataFinished = false;
+
         try {
-            mSocket = new SocketIO();
-            mSocket.connect();
+            MainActivity.mSocket = new SocketIO();
+            MainActivity.mSocket.connect();
+
             do {
                 Thread.sleep(100);
-            } while (mSocket.connected() == false);
+            } while (MainActivity.mSocket.connected() == false);
 
             // Getting a public key from server
-            mSocket.getServersRsaPublicKey();
+            MainActivity.mSocket.getServersRsaPublicKey();
             do {
                 Thread.sleep(100);
-            } while (mSocket.isServersPublicKeyInitialized() == false);
+            } while (MainActivity.mSocket.isServersPublicKeyInitialized() == false);
 
-            smartphoneAddr = MainActivity.myMacAddress;
-            mSocket.amIRegistered(smartphoneAddr);
-            Thread.sleep(500);
+            MainActivity.mSocket.amIRegistered(MainActivity.myMacAddress);
+
+            // Wait for receiving "amIRegistered" data through socket.io
+            while (true) {
+                Thread.sleep(100);
+
+                if (isGettingEmployeeDataFinished) {
+                    break;
+                }
+            }
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -72,15 +80,14 @@ public class EntryActivity extends AppCompatActivity {
 
         } else {
             // If registered and permitted
+            MainActivity.tvNavHeadId.setText(MainActivity.employee_name + " (" + MainActivity.employee_number + ")");
+            MainActivity.tvNavHeadAddr.setText(MainActivity.myMacAddress);
             this.finish();
-
         }
     }
 
     @Override
     protected void onDestroy(){
-        if (mSocket.connected() == true)
-            mSocket.close();
         super.onDestroy();
     }
 }

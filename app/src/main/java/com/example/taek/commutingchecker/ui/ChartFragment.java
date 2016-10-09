@@ -46,11 +46,15 @@ public class ChartFragment extends Fragment {
                              Bundle savedInstanceState) {
 
         switch (getActivity().getTitle().toString()) {
-            case "부서별 인원 수":
+            //nav_movement
+
+            //nav_work
+            case "직원 근무 현황":
                 SocketIO.ChartSignal signal = SocketIO.ChartSignal.POPULATION;
 
                 return populationOfEachDepartment(inflater, container, savedInstanceState, signal);
 
+            //default
             default:
                 return inflater.inflate(R.layout.fragment_chart, container, false);
         }
