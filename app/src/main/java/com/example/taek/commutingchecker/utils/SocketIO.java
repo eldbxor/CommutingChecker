@@ -429,8 +429,10 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
                             Log.d("Awesometic", "amIRegistered - true" + ", " + String.valueOf(permitted) + ", " + name + ", " + employee_number);
                             EntryActivity.amIRegistered = true;
                             EntryActivity.permitted = permitted;
-                            EntryActivity.employee_name = name;
-                            EntryActivity.employee_number = employee_number;
+                            MainActivity.employee_name = name;
+                            MainActivity.employee_number = employee_number;
+
+                            EntryActivity.isGettingEmployeeDataFinished = true;
                         } else {
                             Log.d("Awesometic", "amIRegistered - false");
                             EntryActivity.amIRegistered = false;
