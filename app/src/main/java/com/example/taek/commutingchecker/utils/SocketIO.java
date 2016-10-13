@@ -10,6 +10,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.example.taek.commutingchecker.services.BLEScanService;
+import com.example.taek.commutingchecker.services.CalibrationService;
 import com.example.taek.commutingchecker.ui.ChartFragment;
 import com.example.taek.commutingchecker.ui.EntryActivity;
 import com.example.taek.commutingchecker.ui.MainActivity;
@@ -197,10 +198,10 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
                             if(isComeToWork == true) {
                                 Log.d("ComeToWork", "comeToWork is registered");
                                 GenerateNotification.generateNotification(BLEScanService.ServiceContext, "출근 등록", "출근이 등록되었습니다.", "");
-                            }else{
+                            }else {
                                 GenerateNotification.generateNotification(BLEScanService.ServiceContext, "퇴근 등록", "퇴근이 등록되었습니다.", "");
                             }
-                        }else{
+                        }else {
                             if(BLEScanService.failureCount_SendEv < 2) {
                                 BLEScanService.failureCount_SendEv++;
                                 sendEvent(data, isComeToWork);
@@ -296,15 +297,17 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
 
                             switch (callbackType) {
                                 case Constants.CALLBACK_TYPE_BLE_SCAN_SERVICE:
-                                    BLEScanService mBLEScanService = (BLEScanService) mContext;
-                                    mBLEScanService.mBLEServiceUtils.addEssentialData(map);
+                                    ((BLEScanService) mContext).mBLEServiceUtils.addEssentialData(callbackType, map);
                                     for (int j = 0; j < 3; j++) {
-                                        mBLEScanService.mBLEServiceUtils.addFilterList(beaconAddress[j]);
+                                        ((BLEScanService) mContext).mBLEServiceUtils.addFilterList(callbackType, beaconAddress[j]);
                                     }
                                     break;
 
                                 case Constants.CALLBACK_TYPE_CALIBRATION_SERVICE:
-                                    
+                                    ((CalibrationService) mContext).mBLEServiceUtils.addEssentialData(callbackType, map);
+                                    for (int j = 0; j < 3; j++) {
+                                        ((CalibrationService) mContext).mBLEServiceUtils.addFilterList(callbackType, beaconAddress[j]);
+                                    }
                                     break;
 
                                 case Constants.CALLBACK_TYPE_MAIN_ACTIVITY:
@@ -363,7 +366,7 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
 
                         Boolean isSuccess = contentJson.getBoolean("requestSuccess");
                         if(isSuccess) {
-                            BLEScanService.failureCount_Cali = 0;
+                            ((CalibrationService) mContext).failureCount_Cali = 0;
                             Log.d("Calibration", "Success");
                             // Toast.makeText(BLEScanService.ServiceContext, "Calibration: (" + data.get("CoordinateX") + ", "
                             //        + data.get("CoordinateY") + ", " + data.get("CoordinateZ"), Toast.LENGTH_SHORT).show();
@@ -372,14 +375,14 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
                             GenerateNotification.generateNotification(BLEScanService.ServiceContext, "Calibration", "Rssi 평균 값을 서버에 전송하였습니다." + ".",
                                     "rss1: " + data.get("CoordinateX") + ", " + "rssi2: " + data.get("CoordinateY") + ", " + "rss3: " + data.get("CoordinateZ")); */
                         } else {
-                            if(BLEScanService.failureCount_Cali < 2) {
-                                BLEScanService.failureCount_Cali++;
+                            if(((CalibrationService) mContext).failureCount_Cali < 2) {
+                                ((CalibrationService) mContext).failureCount_Cali++;
                                 calibration(data);
                                 return;
                             }
                             else{
                                 Log.d("Calibration", "failed");
-                                BLEScanService.failureCount_Cali = 0;
+                                ((CalibrationService) mContext).failureCount_Cali = 0;
                                 // Toast.makeText(BLEScanService.ServiceContext, "새로운 좌표 값 등록을 실패하였습니다.", Toast.LENGTH_SHORT).show();
                                 // GenerateNotification.generateNotification(BLEScanService.ServiceContext, "Calibration 실패", "새로운 좌표 값 등록을 실패하였습니다.", "");
                             }
@@ -388,7 +391,7 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
                         // 앱 종료
                         try {
                             Log.d("MessengerCommunication", "Service send 5");
-                            BLEScanService.replyToActivityMessenger.send(Message.obtain(null, Constants.HANDLE_MESSAGE_TYPE_REGISTER_CALIBRATION));
+                            ((CalibrationService) mContext).replyToActivityMessenger.send(Message.obtain(null, Constants.HANDLE_MESSAGE_TYPE_REGISTER_CALIBRATION));
                         }catch(RemoteException e){
                             Log.d("replyToActivity", e.toString());
                         }

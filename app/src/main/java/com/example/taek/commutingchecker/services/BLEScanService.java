@@ -53,7 +53,7 @@ public class BLEScanService extends Service {
     public List<Map<String, String>> EssentialDataArray; // 서버에서 받아온 비콘 데이터
 
     // Target we publish for clients to send messages to IncomingHandler.
-    private Messenger incomingMessenger;
+    // private Messenger incomingMessenger = new Messenger(new IncomingHandler(Constants.HANDLER_TYPE_SERVICE, BLEScanService.this));
 
     public BLEScanService() {
     }
@@ -69,8 +69,6 @@ public class BLEScanService extends Service {
         calibrationResetFlag = false;
         failureCount_SendEv = 0;
         failureCount_Cali = 0;
-
-        incomingMessenger = new Messenger(new IncomingHandler(Constants.HANDLER_TYPE_SERVICE, ServiceContext));
 
         mBLEServiceUtils = new BLEServiceUtils(ServiceContext);
 
@@ -170,7 +168,7 @@ public class BLEScanService extends Service {
         }
 
         // 서버에 Rssi 제한 값 요청 후 데이터 받기
-        mSocketIO.requestEssentialData(SocketIO.SERVICE_CALLBACK);
+        mSocketIO.requestEssentialData(Constants.CALLBACK_TYPE_BLE_SCAN_SERVICE);
         try{
             do {
                 Thread.sleep(100);
@@ -212,7 +210,7 @@ public class BLEScanService extends Service {
 
                     // 0.5초 동안 3번 Rssi 체크 후 2번 이상 적합하면 sendEvent() 메서드 실행
                     if (!commuteCycle && !commuteStatus)
-                        mBLEServiceUtils.comeToWorkCheckTime();
+                        mBLEServiceUtils.comeToWorkCheckTime(Constants.CALLBACK_TYPE_BLE_SCAN_SERVICE);
 
                     //mSocketIO.sendEvent(new HashMap<String, String>());
                     //scanLeDevice(false);
@@ -230,7 +228,7 @@ public class BLEScanService extends Service {
     @Override
     public IBinder onBind(Intent intent) {
         Log.d(TAG, "BLEScanService onBind()");
-        return null;
+        return null; // BoundService가 아님을 안드로이드 시스템에 알림
     }
 
     public void scanLeDevice(final boolean enable){

@@ -14,6 +14,7 @@ import android.os.RemoteException;
 import android.util.Log;
 
 import com.example.taek.commutingchecker.services.BLEScanService;
+import com.example.taek.commutingchecker.services.CalibrationService;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -34,11 +35,11 @@ public class BLEServiceUtils {
     public BluetoothManager mBluetoothManager;
     public BluetoothAdapter mBluetoothAdapter;
     public BluetoothLeScanner mBLEScanner; // BLE 스캐너(api 21 이상)
-    BLEScanService mBLEScanService;
+    private Context mContext;
 
     // 생성자
     public BLEServiceUtils(Context context) {
-        mBLEScanService = (BLEScanService) context;
+        mContext = context;
     }
 
     public void createBluetoothAdapter(Object obj){
@@ -56,63 +57,106 @@ public class BLEServiceUtils {
         boolean isExisted = false;
         int index = 0;
 
-        for(DeviceInfo mInfo : mBLEScanService.mBLEDevices){
+        for(DeviceInfo mInfo : ((BLEScanService) mContext).mBLEDevices){
             if(mInfo.Address.equals(deviceInfo.Address)){
                 isExisted = true;
-                index = mBLEScanService.mBLEDevices.indexOf(mInfo);
+                index = ((BLEScanService) mContext).mBLEDevices.indexOf(mInfo);
                 break;
             }
         }
 
         if(isExisted == true){
-            mBLEScanService.mBLEDevices.add(index, deviceInfo);
-            mBLEScanService.mBLEDevices.remove(index + 1);
+            ((BLEScanService) mContext).mBLEDevices.add(index, deviceInfo);
+            ((BLEScanService) mContext).mBLEDevices.remove(index + 1);
         }else{
-            mBLEScanService.mBLEDevices.add(deviceInfo);
+            ((BLEScanService) mContext).mBLEDevices.add(deviceInfo);
         }
     }
 
-    public void addEssentialData(Map<String, String> essentialData) {
+    public void addEssentialData(int callbackType, Map<String, String> essentialData) {
         boolean isExisted = false;
         int index = 0;
 
-        for(Map<String, String> map : mBLEScanService.EssentialDataArray){
-            if(essentialData.get("id_workplace").equals(map.get("id_workplace"))){
-                isExisted = true;
-                index = mBLEScanService.EssentialDataArray.indexOf(map);
-                break;
-            }
-        }
+        switch (callbackType) {
+            case Constants.CALLBACK_TYPE_BLE_SCAN_SERVICE:
+                for (Map<String, String> map : ((BLEScanService) mContext).EssentialDataArray) {
+                    if (essentialData.get("id_workplace").equals(map.get("id_workplace"))) {
+                        isExisted = true;
+                        index = ((BLEScanService) mContext).EssentialDataArray.indexOf(map);
+                        break;
+                    }
+                }
 
-        if(isExisted == true){
-            mBLEScanService.EssentialDataArray.add(index, essentialData);
-            mBLEScanService.EssentialDataArray.remove(index + 1);
-        }else{
-            mBLEScanService.EssentialDataArray.add(essentialData);
+                if (isExisted == true) {
+                    ((BLEScanService) mContext).EssentialDataArray.add(index, essentialData);
+                    ((BLEScanService) mContext).EssentialDataArray.remove(index + 1);
+                } else {
+                    ((BLEScanService) mContext).EssentialDataArray.add(essentialData);
+                }
+                break;
+
+            case Constants.CALLBACK_TYPE_CALIBRATION_SERVICE:
+                for (Map<String, String> map : ((CalibrationService) mContext).EssentialDataArray) {
+                    if (essentialData.get("id_workplace").equals(map.get("id_workplace"))) {
+                        isExisted = true;
+                        index = ((CalibrationService) mContext).EssentialDataArray.indexOf(map);
+                        break;
+                    }
+                }
+
+                if (isExisted == true) {
+                    ((CalibrationService) mContext).EssentialDataArray.add(index, essentialData);
+                    ((CalibrationService) mContext).EssentialDataArray.remove(index + 1);
+                } else {
+                    ((CalibrationService) mContext).EssentialDataArray.add(essentialData);
+                }
+                break;
         }
     }
 
-    public void addFilterList(String beaconAddress){
+    public void addFilterList(int callbackType, String beaconAddress){
         boolean isExisted = false;
         int index = 0;
 
         if(beaconAddress.equals(""))
             return;
 
-        for(String mac : mBLEScanService.filterlist){
-            if(mac.equals(beaconAddress)){
-                isExisted = true;
-                index = mBLEScanService.filterlist.indexOf(mac);
+        switch (callbackType) {
+            case Constants.CALLBACK_TYPE_BLE_SCAN_SERVICE:
+                for(String mac : ((BLEScanService) mContext).filterlist){
+                    if(mac.equals(beaconAddress)){
+                        isExisted = true;
+                        index = ((BLEScanService) mContext).filterlist.indexOf(mac);
+                        break;
+                    }
+                }
+
+                if(isExisted == true){
+                    ((BLEScanService) mContext).filterlist.add(index, beaconAddress);
+                    ((BLEScanService) mContext).filterlist.remove(index + 1);
+                }else{
+                    ((BLEScanService) mContext).filterlist.add(beaconAddress);
+                }
                 break;
-            }
+
+            case Constants.CALLBACK_TYPE_CALIBRATION_SERVICE:
+                for(String mac : ((CalibrationService) mContext).filterlist){
+                    if(mac.equals(beaconAddress)){
+                        isExisted = true;
+                        index = ((CalibrationService) mContext).filterlist.indexOf(mac);
+                        break;
+                    }
+                }
+
+                if(isExisted == true){
+                    ((CalibrationService) mContext).filterlist.add(index, beaconAddress);
+                    ((CalibrationService) mContext).filterlist.remove(index + 1);
+                }else{
+                    ((CalibrationService) mContext).filterlist.add(beaconAddress);
+                }
+                break;
         }
 
-        if(isExisted == true){
-            mBLEScanService.filterlist.add(index, beaconAddress);
-            mBLEScanService.filterlist.remove(index + 1);
-        }else{
-            mBLEScanService.filterlist.add(beaconAddress);
-        }
     }
 
     // uuid, major, minor 나누는 메서드
@@ -168,7 +212,7 @@ public class BLEServiceUtils {
         return settings;
     }
 
-    public void comeToWorkCheckTime(){
+    public void comeToWorkCheckTime(final int callbackType) {
         Runnable r = new Runnable() {
             @Override
             public void run() {
@@ -176,91 +220,135 @@ public class BLEServiceUtils {
                 List<Boolean> checkThreeTime = new ArrayList<Boolean>();
                 DeviceInfo mDeviceInfo1 = null, mDeviceInfo2 = null, mDeviceInfo3 = null;
                 int coordinateX = 0, coordinateY = 0, coordinateZ = 0, count = 0, threshold = 0;
-                mBLEDevices = mBLEScanService.mBLEDevices;
 
-                BLEScanService.commuteCycle = true;
-                BLEScanService.commuteStatus = false;
+                switch (callbackType) {
+                    case Constants.CALLBACK_TYPE_BLE_SCAN_SERVICE:
+                        mBLEDevices = ((BLEScanService) mContext).mBLEDevices;
 
-                if(!BLEScanService.CalibrationFlag)
-                    Log.d("ComeToWork", "start comeToWorkCheckTime");
+                        BLEScanService.commuteCycle = true;
+                        BLEScanService.commuteStatus = false;
 
-                if(mBLEScanService.mBLEDevices.size() != 3)
-                    return;
+                        if (((BLEScanService) mContext).mBLEDevices.size() != 3)
+                            return;
 
-                // Rssi 제한값 검사
-                for(Map<String, String> map : mBLEScanService.EssentialDataArray){
-                    for(int j = 0; j < 3; j++){
-                        if(map.get("beacon_address1").equals(mBLEDevices.get(j).Address))
-                            mDeviceInfo1 = mBLEDevices.get(j);
-                        else if(map.get("beacon_address2").equals(mBLEDevices.get(j).Address))
-                            mDeviceInfo2 = mBLEDevices.get(j);
-                        else if(map.get("beacon_address3").equals(mBLEDevices.get(j).Address)) {
-                            mDeviceInfo3 = mBLEDevices.get(j);
-                            coordinateX = Integer.valueOf(map.get("coordinateX"));
-                            coordinateY = Integer.valueOf(map.get("coordinateY"));
-                            coordinateZ = Integer.valueOf(map.get("coordinateZ"));
-                            threshold = Integer.valueOf(map.get("thresholdX"));
+                        // Rssi 제한값 검사
+                        for (Map<String, String> map : ((BLEScanService) mContext).EssentialDataArray) {
+                            for (int j = 0; j < 3; j++) {
+                                if (map.get("beacon_address1").equals(mBLEDevices.get(j).Address))
+                                    mDeviceInfo1 = mBLEDevices.get(j);
+                                else if (map.get("beacon_address2").equals(mBLEDevices.get(j).Address))
+                                    mDeviceInfo2 = mBLEDevices.get(j);
+                                else if (map.get("beacon_address3").equals(mBLEDevices.get(j).Address)) {
+                                    mDeviceInfo3 = mBLEDevices.get(j);
+                                    coordinateX = Integer.valueOf(map.get("coordinateX"));
+                                    coordinateY = Integer.valueOf(map.get("coordinateY"));
+                                    coordinateZ = Integer.valueOf(map.get("coordinateZ"));
+                                    threshold = Integer.valueOf(map.get("thresholdX"));
+                                }
+                            }
                         }
-                    }
+                        break;
+
+                    case Constants.CALLBACK_TYPE_CALIBRATION_SERVICE:
+                        mBLEDevices = ((CalibrationService) mContext).mBLEDevices;
+
+                        if (!CalibrationService.CalibrationFlag)
+                            Log.d("ComeToWork", "start comeToWorkCheckTime");
+
+                        if (((CalibrationService) mContext).mBLEDevices.size() != 3)
+                            return;
+
+                        // Rssi 제한값 검사
+                        for (Map<String, String> map : ((CalibrationService) mContext).EssentialDataArray) {
+                            for (int j = 0; j < 3; j++) {
+                                if (map.get("beacon_address1").equals(mBLEDevices.get(j).Address))
+                                    mDeviceInfo1 = mBLEDevices.get(j);
+                                else if (map.get("beacon_address2").equals(mBLEDevices.get(j).Address))
+                                    mDeviceInfo2 = mBLEDevices.get(j);
+                                else if (map.get("beacon_address3").equals(mBLEDevices.get(j).Address)) {
+                                    mDeviceInfo3 = mBLEDevices.get(j);
+                                    coordinateX = Integer.valueOf(map.get("coordinateX"));
+                                    coordinateY = Integer.valueOf(map.get("coordinateY"));
+                                    coordinateZ = Integer.valueOf(map.get("coordinateZ"));
+                                    threshold = Integer.valueOf(map.get("thresholdX"));
+                                }
+                            }
+                        }
+                        break;
                 }
 
-                while(true){
-                    if(BLEScanService.CompleteCalibraton) {
-                        /* 서버에 전송하는 내용
-                        data.put("BeaconDeviceAddress1", mDeviceInfo1.Address);
-                        data.put("BeaconDeviceAddress2", mDeviceInfo2.Address);
-                        data.put("BeaconDeviceAddress3", mDeviceInfo3.Address);
-                        data.put("BeaconData1", mDeviceInfo1.ScanRecord);
-                        data.put("BeaconData2", mDeviceInfo2.ScanRecord);
-                        data.put("BeaconData3", mDeviceInfo3.ScanRecord);
-                        data.put("SmartphoneAddress", BLEScanService.myMacAddress);
-                        //data.put("DateTime", CurrentTime.currentTime());
-                        data.put("CoordinateX", String.valueOf(sumOfRssi1));
-                        data.put("CoordinateY", String.valueOf(sumOfRssi2));
-                        data.put("CoordinateZ", String.valueOf(sumOfRssi3));
-                        BLEScanService.temporaryCalibrationData.put("ThresholdX", String.valueOf(threshold_Calibration));
-                        BLEScanService.temporaryCalibrationData.put("ThresholdY", String.valueOf(threshold_Calibration));
-                        BLEScanService.temporaryCalibrationData.put("ThresholdZ", String.valueOf(threshold_Calibration));
-                         */
-                        mBLEScanService.temporaryCalibrationData.put("ThresholdX", String.valueOf(threshold_Calibration));
-                        mBLEScanService.temporaryCalibrationData.put("ThresholdY", String.valueOf(threshold_Calibration));
-                        mBLEScanService.temporaryCalibrationData.put("ThresholdZ", String.valueOf(threshold_Calibration));
-                        mBLEScanService.mSocketIO.calibration(mBLEScanService.temporaryCalibrationData);
-
-                        return;
-                    }
-
-                    mBLEDevices = mBLEScanService.mBLEDevices;
-                    for(DeviceInfo deviceInfo : mBLEDevices){
-                        if(deviceInfo.Address.equals(mDeviceInfo1.Address))
-                            mDeviceInfo1 = deviceInfo;
-                        else if(deviceInfo.Address.equals(mDeviceInfo2.Address))
-                            mDeviceInfo2 = deviceInfo;
-                        else if(deviceInfo.Address.equals(mDeviceInfo3.Address))
-                            mDeviceInfo3 = deviceInfo;
-                    }
+                while(true) {
                     int count_for = 0;
 
-                    if(BLEScanService.CalibrationFlag){ // Calibration 중일 때
-                        if (mDeviceInfo1.Rssi > (coordinateX - threshold_Calibration) && mDeviceInfo1.Rssi < (coordinateX + threshold_Calibration)) {
-                            count_for++;
-                        }
-                        if (mDeviceInfo2.Rssi > (coordinateY - threshold_Calibration) && mDeviceInfo2.Rssi < (coordinateY + threshold_Calibration)) {
-                            count_for++;
-                        }
-                        if (mDeviceInfo3.Rssi > (coordinateZ - threshold_Calibration) && mDeviceInfo3.Rssi < (coordinateZ + threshold_Calibration)) {
-                            count_for++;
-                        }
-                    }else {
-                        if (mDeviceInfo1.Rssi > (coordinateX - threshold) && mDeviceInfo1.Rssi < (coordinateX + threshold)) {
-                            count_for++;
-                        }
-                        if (mDeviceInfo2.Rssi > (coordinateY - threshold) && mDeviceInfo2.Rssi < (coordinateY + threshold)) {
-                            count_for++;
-                        }
-                        if (mDeviceInfo3.Rssi > (coordinateZ - threshold) && mDeviceInfo3.Rssi < (coordinateZ + threshold)) {
-                            count_for++;
-                        }
+                    switch (callbackType) {
+                        case Constants.CALLBACK_TYPE_BLE_SCAN_SERVICE:
+                            mBLEDevices = ((BLEScanService) mContext).mBLEDevices;
+                            for(DeviceInfo deviceInfo : mBLEDevices){
+                                if(deviceInfo.Address.equals(mDeviceInfo1.Address))
+                                    mDeviceInfo1 = deviceInfo;
+                                else if(deviceInfo.Address.equals(mDeviceInfo2.Address))
+                                    mDeviceInfo2 = deviceInfo;
+                                else if(deviceInfo.Address.equals(mDeviceInfo3.Address))
+                                    mDeviceInfo3 = deviceInfo;
+                            }
+
+                            if (mDeviceInfo1.Rssi > (coordinateX - threshold) && mDeviceInfo1.Rssi < (coordinateX + threshold)) {
+                                count_for++;
+                            }
+                            if (mDeviceInfo2.Rssi > (coordinateY - threshold) && mDeviceInfo2.Rssi < (coordinateY + threshold)) {
+                                count_for++;
+                            }
+                            if (mDeviceInfo3.Rssi > (coordinateZ - threshold) && mDeviceInfo3.Rssi < (coordinateZ + threshold)) {
+                                count_for++;
+                            }
+                            break;
+
+                        case Constants.CALLBACK_TYPE_CALIBRATION_SERVICE:
+                            if(CalibrationService.CompleteCalibraton) {
+                                /* 서버에 전송하는 내용
+                                data.put("BeaconDeviceAddress1", mDeviceInfo1.Address);
+                                data.put("BeaconDeviceAddress2", mDeviceInfo2.Address);
+                                data.put("BeaconDeviceAddress3", mDeviceInfo3.Address);
+                                data.put("BeaconData1", mDeviceInfo1.ScanRecord);
+                                data.put("BeaconData2", mDeviceInfo2.ScanRecord);
+                                data.put("BeaconData3", mDeviceInfo3.ScanRecord);
+                                data.put("SmartphoneAddress", BLEScanService.myMacAddress);
+                                //data.put("DateTime", CurrentTime.currentTime());
+                                data.put("CoordinateX", String.valueOf(sumOfRssi1));
+                                data.put("CoordinateY", String.valueOf(sumOfRssi2));
+                                data.put("CoordinateZ", String.valueOf(sumOfRssi3));
+                                BLEScanService.temporaryCalibrationData.put("ThresholdX", String.valueOf(threshold_Calibration));
+                                BLEScanService.temporaryCalibrationData.put("ThresholdY", String.valueOf(threshold_Calibration));
+                                BLEScanService.temporaryCalibrationData.put("ThresholdZ", String.valueOf(threshold_Calibration));
+                                 */
+                                ((CalibrationService) mContext).temporaryCalibrationData.put("ThresholdX", String.valueOf(threshold_Calibration));
+                                ((CalibrationService) mContext).temporaryCalibrationData.put("ThresholdY", String.valueOf(threshold_Calibration));
+                                ((CalibrationService) mContext).temporaryCalibrationData.put("ThresholdZ", String.valueOf(threshold_Calibration));
+                                ((CalibrationService) mContext).mSocketIO.calibration(((BLEScanService) mContext).temporaryCalibrationData);
+
+                                return;
+                            }
+
+                            mBLEDevices = ((CalibrationService) mContext).mBLEDevices;
+                            for(DeviceInfo deviceInfo : mBLEDevices){
+                                if(deviceInfo.Address.equals(mDeviceInfo1.Address))
+                                    mDeviceInfo1 = deviceInfo;
+                                else if(deviceInfo.Address.equals(mDeviceInfo2.Address))
+                                    mDeviceInfo2 = deviceInfo;
+                                else if(deviceInfo.Address.equals(mDeviceInfo3.Address))
+                                    mDeviceInfo3 = deviceInfo;
+                            }
+
+                            if (mDeviceInfo1.Rssi > (coordinateX - threshold_Calibration) && mDeviceInfo1.Rssi < (coordinateX + threshold_Calibration)) {
+                                count_for++;
+                            }
+                            if (mDeviceInfo2.Rssi > (coordinateY - threshold_Calibration) && mDeviceInfo2.Rssi < (coordinateY + threshold_Calibration)) {
+                                count_for++;
+                            }
+                            if (mDeviceInfo3.Rssi > (coordinateZ - threshold_Calibration) && mDeviceInfo3.Rssi < (coordinateZ + threshold_Calibration)) {
+                                count_for++;
+                            }
+                            break;
                     }
 
                     if(count_for >= 2){
@@ -285,30 +373,34 @@ public class BLEServiceUtils {
                             times++;
                     }
 
-                    if(BLEScanService.CalibrationFlag){ // Calibration 중일 때
-                        if(times >= 2){ // 출근존을 지났을 때
-                            try {
-                                BLEScanService.replyToActivityMessenger.send(Message.obtain(null, Constants.HANDLE_MESSAGE_TYPE_SETTEXT_ATTENDANCE_ZONE));
-                                Log.d("MessengerCommunication", "Service send 3");
-                            }catch(RemoteException e){
-                                Log.d("replyToActivity", e.toString());
+                    switch (callbackType) {
+                        case Constants.CALLBACK_TYPE_BLE_SCAN_SERVICE:
+                            if (times >= 2) { // 출근존을 지났을 때
+                                // BLEServiceUtils.sendEvent(mDeviceInfo1, mDeviceInfo2, mDeviceInfo3, true);
+                                Log.d("ComeToWork", "comeToWork's zone");
+                                GenerateNotification.generateNotification(BLEScanService.ServiceContext, "출근 대기 중", "출근 대기 중입니다.", "");
+                                timerStart(mDeviceInfo1, mDeviceInfo2, mDeviceInfo3);
+                                break;
                             }
-                        }else{
-                            try {
-                                BLEScanService.replyToActivityMessenger.send(Message.obtain(null, Constants.HANDLE_MESSAGE_TYPE_SETTEXT_NOT_ATTENDANCE_ZONE));
-                                Log.d("MessengerCommunication", "Service send 4");
-                            }catch(RemoteException e){
-                                Log.d("replyToActivity", e.toString());
-                            }
-                        }
-                    }else {
-                        if (times >= 2) { // 출근존을 지났을 때
-                            // BLEServiceUtils.sendEvent(mDeviceInfo1, mDeviceInfo2, mDeviceInfo3, true);
-                            Log.d("ComeToWork", "comeToWork's zone");
-                            GenerateNotification.generateNotification(BLEScanService.ServiceContext, "출근 대기 중", "출근 대기 중입니다.", "");
-                            timerStart(mDeviceInfo1, mDeviceInfo2, mDeviceInfo3);
                             break;
-                        }
+
+                        case Constants.CALLBACK_TYPE_CALIBRATION_SERVICE:
+                            if(times >= 2){ // 출근존을 지났을 때
+                                try {
+                                    BLEScanService.replyToActivityMessenger.send(Message.obtain(null, Constants.HANDLE_MESSAGE_TYPE_SETTEXT_ATTENDANCE_ZONE));
+                                    Log.d("MessengerCommunication", "Service send 3");
+                                }catch(RemoteException e){
+                                    Log.d("replyToActivity", e.toString());
+                                }
+                            }else{
+                                try {
+                                    BLEScanService.replyToActivityMessenger.send(Message.obtain(null, Constants.HANDLE_MESSAGE_TYPE_SETTEXT_NOT_ATTENDANCE_ZONE));
+                                    Log.d("MessengerCommunication", "Service send 4");
+                                }catch(RemoteException e){
+                                    Log.d("replyToActivity", e.toString());
+                                }
+                            }
+                            break;
                     }
 
                     try {
@@ -355,7 +447,7 @@ public class BLEServiceUtils {
         timer.cancel();
         timer = null;
 
-        mBLEScanService.timerHandler.removeCallbacks(updater);
+        ((BLEScanService) mContext).timerHandler.removeCallbacks(updater);
         updater = null;
         sendEvent(deviceInfo1, deviceInfo2, deviceInfo3, false);
     }
@@ -396,7 +488,7 @@ public class BLEServiceUtils {
                 }
             }
         };
-        mBLEScanService.timerHandler.post(updater);
+        ((BLEScanService) mContext).timerHandler.post(updater);
     }
 
     private void timerStart(final DeviceInfo deviceInfo1, final DeviceInfo deviceInfo2, final DeviceInfo deviceInfo3) {
@@ -407,7 +499,7 @@ public class BLEServiceUtils {
         // 출근 대기 상태 알림
         Intent intent = new Intent("android.intent.action.STAND_BY_COME_TO_WORK_STATE");
         intent.setData(Uri.parse("standByComeToWork:"));
-        mBLEScanService.sendBroadcast(intent);
+        ((BLEScanService) mContext).sendBroadcast(intent);
 
 //        BLEScanService.checkCallbackThread_standByAttendance = new CheckCallback(deviceInfo1, deviceInfo2, deviceInfo3, true); // 출근 범위 검사 스레드 실행
         timer.schedule(new TimerTask() {
@@ -424,7 +516,7 @@ public class BLEServiceUtils {
         timer.cancel();
         timer = null;
 
-        mBLEScanService.timerHandler.removeCallbacks(updater);
+        ((BLEScanService) mContext).timerHandler.removeCallbacks(updater);
         updater = null;
     }
 
@@ -441,14 +533,14 @@ public class BLEServiceUtils {
                 if(currentBeacons.size() != 3){ // 출근 범위를 벗어났을 경우 - 출근 조건을 만족하지 못함
                     Log.d("ComeToWork", "comeToWork is failed(StandByAttendance))");
                     timerStop();
-                    GenerateNotification.generateNotification(mBLEScanService, "출근 실패", "출근대기 중 범위를 벗어났습니다.", "");
+                    GenerateNotification.generateNotification(((BLEScanService) mContext), "출근 실패", "출근대기 중 범위를 벗어났습니다.", "");
                     BLEScanService.commuteStatus = false;
                     BLEScanService.commuteCycle = false;
 
                     // 퇴근 상태 알림
                     Intent intent = new Intent("android.intent.action.LEAVE_WORK_STATE");
                     intent.setData(Uri.parse("leaveWork:"));
-                    mBLEScanService.sendBroadcast(intent);
+                    ((BLEScanService) mContext).sendBroadcast(intent);
 
                 } else if (timerSecond == 10) { // 출근 조건을 만족했을 경우 ( real second == timerSecond * 3 )
                     Log.d("ComeToWork", "comeToWork success");
@@ -461,7 +553,7 @@ public class BLEServiceUtils {
                 currentBeacons.clear();
             }
         };
-        mBLEScanService.timerHandler.post(updater);
+        ((BLEScanService) mContext).timerHandler.post(updater);
     }
 
     public void sendEvent(DeviceInfo deviceInfo1, DeviceInfo deviceInfo2, DeviceInfo deviceInfo3, final boolean isComeToWork){
@@ -477,7 +569,7 @@ public class BLEServiceUtils {
             data.put("SmartphoneAddress", BLEScanService.myMacAddress);
             //data.put("DateTime", CurrentTime.currentTime());
 
-            mBLEScanService.mSocketIO.sendEvent(data, isComeToWork);
+            ((BLEScanService) mContext).mSocketIO.sendEvent(data, isComeToWork);
             if (isComeToWork) {
                 BLEScanService.commuteStatus = true;
                 BLEScanService.commuteCycle = true;
@@ -485,16 +577,16 @@ public class BLEServiceUtils {
                 // 출근 상태 알림
                 Intent intent = new Intent("android.intent.action.COME_TO_WORK_STATE");
                 intent.setData(Uri.parse("comeToWork:"));
-                mBLEScanService.sendBroadcast(intent);
+                ((BLEScanService) mContext).sendBroadcast(intent);
             } else {
                 BLEScanService.commuteStatus = false;
                 BLEScanService.commuteCycle = false;
-                mBLEScanService.mBLEDevices.clear();
+                ((BLEScanService) mContext).mBLEDevices.clear();
 
                 // 퇴근 상태 알림
                 Intent intent = new Intent("android.intent.action.LEAVE_WORK_STATE");
                 intent.setData(Uri.parse("leaveWork:"));
-                mBLEScanService.sendBroadcast(intent);
+                ((BLEScanService) mContext).sendBroadcast(intent);
             }
         }
     }

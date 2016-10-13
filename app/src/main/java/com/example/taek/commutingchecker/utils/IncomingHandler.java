@@ -9,7 +9,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.example.taek.commutingchecker.R;
-import com.example.taek.commutingchecker.services.BLEScanService;
+import com.example.taek.commutingchecker.services.CalibrationService;
 import com.example.taek.commutingchecker.ui.CalibrationFragment;
 import com.example.taek.commutingchecker.ui.MainActivity;
 import com.example.taek.commutingchecker.ui.ThresholdAdjustmentFragment;
@@ -36,11 +36,13 @@ public class IncomingHandler extends Handler{
                         Log.d("MessengerCommunication", "Activity receive 1");
                         CalibrationFragment.btnCalibrationStart.setText("NEXT");
                         break;
+
                     case Constants.HANDLE_MESSAGE_TYPE_ADD_TIMESECOND:
                         Log.d("MessengerCommunication", "Activity receive 2");
                         CalibrationFragment.timerSecond++;
                         CalibrationFragment.progressBar.setProgress(CalibrationFragment.timerSecond);
                         break;
+
                     case Constants.HANDLE_MESSAGE_TYPE_SETTEXT_ATTENDANCE_ZONE:
                         Log.d("MessengerCommunication", "Activity receive 3");
                         ThresholdAdjustmentFragment.fragment.getActivity().runOnUiThread(new Runnable() {
@@ -55,6 +57,7 @@ public class IncomingHandler extends Handler{
                             }
                         });
                         break;
+
                     case Constants.HANDLE_MESSAGE_TYPE_SETTEXT_NOT_ATTENDANCE_ZONE:
                         Log.d("MessengerCommunication", "Activity receive 4");
                         ThresholdAdjustmentFragment.fragment.getActivity().runOnUiThread(new Runnable() {
@@ -69,6 +72,7 @@ public class IncomingHandler extends Handler{
                             }
                         });
                         break;
+
                     case Constants.HANDLE_MESSAGE_TYPE_REGISTER_CALIBRATION:
                         Log.d("MessengerCommunication", "Activity receive 5");
                         try {
@@ -91,45 +95,46 @@ public class IncomingHandler extends Handler{
                 break;
 
             case Constants.HANDLER_TYPE_SERVICE: // Service's handleMessage
-                BLEScanService mBLEScanService = (BLEScanService) mContext;
+                CalibrationService mCalibrationService = (CalibrationService) mContext;
                 switch (msg.what){
                     case Constants.HANDLE_MESSAGE_TYPE_CALIBRATION:
                         Log.d("MessengerCommunication", "Service receive 1");
-                        mBLEScanService.calibrationResetFlag = false;
-                        mBLEScanService.CalibrationFlag = true;
-                        mBLEScanService.CompleteCalibraton = false;
-                        mBLEScanService.replyToActivityMessenger = msg.replyTo;
+                        mCalibrationService.calibrationResetFlag = false;
+                        mCalibrationService.CalibrationFlag = true;
+                        mCalibrationService.CompleteCalibraton = false;
+                        mCalibrationService.replyToActivityMessenger = msg.replyTo;
 
                         try{
                             do {
                                 Thread.sleep(100);
-                            } while (mBLEScanService.mSocketIO.connected() == false);
+                            }while(mCalibrationService.EssentialDataArray.size() == 0);
                         }catch (InterruptedException e){
                             e.printStackTrace();
                         }
-                        mBLEScanService.scanLeDevice(true);
-                        /*
-                            *****************변경사항********************
-                            *****************바운드 서비스에서 동작하기*******************
-                         */
-                        // mBLEScanService.calibration();
+                        mCalibrationService.scanLeDevice(true);
+
+                        mCalibrationService.mCalibration.calibration();
                         break;
+
                     case Constants.HANDLE_MESSAGE_TYPE_CALIBRATION_RESET:
                         Log.d("MessengerCommunication", "Service receive 2");
-                        mBLEScanService.calibrationResetFlag = true;
-                        Log.d("ServHandler_ResetFlag", String.valueOf(mBLEScanService.calibrationResetFlag));
+                        mCalibrationService.calibrationResetFlag = true;
+                        Log.d("ServHandler_ResetFlag", String.valueOf(mCalibrationService.calibrationResetFlag));
                         break;
+
                     case Constants.HANDLE_MESSAGE_TYPE_CEHCK_THRESHOLD:
                         Log.d("MessengerCommunication", "Service receive 3");
-                        mBLEScanService.mBLEServiceUtils.comeToWorkCheckTime();
+                        mCalibrationService.mBLEServiceUtils.comeToWorkCheckTime(Constants.CALLBACK_TYPE_CALIBRATION_SERVICE);
                         break;
+
                     case Constants.HANDLE_MESSAGE_TYPE_COMPLETE_CALIBRATION:
                         Log.d("MessengerCommunication", "Service receive 4");
-                        mBLEScanService.CompleteCalibraton = true;
+                        mCalibrationService.CompleteCalibraton = true;
                         break;
+
                     case Constants.HANDLE_MESSAGE_TYPE_SEEKBAR_VALUE_CHANGED:
                         Log.d("MessengerCommunication", "Service receive 5");
-                        BLEServiceUtils.threshold_Calibration = msg.arg1;
+                        mCalibrationService.mBLEServiceUtils.threshold_Calibration = msg.arg1;
                         break;
                 }
                 break;

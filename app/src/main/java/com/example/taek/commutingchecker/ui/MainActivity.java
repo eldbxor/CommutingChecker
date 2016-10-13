@@ -35,6 +35,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import com.crashlytics.android.Crashlytics;
 import com.example.taek.commutingchecker.services.BLEScanService;
+import com.example.taek.commutingchecker.services.CalibrationService;
 import com.example.taek.commutingchecker.utils.BackPressCloseHandler;
 import com.example.taek.commutingchecker.R;
 import com.example.taek.commutingchecker.utils.Constants;
@@ -81,7 +82,7 @@ public class MainActivity extends AppCompatActivity
 
     public static void connectMessenger(){
         Log.d("MainActivity method", "call connectMessenger");
-        ComponentName cn = new ComponentName(MainActivity.MainActivityContext, BLEScanService.class);
+        ComponentName cn = new ComponentName(MainActivity.MainActivityContext, CalibrationService.class);
         Intent intent = new Intent();
         intent.setComponent(cn);
 
@@ -129,7 +130,6 @@ public class MainActivity extends AppCompatActivity
         messenger = null;
         activity = MainActivity.this;
         unbindHandler = new Handler();
-        // connectMessenger();
 
         // Go to EntryActivity, and check whether this smart phone is registered or not
         mainActivity = this;
@@ -350,6 +350,10 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onDestroy(){
         super.onDestroy();
+        unregisterReceiver(ComeToWorkStateReceiver);
+        unregisterReceiver(LeaveWorkStateReceiver);
+        unregisterReceiver(StandByComeToWorkStateReceiver);
+
         try {
             mSocket.close();
             // unbindService(conn);

@@ -37,7 +37,7 @@ public class RegisterReceiver {
                             // Getting a public key from server
                             ((BLEScanService) mContext).mSocketIO.getServersRsaPublicKey(BLEScanService.myMacAddress);
 
-                            ((BLEScanService) mContext).mSocketIO.requestEssentialData(SocketIO.SERVICE_CALLBACK);
+                            ((BLEScanService) mContext).mSocketIO.requestEssentialData(Constants.CALLBACK_TYPE_BLE_SCAN_SERVICE);
                         }catch (Exception e){
                             e.printStackTrace();
                             Toast.makeText(BLEScanService.ServiceContext, "서비스 실행상태가 아닙니다.", Toast.LENGTH_LONG).show();

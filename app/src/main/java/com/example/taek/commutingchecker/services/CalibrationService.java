@@ -19,6 +19,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.example.taek.commutingchecker.utils.BLEServiceUtils;
+import com.example.taek.commutingchecker.utils.Calibration;
 import com.example.taek.commutingchecker.utils.Constants;
 import com.example.taek.commutingchecker.utils.DeviceInfo;
 import com.example.taek.commutingchecker.utils.GenerateNotification;
@@ -31,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 
 public class CalibrationService extends Service {
+    public static String myMacAddress; // 스마트폰 블루투스 Mac 주소
     public static Context ServiceContext;
     public static boolean CalibrationFlag, CompleteCalibraton, calibrationResetFlag;
     public static int failureCount_Cali; // Calibration's Failure Count
@@ -44,23 +46,24 @@ public class CalibrationService extends Service {
     public BLEServiceUtils mBLEServiceUtils;
     private String TAG = "CalibrationService";
     public List<Map<String, String>> EssentialDataArray; // 서버에서 받아온 비콘 데이터
+    public Calibration mCalibration;
 
     // Target we publish for clients to send messages to IncomingHandler.
-    private Messenger incomingMessenger;
+    private Messenger incomingMessenger = new Messenger(new IncomingHandler(Constants.HANDLER_TYPE_SERVICE, CalibrationService.this));
 
     public CalibrationService() {
     }
 
     @Override
     public void onCreate(){
-        Log.i(TAG, "Service onCreate");
+        Log.i(TAG, "CalibrationService onCreate");
         CalibrationFlag = false;
         ServiceContext = this;
 //        isCallbackRunning = false;
         calibrationResetFlag = false;
         failureCount_Cali = 0;
 
-        incomingMessenger = new Messenger(new IncomingHandler(Constants.HANDLER_TYPE_SERVICE, ServiceContext));
+        mCalibration = new Calibration(ServiceContext);
 
         mBLEServiceUtils = new BLEServiceUtils(ServiceContext);
 
@@ -82,7 +85,7 @@ public class CalibrationService extends Service {
         // waiting for stating bluetooth on
         try{
             do {
-                Log.d("BLEScan", "BLEScanService onCreate(): waiting for stating bluetooth on");
+                Log.d(TAG, "onCreate(): waiting for stating bluetooth on");
                 Thread.sleep(100);
             } while (mBLEServiceUtils.mBluetoothAdapter.getState() != mBLEServiceUtils.mBluetoothAdapter.STATE_ON);
         }catch (InterruptedException e){
@@ -96,9 +99,12 @@ public class CalibrationService extends Service {
                 filters = new ArrayList<ScanFilter>();
             }
 
+            myMacAddress = android.provider.Settings.Secure.getString(this.getContentResolver(), "bluetooth_address");
+            Log.d(TAG, "onCreate(): myMacAddress: " + myMacAddress);
+
             // BLEScanner 객체 확인
             if(mBLEServiceUtils.mBLEScanner == null && Build.VERSION.SDK_INT >= 21) {
-                Log.d("BLEScan", "BLEScanService onCreate(): mBLEScanner is null");
+                Log.d(TAG, "onCreate(): mBLEScanner is null");
                 Toast.makeText(this, "Can not find BLE Scanner", Toast.LENGTH_SHORT).show();
                 return;
             }
@@ -114,6 +120,7 @@ public class CalibrationService extends Service {
             Log.d("Service's SocketIO", "already connected");
         */
         this.mSocketIO.connect();
+        Log.d(TAG, "onCreate(): waiting for connecting a socket");
 
         // To Wait for connecting
         try{
@@ -126,6 +133,7 @@ public class CalibrationService extends Service {
 
         // Getting a public key from server
         mSocketIO.getServersRsaPublicKey();
+        Log.d(TAG, "onCreate(): Getting a public key from server");
 
         try{
             do {
@@ -136,8 +144,8 @@ public class CalibrationService extends Service {
         }
 
         // 서버에 Rssi 제한 값 요청 후 데이터 받기
-        // ************************ BLEScanService 와 구분해야함!
-        mSocketIO.requestEssentialData(SocketIO.SERVICE_CALLBACK);
+        mSocketIO.requestEssentialData(Constants.CALLBACK_TYPE_CALIBRATION_SERVICE);
+        Log.d(TAG, "onCreate(): requestEssentialData");
         try{
             do {
                 Thread.sleep(100);
@@ -146,7 +154,7 @@ public class CalibrationService extends Service {
             e.printStackTrace();
         }
 
-        Log.d("EssentialData's size", EssentialDataArray.size() + "");
+        Log.d(TAG, "onCreate(): EssentialData's size: " + EssentialDataArray.size());
     }
 
     public void scanLeDevice(final boolean enable){
