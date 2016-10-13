@@ -1,5 +1,6 @@
 package com.example.taek.commutingchecker.utils;
 
+import android.content.Context;
 import android.os.Message;
 import android.os.RemoteException;
 import android.util.Log;
@@ -20,8 +21,13 @@ public class Calibration {
     private static List<DeviceInfo> mBLEDevices_Calibration;
     private static int sumOfRssi1, sumOfRssi2, sumOfRssi3;
     private static int count_error = 0;
+    private BLEScanService mBLEScanService;
 
-    public static void calibration(){
+    public Calibration(Context context) {
+        mBLEScanService = (BLEScanService) context;
+    }
+
+    public void calibration() {
         Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -32,9 +38,9 @@ public class Calibration {
                     }catch (Exception e){
                         e.printStackTrace();
                     }
-                    if (BLEScanService.mBLEDevices.size() < 3) {
+                    if (mBLEScanService.mBLEDevices.size() < 3) {
                         if (count_error == 10) {
-                            GenerateNotification.generateNotification(BLEScanService.ServiceContext, "Calibration Error", "비콘 데이터가 없습니다 잠시후 재시도 해주십시오.", "");
+                            GenerateNotification.generateNotification(mBLEScanService, "Calibration Error", "비콘 데이터가 없습니다 잠시후 재시도 해주십시오.", "");
                             BLEScanService.CalibrationFlag = false;
                             return;
                         }else{
@@ -53,7 +59,7 @@ public class Calibration {
                 sumOfRssi2 = 0;
                 sumOfRssi3 = 0;
                 rssi1.clear(); rssi2.clear(); rssi3.clear();
-                mBLEDevices_Calibration = BLEScanService.mBLEDevices;
+                mBLEDevices_Calibration = mBLEScanService.mBLEDevices;
 
                 mDeviceInfo1 = mBLEDevices_Calibration.get(0);
                 mDeviceInfo2 = mBLEDevices_Calibration.get(1);
@@ -74,7 +80,7 @@ public class Calibration {
                     // Log.d("calibrationResetFlag", String.valueOf(BLEScanService.calibrationResetFlag));
 
                     mBLEDevices_Calibration = null;
-                    mBLEDevices_Calibration = BLEScanService.mBLEDevices;
+                    mBLEDevices_Calibration = mBLEScanService.mBLEDevices;
                     for(DeviceInfo deviceInfo : mBLEDevices_Calibration){
                         if(deviceInfo.Address.equals(mDeviceInfo1.Address)) {
                             rssi1.add(deviceInfo.Rssi);
@@ -137,7 +143,7 @@ public class Calibration {
                 data.put("CoordinateX", String.valueOf(sumOfRssi1));
                 data.put("CoordinateY", String.valueOf(sumOfRssi2));
                 data.put("CoordinateZ", String.valueOf(sumOfRssi3));
-                BLEScanService.temporaryCalibrationData = data;
+                mBLEScanService.temporaryCalibrationData = data;
               // BLEScanService.mSocketIO.calibration(data);
             }
         });

@@ -1,6 +1,7 @@
 package com.example.taek.commutingchecker.utils;
 
 import android.bluetooth.le.ScanFilter;
+import android.content.Context;
 import android.os.Build;
 import android.os.Message;
 import android.os.RemoteException;
@@ -42,8 +43,6 @@ import io.socket.emitter.Emitter;
  * Created by Taek on 2016-04-15.
  */
 public class SocketIO {
-    public static final int SERVICE_CALLBACK = 1;
-    public static final int ACTIVITY_CALLBACK = 2;
 
     io.socket.client.Socket mSocket;
 
@@ -54,11 +53,14 @@ public class SocketIO {
      * It helps encrypt, decrypt JSON data and analyze received JSON from server
      */
     Analyzer analyzer;
+    public Context mContext;
 
     // 생성자
-    public SocketIO(){
+    public SocketIO(Context context) {
         try {
             mSocket = IO.socket(Constants.SERVER_URL);
+
+            mContext = context;
 
             // Initialize anlayzer instance
             analyzer = new Analyzer();
@@ -70,8 +72,12 @@ public class SocketIO {
     }
 
     // 소켓 연결
-    public void connect(){
-        mSocket.connect();
+    public void connect() {
+        if(!mSocket.connected()) {
+            mSocket.connect();
+        }else {
+            Log.d("Service' onCreate(): ", "Socket is already connected");
+        }
         Log.d("NetworkStatus", "connecting...");
     }
 
@@ -289,14 +295,19 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
                             map.put("thresholdZ", String.valueOf(threshold[2]));
 
                             switch (callbackType) {
-                                case SERVICE_CALLBACK:
-                                    BLEServiceUtils.addEssentialData(map);
+                                case Constants.CALLBACK_TYPE_BLE_SCAN_SERVICE:
+                                    BLEScanService mBLEScanService = (BLEScanService) mContext;
+                                    mBLEScanService.mBLEServiceUtils.addEssentialData(map);
                                     for (int j = 0; j < 3; j++) {
-                                        BLEServiceUtils.addFilterList(beaconAddress[j]);
+                                        mBLEScanService.mBLEServiceUtils.addFilterList(beaconAddress[j]);
                                     }
                                     break;
 
-                                case ACTIVITY_CALLBACK:
+                                case Constants.CALLBACK_TYPE_CALIBRATION_SERVICE:
+                                    
+                                    break;
+
+                                case Constants.CALLBACK_TYPE_MAIN_ACTIVITY:
                                     break;
                             }
                         }

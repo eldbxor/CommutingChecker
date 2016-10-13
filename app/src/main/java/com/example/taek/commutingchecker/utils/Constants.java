@@ -8,23 +8,14 @@ public class Constants {
 //    public static final String SERVER_URL = "http://192.168.0.25:2070"; // Awesometic: for developing using my desktop
     public static final String AES256_KEY_SALT = "Awesometic";
 
-    /**
-     * Trigger a callback for every Bluetooth advertisement found that matches the filter criteria.
-     * If no filter is active, all advertisement packets are reported.
-     */
-    public static final int CALLBACK_TYPE_ALL_MATCHES = 1;
+    // Handler를 생성하는 컴포넌트
+    public static final int HANDLER_TYPE_ACTIVITY = 1;
+    public static final int HANDLER_TYPE_SERVICE = 2;
 
-    /**
-     * A result callback is only triggered for the first advertisement packet received that matches
-     * the filter criteria.
-     */
-    public static final int CALLBACK_TYPE_FIRST_MATCH = 2;
-
-    /**
-     * Receive a callback when advertisements are no longer received from a device that has been
-     * previously reported by a first match callback.
-     */
-    public static final int CALLBACK_TYPE_MATCH_LOST = 4;
+    // BLEScanService와 CalibrationService, MainActivity를 구분(메서드 호출 시)
+    public static final int CALLBACK_TYPE_MAIN_ACTIVITY = 1;
+    public static final int CALLBACK_TYPE_BLE_SCAN_SERVICE = 2;
+    public static final int CALLBACK_TYPE_CALIBRATION_SERVICE = 3;
 
     // 서비스에서 받는 Message
     public static final int HANDLE_MESSAGE_TYPE_CALIBRATION = 1;
@@ -53,4 +44,7 @@ public class Constants {
     public static final int NETWORK_TYPE_WIFI = 1;
     public static final int NETWORK_TYPE_MOBILE = 2;
     public static final int NETWORK_TYPE_NOT_CONNECTED = 0;
+
+    // Notification ID
+    public static final int NOTIFICATION_ID = 1;
 }

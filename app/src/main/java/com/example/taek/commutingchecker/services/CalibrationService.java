@@ -19,7 +19,6 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.example.taek.commutingchecker.utils.BLEServiceUtils;
-//import com.example.taek.commutingchecker.utils.CheckCallback;
 import com.example.taek.commutingchecker.utils.Constants;
 import com.example.taek.commutingchecker.utils.DeviceInfo;
 import com.example.taek.commutingchecker.utils.GenerateNotification;
@@ -31,12 +30,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class BLEScanService extends Service {
-    public static String myMacAddress; // 스마트폰 블루투스 Mac 주소
+public class CalibrationService extends Service {
     public static Context ServiceContext;
-    public static boolean ScanFlag, CalibrationFlag, CompleteCalibraton; // 출퇴근등록 쓰레드 실행 플래그, Rssi 측정 플래그
-    public static boolean commuteCycle, calibrationResetFlag, commuteStatus;
-    public static int failureCount_SendEv; // sendEvent's Failure Count
+    public static boolean CalibrationFlag, CompleteCalibraton, calibrationResetFlag;
     public static int failureCount_Cali; // Calibration's Failure Count
     public static Messenger replyToActivityMessenger; // Activity에 응답하기 위한 Messenger
     public Map<String, String> temporaryCalibrationData; // 서버에 Calibration 데이터를 보내기 위한 임시 저장소
@@ -45,29 +41,23 @@ public class BLEScanService extends Service {
     private ScanSettings settings; // BLE 스캔 옵션 세팅
     public List<ScanFilter> filters; // BLE 스캔 필터
     public List<String> filterlist; // Api21 이하 버전용 BLE 스캔 필터
-    public Handler timerHandler;
     public BLEServiceUtils mBLEServiceUtils;
-    private String TAG = "BLEScanService";
-    private Thread commutingThread; // 출퇴근 등록 쓰레드
-    private BroadcastReceiver StopSelfReceiver, RequestDataReceiver, ShowDataReceiver, NetworkChnageReceiver;
+    private String TAG = "CalibrationService";
     public List<Map<String, String>> EssentialDataArray; // 서버에서 받아온 비콘 데이터
 
     // Target we publish for clients to send messages to IncomingHandler.
     private Messenger incomingMessenger;
 
-    public BLEScanService() {
+    public CalibrationService() {
     }
 
     @Override
     public void onCreate(){
         Log.i(TAG, "Service onCreate");
-        ScanFlag = true;
         CalibrationFlag = false;
-        commuteCycle = false;
         ServiceContext = this;
 //        isCallbackRunning = false;
         calibrationResetFlag = false;
-        failureCount_SendEv = 0;
         failureCount_Cali = 0;
 
         incomingMessenger = new Messenger(new IncomingHandler(Constants.HANDLER_TYPE_SERVICE, ServiceContext));
@@ -85,27 +75,6 @@ public class BLEScanService extends Service {
 
         // 소켓 생성
         this.mSocketIO = new SocketIO(ServiceContext);
-
-        timerHandler = new Handler();
-
-        // 리시버 등록
-        RegisterReceiver mRegisterReceiver = new RegisterReceiver(ServiceContext);
-
-        StopSelfReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                stopSelf();
-            }
-        };
-
-        RequestDataReceiver = mRegisterReceiver.createReceiver(Constants.BROADCAST_RECEIVER_TYPE_REQEUST_DATA);
-        ShowDataReceiver = mRegisterReceiver.createReceiver(Constants.BROADCAST_RECEIVER_TYPE_SHOW_DATA);
-        NetworkChnageReceiver = mRegisterReceiver.createReceiver(Constants.BROADCAST_RECEIVER_TYPE_NETWORK_CHANGE);
-        registerReceiver(StopSelfReceiver, mRegisterReceiver.createPackageFilter(Constants.BROADCAST_RECEIVER_TYPE_STOP_SERVICE));
-        registerReceiver(RequestDataReceiver, mRegisterReceiver.createPackageFilter(Constants.BROADCAST_RECEIVER_TYPE_REQEUST_DATA));
-        registerReceiver(ShowDataReceiver, mRegisterReceiver.createPackageFilter(Constants.BROADCAST_RECEIVER_TYPE_SHOW_DATA));
-        registerReceiver(NetworkChnageReceiver, mRegisterReceiver.createPackageFilter(Constants.BROADCAST_RECEIVER_TYPE_NETWORK_CHANGE));
-
 
         mBLEServiceUtils.createBluetoothAdapter(getSystemService(this.BLUETOOTH_SERVICE)); // Bluetooth Adapter 생성
         mBLEServiceUtils.enableBluetooth(); // Bluetooth 사용
@@ -126,9 +95,6 @@ public class BLEScanService extends Service {
                 settings = mBLEServiceUtils.setPeriod(ScanSettings.SCAN_MODE_LOW_LATENCY);
                 filters = new ArrayList<ScanFilter>();
             }
-
-            myMacAddress = android.provider.Settings.Secure.getString(this.getContentResolver(), "bluetooth_address");
-            Log.d("myMacAddress", myMacAddress);
 
             // BLEScanner 객체 확인
             if(mBLEServiceUtils.mBLEScanner == null && Build.VERSION.SDK_INT >= 21) {
@@ -170,6 +136,7 @@ public class BLEScanService extends Service {
         }
 
         // 서버에 Rssi 제한 값 요청 후 데이터 받기
+        // ************************ BLEScanService 와 구분해야함!
         mSocketIO.requestEssentialData(SocketIO.SERVICE_CALLBACK);
         try{
             do {
@@ -180,57 +147,6 @@ public class BLEScanService extends Service {
         }
 
         Log.d("EssentialData's size", EssentialDataArray.size() + "");
-    }
-
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId){
-        Runnable r = new Runnable() {
-            @Override
-            public void run() {
-                Log.d(TAG, "Service onStartCommand");
-
-
-                /*
-                Log.d("FilterListSize", String.valueOf(filterlist.size()));
-                for(int i = 0; i < filterlist.size(); i++) {
-                    Log.d("FilterList", String.valueOf(i) + ": " + filterlist.get(i));
-                } */
-
-                // 스캔 시작
-                scanLeDevice(true);
-
-                while(ScanFlag) {
-                    try {
-                        Thread.sleep(300);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-
-                    // 3개의 비콘 정보가 없을 경우 continue
-                    if (mBLEDevices.size() != 3)
-                        continue;
-
-                    // 0.5초 동안 3번 Rssi 체크 후 2번 이상 적합하면 sendEvent() 메서드 실행
-                    if (!commuteCycle && !commuteStatus)
-                        mBLEServiceUtils.comeToWorkCheckTime();
-
-                    //mSocketIO.sendEvent(new HashMap<String, String>());
-                    //scanLeDevice(false);
-                    //ScanFlag = false;
-                }
-            } // End of while
-        };
-
-        commutingThread = new Thread(r);
-        commutingThread.start();
-        // return Service.START_STICKY;
-        return Service.START_NOT_STICKY;
-    }
-
-    @Override
-    public IBinder onBind(Intent intent) {
-        Log.d(TAG, "BLEScanService onBind()");
-        return null;
     }
 
     public void scanLeDevice(final boolean enable){
@@ -255,20 +171,6 @@ public class BLEScanService extends Service {
                 filters.clear();
             }
         }
-    }
-
-    @Override
-    public void onDestroy(){
-        Log.i(TAG, "Service onDestroy");
-        ScanFlag = false;
-        scanLeDevice(false); // 스캔 중지
-        unregisterReceiver(StopSelfReceiver);
-        unregisterReceiver(RequestDataReceiver);
-        unregisterReceiver(ShowDataReceiver);
-        unregisterReceiver(NetworkChnageReceiver);
-        if(mSocketIO.connected() == true)
-            mSocketIO.close();
-        GenerateNotification.generateNotification(this, "서비스 종료", "서비스가 종료되었습니다.", "");
     }
 
     // api 21 이상
@@ -360,4 +262,19 @@ public class BLEScanService extends Service {
             BLEServiceUtils.setCurrentBeacons(device.getAddress(), rssi);
         }
     };
+
+    @Override
+    public IBinder onBind(Intent intent) {
+        Log.d(TAG, "BLEScanService onBind()");
+        return incomingMessenger.getBinder();
+    }
+
+    @Override
+    public void onDestroy(){
+        Log.i(TAG, "Service onDestroy");
+        scanLeDevice(false); // 스캔 중지
+        if(mSocketIO.connected() == true)
+            mSocketIO.close();
+        GenerateNotification.generateNotification(this, "서비스 종료", "서비스가 종료되었습니다.", "");
+    }
 }

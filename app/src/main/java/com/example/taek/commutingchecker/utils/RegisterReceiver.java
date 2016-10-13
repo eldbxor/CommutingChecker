@@ -20,6 +20,12 @@ import com.example.taek.commutingchecker.ui.ThresholdAdjustmentFragment;
  * Created by Taek on 2016-09-05.
  */
 public class RegisterReceiver {
+    Context mContext;
+
+    public RegisterReceiver(Context context) {
+        mContext = context;
+    }
+
     public BroadcastReceiver createReceiver(int receiverType){
         BroadcastReceiver broadcastReceiver;
         switch (receiverType){
@@ -29,9 +35,9 @@ public class RegisterReceiver {
                     public void onReceive(Context context, Intent intent) {
                         try{
                             // Getting a public key from server
-                            BLEScanService.mSocketIO.getServersRsaPublicKey(BLEScanService.myMacAddress);
+                            ((BLEScanService) mContext).mSocketIO.getServersRsaPublicKey(BLEScanService.myMacAddress);
 
-                            BLEScanService.mSocketIO.requestEssentialData(SocketIO.SERVICE_CALLBACK);
+                            ((BLEScanService) mContext).mSocketIO.requestEssentialData(SocketIO.SERVICE_CALLBACK);
                         }catch (Exception e){
                             e.printStackTrace();
                             Toast.makeText(BLEScanService.ServiceContext, "서비스 실행상태가 아닙니다.", Toast.LENGTH_LONG).show();
@@ -44,19 +50,19 @@ public class RegisterReceiver {
                     @Override
                     public void onReceive(Context context, Intent intent) {
                         try{
-                            if(BLEScanService.EssentialDataArray.size() > 0) {
-                                GenerateNotification.generateNotification(BLEScanService.ServiceContext, "ShowData", "Data_Info",
-                                        "사무실 총 수: " + + BLEScanService.EssentialDataArray.size() + ", 좌표 값: "
+                            if(((BLEScanService) mContext).EssentialDataArray.size() > 0) {
+                                GenerateNotification.generateNotification(((BLEScanService) mContext), "ShowData", "Data_Info",
+                                        "사무실 총 수: " + + ((BLEScanService) mContext).EssentialDataArray.size() + ", 좌표 값: "
                                                 //+ "사무실 번호: " + BLEScanService.EssentialDataArray.get(0).get("id_workplace").toString() + ","
                                                 //+ BLEScanService.EssentialDataArray.get(0).get("beacon_address1").toString() + ": "
-                                                + BLEScanService.EssentialDataArray.get(0).get("coordinateX").toString() + ","
+                                                + ((BLEScanService) mContext).EssentialDataArray.get(0).get("coordinateX").toString() + ","
                                                 // + BLEScanService.EssentialDataArray.get(0).get("beacon_address2").toString() + ": "
-                                                + BLEScanService.EssentialDataArray.get(0).get("coordinateY").toString() + ", "
+                                                + ((BLEScanService) mContext).EssentialDataArray.get(0).get("coordinateY").toString() + ", "
                                                 //+ BLEScanService.EssentialDataArray.get(0).get("beacon_address3").toString() + ": "
-                                                + BLEScanService.EssentialDataArray.get(0).get("coordinateZ").toString());
-                                Log.d("ShowData", BLEScanService.EssentialDataArray.get(0).get("coordinateX").toString() + ", " +
-                                        BLEScanService.EssentialDataArray.get(0).get("coordinateY").toString() + ", " +
-                                        BLEScanService.EssentialDataArray.get(0).get("coordinateZ").toString());
+                                                + ((BLEScanService) mContext).EssentialDataArray.get(0).get("coordinateZ").toString());
+                                Log.d("ShowData", ((BLEScanService) mContext).EssentialDataArray.get(0).get("coordinateX").toString() + ", " +
+                                        ((BLEScanService) mContext).EssentialDataArray.get(0).get("coordinateY").toString() + ", " +
+                                        ((BLEScanService) mContext).EssentialDataArray.get(0).get("coordinateZ").toString());
                             }else{
                                 GenerateNotification.generateNotification(BLEScanService.ServiceContext, "ShowData", "No Data",
                                         "");
@@ -81,13 +87,13 @@ public class RegisterReceiver {
                                 Toast.makeText(context, status_str, Toast.LENGTH_SHORT).show();
                                 break;
                             case Constants.NETWORK_TYPE_MOBILE:
-                                if (!BLEScanService.mSocketIO.connected()) {
-                                    BLEScanService.mSocketIO.connect();
+                                if (!((BLEScanService) mContext).mSocketIO.connected()) {
+                                    ((BLEScanService) mContext).mSocketIO.connect();
                                 }
                                 break;
                             case Constants.NETWORK_TYPE_WIFI:
-                                if (!BLEScanService.mSocketIO.connected()) {
-                                    BLEScanService.mSocketIO.connect();
+                                if (!((BLEScanService) mContext).mSocketIO.connected()) {
+                                    ((BLEScanService) mContext).mSocketIO.connect();
                                 }
                                 break;
                         }

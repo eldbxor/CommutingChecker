@@ -71,7 +71,7 @@ public class MainActivity extends AppCompatActivity
     BroadcastReceiver ComeToWorkStateReceiver, LeaveWorkStateReceiver, StandByComeToWorkStateReceiver;
 
     // Target we publish for clients to send messages to IncomingHandler.
-    public static final Messenger incomingMessenger = new Messenger(new IncomingHandler());
+    public static Messenger incomingMessenger;
 
     // Employee information
     public static TextView tvNavHeadId;
@@ -117,6 +117,8 @@ public class MainActivity extends AppCompatActivity
 
         setContentView(R.layout.activity_main);
 
+        incomingMessenger = new Messenger(new IncomingHandler(Constants.HANDLER_TYPE_ACTIVITY, MainActivityContext));
+
         /** 2016. 6. 9
          * Init UI Elements including navigation view
          */
@@ -138,7 +140,7 @@ public class MainActivity extends AppCompatActivity
         startActivity(intent);
 
         // 리시버 등록
-        RegisterReceiver mRegisterReceiver = new RegisterReceiver();
+        RegisterReceiver mRegisterReceiver = new RegisterReceiver(MainActivityContext);
         ComeToWorkStateReceiver = mRegisterReceiver.createReceiver(Constants.BROADCAST_RECEIVER_TYPE_COME_TO_WORK_STATE);
         LeaveWorkStateReceiver = mRegisterReceiver.createReceiver(Constants.BROADCAST_RECEIVER_TYPE_LEAVE_WORK_STATE);
         StandByComeToWorkStateReceiver = mRegisterReceiver.createReceiver(Constants.BROADCAST_RECEIVER_TYPE_STAND_BY_COME_TO_WORK_STATE);

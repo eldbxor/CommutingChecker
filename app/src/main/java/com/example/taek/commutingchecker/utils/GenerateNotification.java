@@ -47,6 +47,6 @@ public class GenerateNotification {
 
         NotificationManager notificationManager = (NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE);
 
-        notificationManager.notify(BLEScanService.NOTIFICATION_ID, mBuilder.build());
+        notificationManager.notify(Constants.NOTIFICATION_ID, mBuilder.build());
     }
 }

@@ -34,7 +34,7 @@ public class EntryActivity extends AppCompatActivity {
         isGettingEmployeeDataFinished = false;
 
         try {
-            MainActivity.mSocket = new SocketIO();
+            MainActivity.mSocket = new SocketIO(this);
             MainActivity.mSocket.connect();
 
             do {
