@@ -36,40 +36,65 @@ public class BLEServiceUtils {
     public BluetoothAdapter mBluetoothAdapter;
     public BluetoothLeScanner mBLEScanner; // BLE 스캐너(api 21 이상)
     private Context mContext;
+    private String TAG = "BLEServiceUtils";
 
     // 생성자
     public BLEServiceUtils(Context context) {
         mContext = context;
+        Log.d(TAG, "BLEServiceUtils(): 생성자");
     }
 
     public void createBluetoothAdapter(Object obj){
         mBluetoothManager = (BluetoothManager)obj;
         mBluetoothAdapter = mBluetoothManager.getAdapter();
+        Log.d(TAG, "createBluetoothAdapter():  BluetoothAdapter 객체 생성");
     }
 
     public void enableBluetooth(){
         if(!mBluetoothAdapter.isEnabled()){
             mBluetoothAdapter.enable();
+            Log.d(TAG, "enableBluetooth():  BluetoothAdapter 실행");
         }
     }
 
-    public void addDeviceInfo(DeviceInfo deviceInfo) {
+    public void addDeviceInfo(int callbackType, DeviceInfo deviceInfo) {
         boolean isExisted = false;
         int index = 0;
 
-        for(DeviceInfo mInfo : ((BLEScanService) mContext).mBLEDevices){
-            if(mInfo.Address.equals(deviceInfo.Address)){
-                isExisted = true;
-                index = ((BLEScanService) mContext).mBLEDevices.indexOf(mInfo);
-                break;
-            }
-        }
+        switch (callbackType) {
+            case Constants.CALLBACK_TYPE_BLE_SCAN_SERVICE:
+                for(DeviceInfo mInfo : ((BLEScanService) mContext).mBLEDevices){
+                    if(mInfo.Address.equals(deviceInfo.Address)){
+                        isExisted = true;
+                        index = ((BLEScanService) mContext).mBLEDevices.indexOf(mInfo);
+                        break;
+                    }
+                }
 
-        if(isExisted == true){
-            ((BLEScanService) mContext).mBLEDevices.add(index, deviceInfo);
-            ((BLEScanService) mContext).mBLEDevices.remove(index + 1);
-        }else{
-            ((BLEScanService) mContext).mBLEDevices.add(deviceInfo);
+                if(isExisted == true){
+                    ((BLEScanService) mContext).mBLEDevices.add(index, deviceInfo);
+                    ((BLEScanService) mContext).mBLEDevices.remove(index + 1);
+                }else{
+                    ((BLEScanService) mContext).mBLEDevices.add(deviceInfo);
+                }
+                break;
+
+            case Constants.CALLBACK_TYPE_CALIBRATION_SERVICE:
+                for(DeviceInfo mInfo : ((CalibrationService) mContext).mBLEDevices){
+                    if(mInfo.Address.equals(deviceInfo.Address)){
+                        isExisted = true;
+                        index = ((CalibrationService) mContext).mBLEDevices.indexOf(mInfo);
+                        break;
+                    }
+                }
+
+                if(isExisted == true){
+                    ((CalibrationService) mContext).mBLEDevices.add(index, deviceInfo);
+                    ((CalibrationService) mContext).mBLEDevices.remove(index + 1);
+                }else{
+                    ((CalibrationService) mContext).mBLEDevices.add(deviceInfo);
+                }
+                break;
         }
     }
 
@@ -324,7 +349,7 @@ public class BLEServiceUtils {
                                 ((CalibrationService) mContext).temporaryCalibrationData.put("ThresholdX", String.valueOf(threshold_Calibration));
                                 ((CalibrationService) mContext).temporaryCalibrationData.put("ThresholdY", String.valueOf(threshold_Calibration));
                                 ((CalibrationService) mContext).temporaryCalibrationData.put("ThresholdZ", String.valueOf(threshold_Calibration));
-                                ((CalibrationService) mContext).mSocketIO.calibration(((BLEScanService) mContext).temporaryCalibrationData);
+                                ((CalibrationService) mContext).mSocketIO.calibration(((CalibrationService) mContext).temporaryCalibrationData);
 
                                 return;
                             }
@@ -373,34 +398,30 @@ public class BLEServiceUtils {
                             times++;
                     }
 
-                    switch (callbackType) {
-                        case Constants.CALLBACK_TYPE_BLE_SCAN_SERVICE:
-                            if (times >= 2) { // 출근존을 지났을 때
-                                // BLEServiceUtils.sendEvent(mDeviceInfo1, mDeviceInfo2, mDeviceInfo3, true);
-                                Log.d("ComeToWork", "comeToWork's zone");
-                                GenerateNotification.generateNotification(BLEScanService.ServiceContext, "출근 대기 중", "출근 대기 중입니다.", "");
-                                timerStart(mDeviceInfo1, mDeviceInfo2, mDeviceInfo3);
-                                break;
-                            }
+                    if (callbackType == Constants.CALLBACK_TYPE_BLE_SCAN_SERVICE) {
+                        if (times >= 2) { // 출근존을 지났을 때
+                            // BLEServiceUtils.sendEvent(mDeviceInfo1, mDeviceInfo2, mDeviceInfo3, true);
+                            Log.d("ComeToWork", "comeToWork's zone");
+                            GenerateNotification.generateNotification(BLEScanService.ServiceContext, "출근 대기 중", "출근 대기 중입니다.", "");
+                            timerStart(mDeviceInfo1, mDeviceInfo2, mDeviceInfo3);
                             break;
-
-                        case Constants.CALLBACK_TYPE_CALIBRATION_SERVICE:
-                            if(times >= 2){ // 출근존을 지났을 때
-                                try {
-                                    BLEScanService.replyToActivityMessenger.send(Message.obtain(null, Constants.HANDLE_MESSAGE_TYPE_SETTEXT_ATTENDANCE_ZONE));
-                                    Log.d("MessengerCommunication", "Service send 3");
-                                }catch(RemoteException e){
-                                    Log.d("replyToActivity", e.toString());
-                                }
-                            }else{
-                                try {
-                                    BLEScanService.replyToActivityMessenger.send(Message.obtain(null, Constants.HANDLE_MESSAGE_TYPE_SETTEXT_NOT_ATTENDANCE_ZONE));
-                                    Log.d("MessengerCommunication", "Service send 4");
-                                }catch(RemoteException e){
-                                    Log.d("replyToActivity", e.toString());
-                                }
+                        }
+                    } else if (callbackType == Constants.CALLBACK_TYPE_CALIBRATION_SERVICE) {
+                        if(times >= 2){ // 출근존을 지났을 때
+                            try {
+                                ((CalibrationService) mContext).replyToActivityMessenger.send(Message.obtain(null, Constants.HANDLE_MESSAGE_TYPE_SETTEXT_ATTENDANCE_ZONE));
+                                Log.d("MessengerCommunication", "Service send 3");
+                            }catch(RemoteException e){
+                                Log.d("replyToActivity", e.toString());
                             }
-                            break;
+                        }else{
+                            try {
+                                ((CalibrationService) mContext).replyToActivityMessenger.send(Message.obtain(null, Constants.HANDLE_MESSAGE_TYPE_SETTEXT_NOT_ATTENDANCE_ZONE));
+                                Log.d("MessengerCommunication", "Service send 4");
+                            }catch(RemoteException e){
+                                Log.d("replyToActivity", e.toString());
+                            }
+                        }
                     }
 
                     try {
@@ -431,6 +452,8 @@ public class BLEServiceUtils {
         timer = new Timer();
         timerSecond = 0;
         leaveWorkCount = 0;
+
+        Log.d(TAG, "leaveWorkTimerStart(): Timer start and clear the map which has current beacons at each second");
         Log.d("Awesometic", "leaveWorkTimerStart(): Timer start and clear the map which has current beacons at each second");
 
         timer.schedule(new TimerTask() {
@@ -444,6 +467,7 @@ public class BLEServiceUtils {
     }
 
     private void leaveWorkTimerStop(final DeviceInfo deviceInfo1, final DeviceInfo deviceInfo2, final DeviceInfo deviceInfo3) {
+        Log.d(TAG, "leaveWorkTimerStop(): Timer Stop");
         timer.cancel();
         timer = null;
 
@@ -460,11 +484,13 @@ public class BLEServiceUtils {
                     return;
                     // Thread.interrupted();
                 }
+                Log.d(TAG, "leaveWorkChecker(): currentBeacons size(): " + currentBeacons.size());
                 Log.d("Awesometic", "leaveWorkChecker(): currentBeacons size(): " + currentBeacons.size());
                 if (BLEScanService.commuteStatus && currentBeacons.size() != 3) {
                     if(leaveWorkCount > 2) {
                         leaveWorkTimerStop(deviceInfo1, deviceInfo2, deviceInfo3);
                         // sendEvent(deviceInfo1, deviceInfo2, deviceInfo3, false);
+                        Log.d(TAG, "leaveWorkChecker(): Get off the office success");
                         Log.d("Awesometic", "leaveWorkChecker(): Get off the office success");
                     }else{
                         leaveWorkCount++;
@@ -474,6 +500,7 @@ public class BLEServiceUtils {
                         if(leaveWorkCount > 2) {
                             leaveWorkTimerStop(deviceInfo1, deviceInfo2, deviceInfo3);
                             // sendEvent(deviceInfo1, deviceInfo2, deviceInfo3, false);
+                            Log.d(TAG, "leaveWorkChecker(): Get off the office success");
                             Log.d("Awesometic", "leaveWorkChecker(): Get off the office success");
                         }else{
                             leaveWorkCount++;
@@ -494,15 +521,14 @@ public class BLEServiceUtils {
     private void timerStart(final DeviceInfo deviceInfo1, final DeviceInfo deviceInfo2, final DeviceInfo deviceInfo3) {
         timerSecond = 0;
         timer = new Timer();
-        Log.d("ComeToWork", "start timer");
+        Log.d(TAG, "timerStart(): start timer(ComeToWork)");
 
         // 출근 대기 상태 알림
         Intent intent = new Intent("android.intent.action.STAND_BY_COME_TO_WORK_STATE");
         intent.setData(Uri.parse("standByComeToWork:"));
         ((BLEScanService) mContext).sendBroadcast(intent);
 
-//        BLEScanService.checkCallbackThread_standByAttendance = new CheckCallback(deviceInfo1, deviceInfo2, deviceInfo3, true); // 출근 범위 검사 스레드 실행
-        timer.schedule(new TimerTask() {
+    timer.schedule(new TimerTask() {
             @Override
             public void run() {
                 timerSecond++;
@@ -513,6 +539,7 @@ public class BLEServiceUtils {
     }
 
     private void timerStop() {
+        Log.d(TAG, "timerStop(): stop timer(ComeToWork)");
         timer.cancel();
         timer = null;
 
@@ -531,7 +558,7 @@ public class BLEServiceUtils {
 
                 //timerText.setText(timerSecond + " 초");
                 if(currentBeacons.size() != 3){ // 출근 범위를 벗어났을 경우 - 출근 조건을 만족하지 못함
-                    Log.d("ComeToWork", "comeToWork is failed(StandByAttendance))");
+                    Log.d(TAG, "timerTextUpdate(): comeToWork is failed(StandByAttendance))");
                     timerStop();
                     GenerateNotification.generateNotification(((BLEScanService) mContext), "출근 실패", "출근대기 중 범위를 벗어났습니다.", "");
                     BLEScanService.commuteStatus = false;
@@ -543,7 +570,7 @@ public class BLEServiceUtils {
                     ((BLEScanService) mContext).sendBroadcast(intent);
 
                 } else if (timerSecond == 10) { // 출근 조건을 만족했을 경우 ( real second == timerSecond * 3 )
-                    Log.d("ComeToWork", "comeToWork success");
+                    Log.d(TAG, "timerTextUpdate(): comeToWork success");
                     timerStop();
 
                     sendEvent(deviceInfo1, deviceInfo2, deviceInfo3, true);

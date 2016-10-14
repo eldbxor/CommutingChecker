@@ -283,7 +283,7 @@ public class BLEScanService extends Service {
             List<String> separatedData = mBLEServiceUtils.separate(result.getScanRecord().getBytes());
 
             // public DeviceInfo(BluetoothDevice device, String address, String scanRecord, String uuid, String major, String minor, int rssi)
-            mBLEServiceUtils.addDeviceInfo(new DeviceInfo(result.getDevice(), result.getDevice().getAddress(), separatedData.get(0),
+            mBLEServiceUtils.addDeviceInfo(Constants.CALLBACK_TYPE_BLE_SCAN_SERVICE, new DeviceInfo(result.getDevice(), result.getDevice().getAddress(), separatedData.get(0),
                     separatedData.get(1), separatedData.get(2), separatedData.get(3), result.getRssi()));
 
             mBLEServiceUtils.setCurrentBeacons(result.getDevice().getAddress(), result.getRssi());
@@ -352,7 +352,7 @@ public class BLEScanService extends Service {
 /*
             Log.d("AllOfScanRecord", all + ", " + uuid + ", " + String.valueOf(major_int) + ", " + String.valueOf(minor_int));
 */
-            mBLEServiceUtils.addDeviceInfo(new DeviceInfo(device, device.getAddress(), all,
+            mBLEServiceUtils.addDeviceInfo(Constants.CALLBACK_TYPE_BLE_SCAN_SERVICE, new DeviceInfo(device, device.getAddress(), all,
                     uuid, String.valueOf(major_int), String.valueOf(minor_int), rssi));
 
             BLEServiceUtils.setCurrentBeacons(device.getAddress(), rssi);

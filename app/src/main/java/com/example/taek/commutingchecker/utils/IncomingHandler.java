@@ -86,8 +86,9 @@ public class IncomingHandler extends Handler{
                             @Override
                             public void run() {
                                 Toast.makeText(MainActivity.MainActivityContext, "Calibration을 완료하였습니다. 앱을 재실행하세요.", Toast.LENGTH_SHORT).show();
+                                MainActivity.activity.finish();
 
-                                MainActivity.conn.onServiceDisconnected(MainActivity.serviceComponentName);
+                                // MainActivity.conn.onServiceDisconnected(MainActivity.serviceComponentName);
                             }
                         }, 2000);
                         break;

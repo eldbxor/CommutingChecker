@@ -96,7 +96,7 @@ public class MainActivity extends AppCompatActivity
 
             @Override
             public void onServiceDisconnected(ComponentName name) {
-                MainActivity.mainActivity.finish();
+                // MainActivity.mainActivity.finish();
             }
         };
 

@@ -250,8 +250,15 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
             if (analyzer.serversPublicKey != null) {
                 try {
                     JSONObject content = new JSONObject();
-                    content.put("SmartphoneAddress", BLEScanService.myMacAddress);
+                    switch (callbackType) {
+                        case Constants.CALLBACK_TYPE_BLE_SCAN_SERVICE:
+                            content.put("SmartphoneAddress", BLEScanService.myMacAddress);
+                            break;
 
+                        case Constants.CALLBACK_TYPE_CALIBRATION_SERVICE:
+                            content.put("SmartphoneAddress", CalibrationService.myMacAddress);
+                            break;
+                    }
                     Log.d("Awesometic", "requestEseentialData: send message to server");
                     mSocket.emit("requestEssentialData", analyzer.encryptSendJson(content));
                 } catch (JSONException e) {
