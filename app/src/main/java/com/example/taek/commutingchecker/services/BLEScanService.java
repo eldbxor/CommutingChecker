@@ -14,16 +14,13 @@ import android.content.Intent;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.Messenger;
 import android.util.Log;
 import android.widget.Toast;
 
 import com.example.taek.commutingchecker.utils.BLEServiceUtils;
-//import com.example.taek.commutingchecker.utils.CheckCallback;
 import com.example.taek.commutingchecker.utils.Constants;
 import com.example.taek.commutingchecker.utils.DeviceInfo;
 import com.example.taek.commutingchecker.utils.GenerateNotification;
-import com.example.taek.commutingchecker.utils.IncomingHandler;
 import com.example.taek.commutingchecker.utils.RegisterReceiver;
 import com.example.taek.commutingchecker.utils.SocketIO;
 
@@ -34,12 +31,8 @@ import java.util.Map;
 public class BLEScanService extends Service {
     public static String myMacAddress; // 스마트폰 블루투스 Mac 주소
     public static Context ServiceContext;
-    public static boolean ScanFlag, CalibrationFlag, CompleteCalibraton; // 출퇴근등록 쓰레드 실행 플래그, Rssi 측정 플래그
-    public static boolean commuteCycle, calibrationResetFlag, commuteStatus;
+    public static boolean scanFlag, commuteCycleFlag, commuteStatusFlag, lowPowerScanFlag;
     public static int failureCount_SendEv; // sendEvent's Failure Count
-    public static int failureCount_Cali; // Calibration's Failure Count
-    public static Messenger replyToActivityMessenger; // Activity에 응답하기 위한 Messenger
-    public Map<String, String> temporaryCalibrationData; // 서버에 Calibration 데이터를 보내기 위한 임시 저장소
     public SocketIO mSocketIO; // Jason을 이용한 서버와의 통신 클래스
     public List<DeviceInfo> mBLEDevices; // 비콘 디바이스 정보를 갖는 ArrayList
     private ScanSettings settings; // BLE 스캔 옵션 세팅
@@ -61,14 +54,11 @@ public class BLEScanService extends Service {
     @Override
     public void onCreate(){
         Log.i(TAG, "Service onCreate");
-        ScanFlag = true;
-        CalibrationFlag = false;
-        commuteCycle = false;
+        scanFlag = true;
+        commuteCycleFlag = false;
         ServiceContext = this;
-//        isCallbackRunning = false;
-        calibrationResetFlag = false;
         failureCount_SendEv = 0;
-        failureCount_Cali = 0;
+        lowPowerScanFlag = false;
 
         mBLEServiceUtils = new BLEServiceUtils(ServiceContext);
 
@@ -197,24 +187,37 @@ public class BLEScanService extends Service {
                 // 스캔 시작
                 scanLeDevice(true);
 
-                while(ScanFlag) {
-                    try {
-                        Thread.sleep(300);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
+                while(scanFlag) {
+                    if (lowPowerScanFlag) {
+                        try {
+                            Thread.sleep(3000);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    } else {
+                        try {
+                            Thread.sleep(300);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
                     }
 
                     // 3개의 비콘 정보가 없을 경우 continue
-                    if (mBLEDevices.size() != 3)
+                    if (mBLEDevices.size() != 3) {
                         continue;
+                    } else {
+                        lowPowerScanFlag = false;
+                    }
 
                     // 0.5초 동안 3번 Rssi 체크 후 2번 이상 적합하면 sendEvent() 메서드 실행
-                    if (!commuteCycle && !commuteStatus)
+                    if (!commuteCycleFlag && !commuteStatusFlag) {
+                        restartScan(ScanSettings.SCAN_MODE_LOW_LATENCY);
                         mBLEServiceUtils.comeToWorkCheckTime(Constants.CALLBACK_TYPE_BLE_SCAN_SERVICE);
+                    }
 
                     //mSocketIO.sendEvent(new HashMap<String, String>());
                     //scanLeDevice(false);
-                    //ScanFlag = false;
+                    //scanFlag = false;
                 }
             } // End of while
         };
@@ -255,10 +258,22 @@ public class BLEScanService extends Service {
         }
     }
 
+    public void restartScan(int scanMode) {
+        if(Build.VERSION.SDK_INT >= 21) {
+            if (settings.getScanMode() == scanMode) {
+                return;
+            } else {
+                scanLeDevice(false);
+                mBLEServiceUtils.setPeriod(scanMode);
+                scanLeDevice(true);
+            }
+        }
+    }
+
     @Override
     public void onDestroy(){
         Log.i(TAG, "Service onDestroy");
-        ScanFlag = false;
+        scanFlag = false;
         scanLeDevice(false); // 스캔 중지
         unregisterReceiver(StopSelfReceiver);
         unregisterReceiver(RequestDataReceiver);

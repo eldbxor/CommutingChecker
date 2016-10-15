@@ -3,7 +3,6 @@ package com.example.taek.commutingchecker.utils;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.le.BluetoothLeScanner;
-import android.bluetooth.le.ScanFilter;
 import android.bluetooth.le.ScanSettings;
 import android.content.Context;
 import android.content.Intent;
@@ -250,8 +249,8 @@ public class BLEServiceUtils {
                     case Constants.CALLBACK_TYPE_BLE_SCAN_SERVICE:
                         mBLEDevices = ((BLEScanService) mContext).mBLEDevices;
 
-                        BLEScanService.commuteCycle = true;
-                        BLEScanService.commuteStatus = false;
+                        BLEScanService.commuteCycleFlag = true;
+                        BLEScanService.commuteStatusFlag = false;
 
                         if (((BLEScanService) mContext).mBLEDevices.size() != 3)
                             return;
@@ -376,17 +375,17 @@ public class BLEServiceUtils {
                             break;
                     }
 
-                    if(count_for >= 2){
+                    if(count_for >= 2) {
                         if(checkThreeTime.size() < 3)
                             checkThreeTime.add(true);
                         else if(checkThreeTime.size() == 3){
                             checkThreeTime.remove(0);
                             checkThreeTime.add(true);
                         }
-                    }else{
-                        if(checkThreeTime.size() < 3)
+                    } else {
+                        if (checkThreeTime.size() < 3)
                             checkThreeTime.add(false);
-                        else if(checkThreeTime.size() == 3){
+                        else if (checkThreeTime.size() == 3) {
                             checkThreeTime.remove(0);
                             checkThreeTime.add(false);
                         }
@@ -452,6 +451,7 @@ public class BLEServiceUtils {
         timer = new Timer();
         timerSecond = 0;
         leaveWorkCount = 0;
+        ((BLEScanService) mContext).restartScan(ScanSettings.SCAN_MODE_LOW_POWER);
 
         Log.d(TAG, "leaveWorkTimerStart(): Timer start and clear the map which has current beacons at each second");
         Log.d("Awesometic", "leaveWorkTimerStart(): Timer start and clear the map which has current beacons at each second");
@@ -463,7 +463,7 @@ public class BLEServiceUtils {
 
                 leaveWorkChecker(deviceInfo1, deviceInfo2, deviceInfo3);
             }
-        }, 0, 3000);
+        }, 0, 6000);
     }
 
     private void leaveWorkTimerStop(final DeviceInfo deviceInfo1, final DeviceInfo deviceInfo2, final DeviceInfo deviceInfo3) {
@@ -486,7 +486,7 @@ public class BLEServiceUtils {
                 }
                 Log.d(TAG, "leaveWorkChecker(): currentBeacons size(): " + currentBeacons.size());
                 Log.d("Awesometic", "leaveWorkChecker(): currentBeacons size(): " + currentBeacons.size());
-                if (BLEScanService.commuteStatus && currentBeacons.size() != 3) {
+                if (BLEScanService.commuteStatusFlag && currentBeacons.size() != 3) {
                     if(leaveWorkCount > 2) {
                         leaveWorkTimerStop(deviceInfo1, deviceInfo2, deviceInfo3);
                         // sendEvent(deviceInfo1, deviceInfo2, deviceInfo3, false);
@@ -561,8 +561,8 @@ public class BLEServiceUtils {
                     Log.d(TAG, "timerTextUpdate(): comeToWork is failed(StandByAttendance))");
                     timerStop();
                     GenerateNotification.generateNotification(((BLEScanService) mContext), "출근 실패", "출근대기 중 범위를 벗어났습니다.", "");
-                    BLEScanService.commuteStatus = false;
-                    BLEScanService.commuteCycle = false;
+                    BLEScanService.commuteStatusFlag = false;
+                    BLEScanService.commuteCycleFlag = false;
 
                     // 퇴근 상태 알림
                     Intent intent = new Intent("android.intent.action.LEAVE_WORK_STATE");
@@ -584,8 +584,8 @@ public class BLEServiceUtils {
     }
 
     public void sendEvent(DeviceInfo deviceInfo1, DeviceInfo deviceInfo2, DeviceInfo deviceInfo3, final boolean isComeToWork){
-        // if((!BLEScanService.commuteCycle && isComeToWork) || (BLEScanService.commuteCycle && !isComeToWork)) {
-        if (BLEScanService.commuteCycle) {
+        // if((!BLEScanService.commuteCycleFlag && isComeToWork) || (BLEScanService.commuteCycleFlag && !isComeToWork)) {
+        if (BLEScanService.commuteCycleFlag) {
             Map<String, String> data = new HashMap<String, String>();
             data.put("BeaconDeviceAddress1", deviceInfo1.Address);
             data.put("BeaconDeviceAddress2", deviceInfo2.Address);
@@ -598,16 +598,16 @@ public class BLEServiceUtils {
 
             ((BLEScanService) mContext).mSocketIO.sendEvent(data, isComeToWork);
             if (isComeToWork) {
-                BLEScanService.commuteStatus = true;
-                BLEScanService.commuteCycle = true;
+                BLEScanService.commuteStatusFlag = true;
+                BLEScanService.commuteCycleFlag = true;
 
                 // 출근 상태 알림
                 Intent intent = new Intent("android.intent.action.COME_TO_WORK_STATE");
                 intent.setData(Uri.parse("comeToWork:"));
                 ((BLEScanService) mContext).sendBroadcast(intent);
             } else {
-                BLEScanService.commuteStatus = false;
-                BLEScanService.commuteCycle = false;
+                BLEScanService.commuteStatusFlag = false;
+                BLEScanService.commuteCycleFlag = false;
                 ((BLEScanService) mContext).mBLEDevices.clear();
 
                 // 퇴근 상태 알림
