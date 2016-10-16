@@ -87,14 +87,10 @@ public class RegisterReceiver {
                                 Toast.makeText(context, status_str, Toast.LENGTH_SHORT).show();
                                 break;
                             case Constants.NETWORK_TYPE_MOBILE:
-                                if (!((BLEScanService) mContext).mSocketIO.connected()) {
-                                    ((BLEScanService) mContext).mSocketIO.connect();
-                                }
+                                ((BLEScanService) mContext).mSocketIO.connect();
                                 break;
                             case Constants.NETWORK_TYPE_WIFI:
-                                if (!((BLEScanService) mContext).mSocketIO.connected()) {
-                                    ((BLEScanService) mContext).mSocketIO.connect();
-                                }
+                                ((BLEScanService) mContext).mSocketIO.connect();
                                 break;
                         }
                     }

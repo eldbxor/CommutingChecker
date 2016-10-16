@@ -32,7 +32,7 @@ public class BLEScanService extends Service {
     public static String myMacAddress; // 스마트폰 블루투스 Mac 주소
     public static Context ServiceContext;
     public static boolean scanFlag, commuteCycleFlag, commuteStatusFlag, lowPowerScanFlag;
-    public static int failureCount_SendEv; // sendEvent's Failure Count
+    public static int failureCount_SendEv; // sendCommutingEvent's Failure Count
     public SocketIO mSocketIO; // Jason을 이용한 서버와의 통신 클래스
     public List<DeviceInfo> mBLEDevices; // 비콘 디바이스 정보를 갖는 ArrayList
     private ScanSettings settings; // BLE 스캔 옵션 세팅
@@ -202,6 +202,8 @@ public class BLEScanService extends Service {
                         }
                     }
 
+                    mSocketIO.sendQueueData();
+
                     // 3개의 비콘 정보가 없을 경우 continue
                     if (mBLEDevices.size() != 3) {
                         continue;
@@ -209,13 +211,13 @@ public class BLEScanService extends Service {
                         lowPowerScanFlag = false;
                     }
 
-                    // 0.5초 동안 3번 Rssi 체크 후 2번 이상 적합하면 sendEvent() 메서드 실행
+                    // 0.5초 동안 3번 Rssi 체크 후 2번 이상 적합하면 sendCommutingEvent() 메서드 실행
                     if (!commuteCycleFlag && !commuteStatusFlag) {
                         restartScan(ScanSettings.SCAN_MODE_LOW_LATENCY);
                         mBLEServiceUtils.comeToWorkCheckTime(Constants.CALLBACK_TYPE_BLE_SCAN_SERVICE);
                     }
 
-                    //mSocketIO.sendEvent(new HashMap<String, String>());
+                    //mSocketIO.sendCommutingEvent(new HashMap<String, String>());
                     //scanLeDevice(false);
                     //scanFlag = false;
                 }
@@ -263,8 +265,9 @@ public class BLEScanService extends Service {
             if (settings.getScanMode() == scanMode) {
                 return;
             } else {
+                Log.d(TAG, "restartScan(): change scanMode");
                 scanLeDevice(false);
-                mBLEServiceUtils.setPeriod(scanMode);
+                settings = mBLEServiceUtils.setPeriod(scanMode);
                 scanLeDevice(true);
             }
         }
@@ -370,7 +373,7 @@ public class BLEScanService extends Service {
             mBLEServiceUtils.addDeviceInfo(Constants.CALLBACK_TYPE_BLE_SCAN_SERVICE, new DeviceInfo(device, device.getAddress(), all,
                     uuid, String.valueOf(major_int), String.valueOf(minor_int), rssi));
 
-            BLEServiceUtils.setCurrentBeacons(device.getAddress(), rssi);
+            mBLEServiceUtils.setCurrentBeacons(device.getAddress(), rssi);
         }
     };
 }

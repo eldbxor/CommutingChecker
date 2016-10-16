@@ -1,13 +1,9 @@
 package com.example.taek.commutingchecker.utils;
 
-import android.bluetooth.le.ScanFilter;
 import android.content.Context;
-import android.os.Build;
 import android.os.Message;
 import android.os.RemoteException;
-import android.util.Base64;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.example.taek.commutingchecker.services.BLEScanService;
 import com.example.taek.commutingchecker.services.CalibrationService;
@@ -19,23 +15,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.ByteArrayOutputStream;
-import java.io.UnsupportedEncodingException;
-import java.math.BigInteger;
 import java.net.URISyntaxException;
-import java.nio.charset.StandardCharsets;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.PublicKey;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
 
 import io.socket.client.IO;
 import io.socket.emitter.Emitter;
@@ -55,6 +37,7 @@ public class SocketIO {
      */
     Analyzer analyzer;
     public Context mContext;
+    private SocketDataQueue mSocketDataQueue;
 
     // 생성자
     public SocketIO(Context context) {
@@ -65,6 +48,8 @@ public class SocketIO {
 
             // Initialize anlayzer instance
             analyzer = new Analyzer();
+
+            mSocketDataQueue = new SocketDataQueue();
 
         } catch (URISyntaxException e){
             e.printStackTrace();
@@ -128,17 +113,7 @@ public class SocketIO {
     }
 
     // 이벤트 보내기
-    public void sendEvent(final Map<String, String> data, final boolean isComeToWork) {
-
-        try {
-//            mSocket.connect();
-            do {
-                Thread.sleep(100);
-            } while (mSocket.connected() == false);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
+    public void sendCommutingEvent(final Map<String, String> data, final boolean isComeToWork) {
         if (mSocket.connected()) {
             if (analyzer.serversPublicKey != null) {
                 try {
@@ -173,15 +148,15 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
                         content.put("Commute", "false");
                     }
                     //content.put("DateTime", data.get("DateTime"));
-                    Log.d("Awesometic", "sendEvent - send message to server");
+                    Log.d("Awesometic", "sendCommutingEvent - send message to server");
                     mSocket.emit("circumstance", analyzer.encryptSendJson(content));
                 } catch (JSONException e) {
                     e.printStackTrace();
-                    Log.d("Awesometic", "sendEvent - exception caught (JSON envelopment)");
+                    Log.d("Awesometic", "sendCommutingEvent - exception caught (JSON envelopment)");
                 }
 
             } else {
-                Log.d("Awesometic", "sendEvent - server's public key is not initialized");
+                Log.d("Awesometic", "sendCommutingEvent - server's public key is not initialized");
             }
 
             mSocket.on("circumstance_answer", new Emitter.Listener() {
@@ -204,7 +179,7 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
                         }else {
                             if(BLEScanService.failureCount_SendEv < 2) {
                                 BLEScanService.failureCount_SendEv++;
-                                sendEvent(data, isComeToWork);
+                                sendCommutingEvent(data, isComeToWork);
                                 return;
                             }
                             else{
@@ -220,7 +195,7 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
                         }
                     } catch (Exception e) {
                         e.printStackTrace();
-                        Log.d("Awesometic", "sendEvent - exception caught (result analyze)");
+                        Log.d("Awesometic", "sendCommutingEvent - exception caught (result analyze)");
                     }
                 }
             });
@@ -239,7 +214,9 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
             //this.close();
 
         } else {
-            Log.d("Awesometic", "sendEvent - socket isn't connected");
+            Log.d("Awesometic", "sendCommutingEvent - socket isn't connected");
+            data.put("isComeToWork", String.valueOf(isComeToWork));
+            insertQueueData(data);
         }
     }
 
@@ -579,6 +556,19 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
         }
     }
 
+    public void sendQueueData() {
+        if (mSocketDataQueue.isEmpty())
+            return;
+        for (int i = 0; i < mSocketDataQueue.size(); i++) {
+            Map<String, String> map = (HashMap<String, String>) mSocketDataQueue.remove();
+            String isComeToWork = map.get("isComeToWork");
+            if(map.containsKey("isComeToWork")) {
+                map.remove("isComeToWork");
+            }
+            sendCommutingEvent(map, Boolean.valueOf(isComeToWork));
+        }
+    }
+
     public boolean isServersPublicKeyInitialized() {
         if (analyzer.serversPublicKey != null)
             return true;
@@ -588,6 +578,12 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
 
     public boolean connected() {
         return mSocket.connected();
+    }
+
+    public void insertQueueData(Object obj) {
+        if (!mSocketDataQueue.contains(obj)) {
+            mSocketDataQueue.insert(obj);
+        }
     }
 
     // 소켓 닫기

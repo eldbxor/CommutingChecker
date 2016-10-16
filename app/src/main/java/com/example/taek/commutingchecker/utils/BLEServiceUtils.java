@@ -26,11 +26,11 @@ import java.util.TimerTask;
  * Created by Taek on 2016-07-07.
  */
 public class BLEServiceUtils {
-    public static int threshold_Calibration = 6;
-    private static Timer timer;
-    private static int timerSecond = 0;
-    private static int leaveWorkCount = 0;
-    private static Runnable updater;
+    public int threshold_Calibration = 6;
+    private Timer timer;
+    private int timerSecond = 0;
+    private int leaveWorkCount = 0;
+    private Runnable updater;
     public BluetoothManager mBluetoothManager;
     public BluetoothAdapter mBluetoothAdapter;
     public BluetoothLeScanner mBLEScanner; // BLE 스캐너(api 21 이상)
@@ -399,7 +399,7 @@ public class BLEServiceUtils {
 
                     if (callbackType == Constants.CALLBACK_TYPE_BLE_SCAN_SERVICE) {
                         if (times >= 2) { // 출근존을 지났을 때
-                            // BLEServiceUtils.sendEvent(mDeviceInfo1, mDeviceInfo2, mDeviceInfo3, true);
+                            // BLEServiceUtils.sendCommutingEvent(mDeviceInfo1, mDeviceInfo2, mDeviceInfo3, true);
                             Log.d("ComeToWork", "comeToWork's zone");
                             GenerateNotification.generateNotification(BLEScanService.ServiceContext, "출근 대기 중", "출근 대기 중입니다.", "");
                             timerStart(mDeviceInfo1, mDeviceInfo2, mDeviceInfo3);
@@ -436,13 +436,13 @@ public class BLEServiceUtils {
         thread.start();
     }
 
-    private static HashMap<String, Integer> currentBeacons = new HashMap<>();
+    private HashMap<String, Integer> currentBeacons = new HashMap<>();
 
     /**
      * Input the beacon's bluetooth address to the map
      * @param bluetoothAddress
      */
-    public static void setCurrentBeacons(String bluetoothAddress, int rssi) {
+    public void setCurrentBeacons(String bluetoothAddress, int rssi) {
         if (!currentBeacons.containsKey(bluetoothAddress))
             currentBeacons.put(bluetoothAddress, rssi);
     }
@@ -459,11 +459,10 @@ public class BLEServiceUtils {
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
-                timerSecond++;
-
                 leaveWorkChecker(deviceInfo1, deviceInfo2, deviceInfo3);
+                timerSecond++;
             }
-        }, 0, 6000);
+        }, 0, 3000);
     }
 
     private void leaveWorkTimerStop(final DeviceInfo deviceInfo1, final DeviceInfo deviceInfo2, final DeviceInfo deviceInfo3) {
@@ -480,7 +479,7 @@ public class BLEServiceUtils {
         updater = new Runnable() {
             @Override
             public void run() {
-                if(timerSecond <= 1){
+                if(timerSecond < 1){
                     return;
                     // Thread.interrupted();
                 }
@@ -489,7 +488,7 @@ public class BLEServiceUtils {
                 if (BLEScanService.commuteStatusFlag && currentBeacons.size() != 3) {
                     if(leaveWorkCount > 2) {
                         leaveWorkTimerStop(deviceInfo1, deviceInfo2, deviceInfo3);
-                        // sendEvent(deviceInfo1, deviceInfo2, deviceInfo3, false);
+                        // sendCommutingEvent(deviceInfo1, deviceInfo2, deviceInfo3, false);
                         Log.d(TAG, "leaveWorkChecker(): Get off the office success");
                         Log.d("Awesometic", "leaveWorkChecker(): Get off the office success");
                     }else{
@@ -499,7 +498,7 @@ public class BLEServiceUtils {
                     if(currentBeacons.get(deviceInfo1.Address) < -100 && currentBeacons.get(deviceInfo2.Address) < -100 && currentBeacons.get(deviceInfo3.Address) < -100){
                         if(leaveWorkCount > 2) {
                             leaveWorkTimerStop(deviceInfo1, deviceInfo2, deviceInfo3);
-                            // sendEvent(deviceInfo1, deviceInfo2, deviceInfo3, false);
+                            // sendCommutingEvent(deviceInfo1, deviceInfo2, deviceInfo3, false);
                             Log.d(TAG, "leaveWorkChecker(): Get off the office success");
                             Log.d("Awesometic", "leaveWorkChecker(): Get off the office success");
                         }else{
@@ -526,14 +525,13 @@ public class BLEServiceUtils {
         // 출근 대기 상태 알림
         Intent intent = new Intent("android.intent.action.STAND_BY_COME_TO_WORK_STATE");
         intent.setData(Uri.parse("standByComeToWork:"));
-        ((BLEScanService) mContext).sendBroadcast(intent);
+        mContext.sendBroadcast(intent);
 
     timer.schedule(new TimerTask() {
             @Override
             public void run() {
-                timerSecond++;
-
                 timerTextUpdate(deviceInfo1, deviceInfo2, deviceInfo3);
+                timerSecond++;
             }
         }, 0, 3000);
     }
@@ -551,7 +549,7 @@ public class BLEServiceUtils {
         updater = new Runnable() {
             @Override
             public void run() {
-                if(timerSecond <= 1){
+                if(timerSecond < 1){
                     return;
                     // Thread.interrupted();
                 }
@@ -596,7 +594,7 @@ public class BLEServiceUtils {
             data.put("SmartphoneAddress", BLEScanService.myMacAddress);
             //data.put("DateTime", CurrentTime.currentTime());
 
-            ((BLEScanService) mContext).mSocketIO.sendEvent(data, isComeToWork);
+            ((BLEScanService) mContext).mSocketIO.sendCommutingEvent(data, isComeToWork);
             if (isComeToWork) {
                 BLEScanService.commuteStatusFlag = true;
                 BLEScanService.commuteCycleFlag = true;
@@ -604,7 +602,7 @@ public class BLEServiceUtils {
                 // 출근 상태 알림
                 Intent intent = new Intent("android.intent.action.COME_TO_WORK_STATE");
                 intent.setData(Uri.parse("comeToWork:"));
-                ((BLEScanService) mContext).sendBroadcast(intent);
+                 mContext.sendBroadcast(intent);
             } else {
                 BLEScanService.commuteStatusFlag = false;
                 BLEScanService.commuteCycleFlag = false;
@@ -613,7 +611,7 @@ public class BLEServiceUtils {
                 // 퇴근 상태 알림
                 Intent intent = new Intent("android.intent.action.LEAVE_WORK_STATE");
                 intent.setData(Uri.parse("leaveWork:"));
-                ((BLEScanService) mContext).sendBroadcast(intent);
+                mContext.sendBroadcast(intent);
             }
         }
     }

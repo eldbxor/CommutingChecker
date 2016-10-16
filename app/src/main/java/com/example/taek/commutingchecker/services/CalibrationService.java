@@ -267,7 +267,7 @@ public class CalibrationService extends Service {
             mBLEServiceUtils.addDeviceInfo(Constants.CALLBACK_TYPE_CALIBRATION_SERVICE, new DeviceInfo(device, device.getAddress(), all,
                     uuid, String.valueOf(major_int), String.valueOf(minor_int), rssi));
 
-            BLEServiceUtils.setCurrentBeacons(device.getAddress(), rssi);
+            mBLEServiceUtils.setCurrentBeacons(device.getAddress(), rssi);
         }
     };
 
