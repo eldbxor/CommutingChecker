@@ -87,10 +87,26 @@ public class RegisterReceiver {
                                 Toast.makeText(context, status_str, Toast.LENGTH_SHORT).show();
                                 break;
                             case Constants.NETWORK_TYPE_MOBILE:
-                                ((BLEScanService) mContext).mSocketIO.connect();
+                                try {
+                                    while (!((BLEScanService) mContext).mSocketIO.connected()) {
+                                        Thread.sleep(500);
+                                        ((BLEScanService) mContext).mSocketIO.connect();
+                                    }
+                                    Toast.makeText(context, status_str, Toast.LENGTH_SHORT).show();
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
                                 break;
                             case Constants.NETWORK_TYPE_WIFI:
-                                ((BLEScanService) mContext).mSocketIO.connect();
+                                try {
+                                    while (!((BLEScanService) mContext).mSocketIO.connected()) {
+                                        Thread.sleep(500);
+                                        ((BLEScanService) mContext).mSocketIO.connect();
+                                    }
+                                    Toast.makeText(context, status_str, Toast.LENGTH_SHORT).show();
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
                                 break;
                         }
                     }
