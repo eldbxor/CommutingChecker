@@ -12,9 +12,7 @@ import android.widget.Toast;
 import com.example.taek.commutingchecker.R;
 import com.example.taek.commutingchecker.services.BLEScanService;
 import com.example.taek.commutingchecker.ui.MainActivity;
-import com.example.taek.commutingchecker.ui.MainFragment;
 import com.example.taek.commutingchecker.ui.SetupFragment;
-import com.example.taek.commutingchecker.ui.ThresholdAdjustmentFragment;
 
 /**
  * Created by Taek on 2016-09-05.
@@ -84,48 +82,57 @@ public class RegisterReceiver {
                         int status_int = NetworkUtil.getConnectivityStatus(context);
                         switch (status_int) {
                             case Constants.NETWORK_TYPE_NOT_CONNECTED:
+                                ((BLEScanService) mContext).networkDisconnectedFlag = true;
                                 Toast.makeText(context, status_str, Toast.LENGTH_SHORT).show();
                                 break;
                             case Constants.NETWORK_TYPE_MOBILE:
-                                try {
-                                    while (!((BLEScanService) mContext).mSocketIO.connected()) {
-                                        Thread.sleep(500);
-                                        ((BLEScanService) mContext).mSocketIO.connect();
-                                    }
-                                    // Getting a new public key from server
-                                    ((BLEScanService) mContext).mSocketIO.removePublicKey();
-                                    ((BLEScanService) mContext).mSocketIO.getServersRsaPublicKey();
-                                    try{
-                                        do {
-                                            Thread.sleep(100);
-                                        } while(!((BLEScanService) mContext).mSocketIO.isServersPublicKeyInitialized());
-                                    }catch (InterruptedException e){
+                                if(((BLEScanService) mContext).networkDisconnectedFlag) {
+                                    ((BLEScanService) mContext).networkDisconnectedFlag = false;
+                                    try {
+                                        while (!((BLEScanService) mContext).mSocketIO.connected()) {
+                                            Thread.sleep(500);
+                                            ((BLEScanService) mContext).mSocketIO.connect();
+                                        }
+                                        // Getting a new public key from server
+                                        ((BLEScanService) mContext).mSocketIO.removePublicKey();
+                                        ((BLEScanService) mContext).mSocketIO.getServersRsaPublicKey();
+                                        try {
+                                            do {
+                                                Thread.sleep(500);
+                                            }
+                                            while (!((BLEScanService) mContext).mSocketIO.isServersPublicKeyInitialized());
+                                        } catch (InterruptedException e) {
+                                            e.printStackTrace();
+                                        }
+                                        Toast.makeText(context, status_str, Toast.LENGTH_SHORT).show();
+                                    } catch (Exception e) {
                                         e.printStackTrace();
                                     }
-                                    Toast.makeText(context, status_str, Toast.LENGTH_SHORT).show();
-                                } catch (Exception e) {
-                                    e.printStackTrace();
                                 }
                                 break;
                             case Constants.NETWORK_TYPE_WIFI:
-                                try {
-                                    while (!((BLEScanService) mContext).mSocketIO.connected()) {
-                                        Thread.sleep(500);
-                                        ((BLEScanService) mContext).mSocketIO.connect();
-                                    }
-                                    // Getting a new public key from server
-                                    ((BLEScanService) mContext).mSocketIO.removePublicKey();
-                                    ((BLEScanService) mContext).mSocketIO.getServersRsaPublicKey();
-                                    try{
-                                        do {
-                                            Thread.sleep(100);
-                                        } while(!((BLEScanService) mContext).mSocketIO.isServersPublicKeyInitialized());
-                                    }catch (InterruptedException e){
+                                if(((BLEScanService) mContext).networkDisconnectedFlag) {
+                                    ((BLEScanService) mContext).networkDisconnectedFlag = false;
+                                    try {
+                                        while (!((BLEScanService) mContext).mSocketIO.connected()) {
+                                            Thread.sleep(500);
+                                            ((BLEScanService) mContext).mSocketIO.connect();
+                                        }
+                                        // Getting a new public key from server
+                                        ((BLEScanService) mContext).mSocketIO.removePublicKey();
+                                        ((BLEScanService) mContext).mSocketIO.getServersRsaPublicKey();
+                                        try {
+                                            do {
+                                                Thread.sleep(500);
+                                            }
+                                            while (!((BLEScanService) mContext).mSocketIO.isServersPublicKeyInitialized());
+                                        } catch (InterruptedException e) {
+                                            e.printStackTrace();
+                                        }
+                                        Toast.makeText(context, status_str, Toast.LENGTH_SHORT).show();
+                                    } catch (Exception e) {
                                         e.printStackTrace();
                                     }
-                                    Toast.makeText(context, status_str, Toast.LENGTH_SHORT).show();
-                                } catch (Exception e) {
-                                    e.printStackTrace();
                                 }
                                 break;
                         }

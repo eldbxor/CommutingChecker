@@ -31,14 +31,14 @@ import java.util.Map;
 public class BLEScanService extends Service {
     public static String myMacAddress; // 스마트폰 블루투스 Mac 주소
     public static Context ServiceContext;
-    public static boolean scanFlag, commuteCycleFlag, commuteStatusFlag, lowPowerScanFlag;
+    public static boolean scanFlag, commuteCycleFlag, commuteStatusFlag, lowPowerScanFlag, networkDisconnectedFlag;
     public static int failureCount_SendEv; // sendCommutingEvent's Failure Count
     public SocketIO mSocketIO; // Jason을 이용한 서버와의 통신 클래스
     public List<DeviceInfo> mBLEDevices; // 비콘 디바이스 정보를 갖는 ArrayList
     private ScanSettings settings; // BLE 스캔 옵션 세팅
     public List<ScanFilter> filters; // BLE 스캔 필터
     public List<String> filterlist; // Api21 이하 버전용 BLE 스캔 필터
-    public Handler timerHandler;
+    public Handler timerHandler, leaveWorkTimerHandler;
     public BLEServiceUtils mBLEServiceUtils;
     private String TAG = "BLEScanService";
     private Thread commutingThread; // 출퇴근 등록 쓰레드
@@ -75,6 +75,7 @@ public class BLEScanService extends Service {
         this.mSocketIO = new SocketIO(ServiceContext);
 
         timerHandler = new Handler();
+        leaveWorkTimerHandler = new Handler();
 
         // 리시버 등록
         RegisterReceiver mRegisterReceiver = new RegisterReceiver(ServiceContext);
@@ -145,6 +146,7 @@ public class BLEScanService extends Service {
         }catch (InterruptedException e){
             e.printStackTrace();
         }
+        networkDisconnectedFlag = false;
 
         // Getting a public key from server
         mSocketIO.getServersRsaPublicKey();

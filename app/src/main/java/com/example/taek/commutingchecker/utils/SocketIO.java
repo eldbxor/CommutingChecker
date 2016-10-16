@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.Message;
 import android.os.RemoteException;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.example.taek.commutingchecker.services.BLEScanService;
 import com.example.taek.commutingchecker.services.CalibrationService;
@@ -158,6 +159,7 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
 
             } else {
                 Log.d("Awesometic", "sendCommutingEvent - server's public key is not initialized");
+                getServersRsaPublicKey();
             }
 
             mSocket.on("circumstance_answer", new Emitter.Listener() {
@@ -216,6 +218,7 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
 
         } else {
             Log.d("Awesometic", "sendCommutingEvent - socket isn't connected");
+            mSocket.connect();
             data.put("isComeToWork", String.valueOf(isComeToWork));
             insertQueueData(data);
         }
@@ -560,6 +563,16 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
     public void sendQueueData() {
         if (mSocketDataQueue.isEmpty())
             return;
+
+        if(!mSocketDataQueue.isEmpty()) {
+            Map<String, String> map = (HashMap<String, String>) mSocketDataQueue.remove();
+            String isComeToWork = map.get("isComeToWork");
+            if (map.containsKey("isComeToWork")) {
+                map.remove("isComeToWork");
+            }
+            sendCommutingEvent(map, Boolean.valueOf(isComeToWork));
+        }
+        /*
         for (int i = 0; i < mSocketDataQueue.size(); i++) {
             Map<String, String> map = (HashMap<String, String>) mSocketDataQueue.remove();
             String isComeToWork = map.get("isComeToWork");
@@ -567,7 +580,7 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
                 map.remove("isComeToWork");
             }
             sendCommutingEvent(map, Boolean.valueOf(isComeToWork));
-        }
+        } */
     }
 
     public void removePublicKey() {

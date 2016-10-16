@@ -27,19 +27,21 @@ import java.util.TimerTask;
  */
 public class BLEServiceUtils {
     public int threshold_Calibration = 6;
-    private Timer timer;
+    private Timer timer, leaveWorkTimer;
     private int timerSecond = 0;
     private int leaveWorkCount = 0;
-    private Runnable updater;
+    private Runnable updater, leaveWorkUpdater;
     public BluetoothManager mBluetoothManager;
     public BluetoothAdapter mBluetoothAdapter;
     public BluetoothLeScanner mBLEScanner; // BLE 스캐너(api 21 이상)
     private Context mContext;
     private String TAG = "BLEServiceUtils";
+    private boolean standByLeaveWorkFlag;
 
     // 생성자
     public BLEServiceUtils(Context context) {
         mContext = context;
+        standByLeaveWorkFlag = false;
         Log.d(TAG, "BLEServiceUtils(): 생성자");
     }
 
@@ -302,6 +304,10 @@ public class BLEServiceUtils {
                 }
 
                 while(true) {
+                    if(!((BLEScanService) mContext).scanFlag) {
+                        break;
+                    }
+
                     int count_for = 0;
 
                     switch (callbackType) {
@@ -448,7 +454,8 @@ public class BLEServiceUtils {
     }
 
     private void leaveWorkTimerStart(final DeviceInfo deviceInfo1, final DeviceInfo deviceInfo2, final DeviceInfo deviceInfo3) {
-        timer = new Timer();
+        standByLeaveWorkFlag = true;
+        leaveWorkTimer = new Timer();
         timerSecond = 0;
         leaveWorkCount = 0;
         ((BLEScanService) mContext).restartScan(ScanSettings.SCAN_MODE_LOW_POWER);
@@ -456,7 +463,7 @@ public class BLEServiceUtils {
         Log.d(TAG, "leaveWorkTimerStart(): Timer start and clear the map which has current beacons at each second");
         Log.d("Awesometic", "leaveWorkTimerStart(): Timer start and clear the map which has current beacons at each second");
 
-        timer.schedule(new TimerTask() {
+        leaveWorkTimer.schedule(new TimerTask() {
             @Override
             public void run() {
                 leaveWorkChecker(deviceInfo1, deviceInfo2, deviceInfo3);
@@ -467,22 +474,28 @@ public class BLEServiceUtils {
 
     private void leaveWorkTimerStop(final DeviceInfo deviceInfo1, final DeviceInfo deviceInfo2, final DeviceInfo deviceInfo3) {
         Log.d(TAG, "leaveWorkTimerStop(): Timer Stop");
-        timer.cancel();
-        timer = null;
+        leaveWorkTimer.cancel();
+        leaveWorkTimer = null;
 
-        ((BLEScanService) mContext).timerHandler.removeCallbacks(updater);
-        updater = null;
+        ((BLEScanService) mContext).leaveWorkTimerHandler.removeCallbacks(leaveWorkUpdater);
+        leaveWorkUpdater = null;
         sendEvent(deviceInfo1, deviceInfo2, deviceInfo3, false);
+        standByLeaveWorkFlag = false;
     }
 
     private void leaveWorkChecker(final DeviceInfo deviceInfo1, final DeviceInfo deviceInfo2, final DeviceInfo deviceInfo3) {
-        updater = new Runnable() {
+        leaveWorkUpdater = new Runnable() {
             @Override
             public void run() {
-                if(timerSecond < 1){
+                if(timerSecond <= 1){
                     return;
                     // Thread.interrupted();
                 }
+
+                if(!((BLEScanService) mContext).scanFlag) {
+                    leaveWorkTimer.cancel();
+                }
+
                 Log.d(TAG, "leaveWorkChecker(): currentBeacons size(): " + currentBeacons.size());
                 Log.d("Awesometic", "leaveWorkChecker(): currentBeacons size(): " + currentBeacons.size());
                 if (BLEScanService.commuteStatusFlag && currentBeacons.size() != 3) {
@@ -514,7 +527,7 @@ public class BLEServiceUtils {
                 }
             }
         };
-        ((BLEScanService) mContext).timerHandler.post(updater);
+        ((BLEScanService) mContext).leaveWorkTimerHandler.post(leaveWorkUpdater);
     }
 
     private void timerStart(final DeviceInfo deviceInfo1, final DeviceInfo deviceInfo2, final DeviceInfo deviceInfo3) {
@@ -553,6 +566,12 @@ public class BLEServiceUtils {
                     return;
                     // Thread.interrupted();
                 }
+
+                if(standByLeaveWorkFlag)
+                    return;
+
+                if(!((BLEScanService) mContext).scanFlag)
+                    timerStop();
 
                 //timerText.setText(timerSecond + " 초");
                 if(currentBeacons.size() != 3){ // 출근 범위를 벗어났을 경우 - 출근 조건을 만족하지 못함
