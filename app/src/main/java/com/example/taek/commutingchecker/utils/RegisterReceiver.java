@@ -87,10 +87,46 @@ public class RegisterReceiver {
                                 Toast.makeText(context, status_str, Toast.LENGTH_SHORT).show();
                                 break;
                             case Constants.NETWORK_TYPE_MOBILE:
-                                ((BLEScanService) mContext).mSocketIO.connect();
+                                try {
+                                    while (!((BLEScanService) mContext).mSocketIO.connected()) {
+                                        Thread.sleep(500);
+                                        ((BLEScanService) mContext).mSocketIO.connect();
+                                    }
+                                    // Getting a new public key from server
+                                    ((BLEScanService) mContext).mSocketIO.removePublicKey();
+                                    ((BLEScanService) mContext).mSocketIO.getServersRsaPublicKey();
+                                    try{
+                                        do {
+                                            Thread.sleep(100);
+                                        } while(!((BLEScanService) mContext).mSocketIO.isServersPublicKeyInitialized());
+                                    }catch (InterruptedException e){
+                                        e.printStackTrace();
+                                    }
+                                    Toast.makeText(context, status_str, Toast.LENGTH_SHORT).show();
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
                                 break;
                             case Constants.NETWORK_TYPE_WIFI:
-                                ((BLEScanService) mContext).mSocketIO.connect();
+                                try {
+                                    while (!((BLEScanService) mContext).mSocketIO.connected()) {
+                                        Thread.sleep(500);
+                                        ((BLEScanService) mContext).mSocketIO.connect();
+                                    }
+                                    // Getting a new public key from server
+                                    ((BLEScanService) mContext).mSocketIO.removePublicKey();
+                                    ((BLEScanService) mContext).mSocketIO.getServersRsaPublicKey();
+                                    try{
+                                        do {
+                                            Thread.sleep(100);
+                                        } while(!((BLEScanService) mContext).mSocketIO.isServersPublicKeyInitialized());
+                                    }catch (InterruptedException e){
+                                        e.printStackTrace();
+                                    }
+                                    Toast.makeText(context, status_str, Toast.LENGTH_SHORT).show();
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
                                 break;
                         }
                     }
