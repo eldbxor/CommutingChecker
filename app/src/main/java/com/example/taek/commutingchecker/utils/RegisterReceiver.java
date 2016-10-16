@@ -92,6 +92,16 @@ public class RegisterReceiver {
                                         Thread.sleep(500);
                                         ((BLEScanService) mContext).mSocketIO.connect();
                                     }
+                                    // Getting a new public key from server
+                                    ((BLEScanService) mContext).mSocketIO.removePublicKey();
+                                    ((BLEScanService) mContext).mSocketIO.getServersRsaPublicKey();
+                                    try{
+                                        do {
+                                            Thread.sleep(100);
+                                        } while(!((BLEScanService) mContext).mSocketIO.isServersPublicKeyInitialized());
+                                    }catch (InterruptedException e){
+                                        e.printStackTrace();
+                                    }
                                     Toast.makeText(context, status_str, Toast.LENGTH_SHORT).show();
                                 } catch (Exception e) {
                                     e.printStackTrace();
@@ -102,6 +112,16 @@ public class RegisterReceiver {
                                     while (!((BLEScanService) mContext).mSocketIO.connected()) {
                                         Thread.sleep(500);
                                         ((BLEScanService) mContext).mSocketIO.connect();
+                                    }
+                                    // Getting a new public key from server
+                                    ((BLEScanService) mContext).mSocketIO.removePublicKey();
+                                    ((BLEScanService) mContext).mSocketIO.getServersRsaPublicKey();
+                                    try{
+                                        do {
+                                            Thread.sleep(100);
+                                        } while(!((BLEScanService) mContext).mSocketIO.isServersPublicKeyInitialized());
+                                    }catch (InterruptedException e){
+                                        e.printStackTrace();
                                     }
                                     Toast.makeText(context, status_str, Toast.LENGTH_SHORT).show();
                                 } catch (Exception e) {
