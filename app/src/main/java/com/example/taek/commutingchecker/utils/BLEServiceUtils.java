@@ -408,7 +408,7 @@ public class BLEServiceUtils {
                         if (times >= 2) { // 출근존을 지났을 때
                             // BLEServiceUtils.sendCommutingEvent(mDeviceInfo1, mDeviceInfo2, mDeviceInfo3, true);
                             Log.d("ComeToWork", "comeToWork's zone");
-                            GenerateNotification.generateNotification(BLEScanService.ServiceContext, "출근 대기 중", "출근 대기 중입니다.", "");
+                            GenerateNotification.generateNotification(BLEScanService.ServiceContext, "CommutingChecker", "출근 대기 중", "출근 대기 중입니다.");
                             timerStart(mDeviceInfo1, mDeviceInfo2, mDeviceInfo3);
                             break;
                         }
@@ -568,7 +568,7 @@ public class BLEServiceUtils {
                 if(currentBeacons.size() != 3){ // 출근 범위를 벗어났을 경우 - 출근 조건을 만족하지 못함
                     Log.d(TAG, "timerTextUpdate(): comeToWork is failed(StandByAttendance))");
                     timerStop();
-                    GenerateNotification.generateNotification(((BLEScanService) mContext), "출근 실패", "출근대기 중 범위를 벗어났습니다.", "");
+                    GenerateNotification.generateNotification(((BLEScanService) mContext), "CommutingChecker", "출근 실패", "출근대기 중 범위를 벗어났습니다.");
                     BLEScanService.commuteStatusFlag = false;
                     BLEScanService.commuteCycleFlag = false;
 

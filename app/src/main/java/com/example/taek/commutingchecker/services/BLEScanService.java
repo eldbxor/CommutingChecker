@@ -185,7 +185,7 @@ public class BLEScanService extends Service {
             public void run() {
                 Log.d(TAG, "Service onStartCommand");
 
-                mNotification = GenerateNotification.notification(ServiceContext, "CommutingChecker", "서비스 실행 중", "");
+                mNotification = GenerateNotification.notification(ServiceContext, "CommutingChecker", "CommutingChecker", "서비스 실행 중");
                 startForeground(Constants.NOTIFICATION_ID, mNotification);
 
                 /*
@@ -309,7 +309,7 @@ public class BLEScanService extends Service {
         }
         if(mSocketIO.connected() == true)
             mSocketIO.close();
-        GenerateNotification.generateNotification(this, "서비스 종료", "서비스가 종료되었습니다.", "");
+        GenerateNotification.generateNotification(this, "CommutingChecker", "서비스 종료", "서비스가 종료되었습니다.");
     }
 
     // api 21 이상

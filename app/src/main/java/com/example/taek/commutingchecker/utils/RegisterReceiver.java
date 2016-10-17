@@ -52,7 +52,7 @@ public class RegisterReceiver {
                     public void onReceive(Context context, Intent intent) {
                         try{
                             if(((BLEScanService) mContext).EssentialDataArray.size() > 0) {
-                                GenerateNotification.generateNotification(((BLEScanService) mContext), "ShowData", "Data_Info",
+                                GenerateNotification.generateNotification(((BLEScanService) mContext), "CommutingChecker", "Data_Info",
                                         "사무실 총 수: " + + ((BLEScanService) mContext).EssentialDataArray.size() + ", 좌표 값: "
                                                 //+ "사무실 번호: " + BLEScanService.EssentialDataArray.get(0).get("id_workplace").toString() + ","
                                                 //+ BLEScanService.EssentialDataArray.get(0).get("beacon_address1").toString() + ": "
@@ -65,13 +65,12 @@ public class RegisterReceiver {
                                         ((BLEScanService) mContext).EssentialDataArray.get(0).get("coordinateY").toString() + ", " +
                                         ((BLEScanService) mContext).EssentialDataArray.get(0).get("coordinateZ").toString());
                             }else{
-                                GenerateNotification.generateNotification(BLEScanService.ServiceContext, "ShowData", "No Data",
-                                        "");
+                                GenerateNotification.generateNotification(BLEScanService.ServiceContext, "CommutingChecker", "ShowData", "No Data");
                                 //Toast.makeText(BLEScanService.ServiceContext, "no data", Toast.LENGTH_SHORT).show();
                             }
                         }catch (Exception e){
                             e.printStackTrace();
-                            GenerateNotification.generateNotification(BLEScanService.ServiceContext, "ShowData", "ShowData failed", "");
+                            GenerateNotification.generateNotification(BLEScanService.ServiceContext, "CommutingChecker", "ShowData", "ShowData failed");
                             //Toast.makeText(BLEScanService.ServiceContext, "서비스 실행상태가 아닙니다.", Toast.LENGTH_LONG).show();
                         }
                     }
