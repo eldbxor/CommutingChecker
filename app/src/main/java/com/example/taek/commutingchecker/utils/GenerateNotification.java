@@ -1,5 +1,6 @@
 package com.example.taek.commutingchecker.utils;
 
+import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -14,7 +15,17 @@ import com.example.taek.commutingchecker.ui.MainActivity;
  * Created by Taek on 2016-05-17.
  */
 public class GenerateNotification {
-    public static void generateNotification(Context context, String ticker, String contentTitle, String contentText){
+    public static Notification notification(Context context, String ticker, String contentTitle, String contentText) {
+        Notification notification = new NotificationCompat.Builder(context)
+                .setTicker(ticker)
+                .setContentTitle(contentTitle)
+                .setContentText(contentText)
+                .setSmallIcon(R.drawable.commuting)
+                .setWhen(System.currentTimeMillis()).build();
+
+        return notification;
+    }
+    public static void generateNotification(Context context, String ticker, String contentTitle, String contentText) {
         android.support.v4.app.NotificationCompat.Builder mBuilder = new android.support.v4.app.NotificationCompat.Builder(context)
                 .setTicker(ticker)
                 .setContentTitle(contentTitle)
@@ -30,7 +41,7 @@ public class GenerateNotification {
             inboxStyle.addLine(events[j]);
         }
         mBuilder.setStyle(inboxStyle); */
-
+/*
         Intent notifyIntent = new Intent(context, MainActivity.class);
 
         notifyIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
@@ -44,7 +55,7 @@ public class GenerateNotification {
                         notifyIntent,
                         PendingIntent.FLAG_UPDATE_CURRENT
                 );
-
+*/
         NotificationManager notificationManager = (NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE);
 
         notificationManager.notify(Constants.NOTIFICATION_ID, mBuilder.build());

@@ -1,6 +1,7 @@
 package com.example.taek.commutingchecker.services;
 
 import android.annotation.SuppressLint;
+import android.app.Notification;
 import android.app.Service;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -42,8 +43,9 @@ public class BLEScanService extends Service {
     public BLEServiceUtils mBLEServiceUtils;
     private String TAG = "BLEScanService";
     private Thread commutingThread; // 출퇴근 등록 쓰레드
-    private BroadcastReceiver StopSelfReceiver, RequestDataReceiver, ShowDataReceiver, NetworkChnageReceiver;
+    private BroadcastReceiver StopSelfReceiver, RequestDataReceiver, ShowDataReceiver, NetworkChnageReceiver, ScreenOffReceiver;
     public List<Map<String, String>> EssentialDataArray; // 서버에서 받아온 비콘 데이터
+    private Notification mNotification;
 
     // Target we publish for clients to send messages to IncomingHandler.
     // private Messenger incomingMessenger = new Messenger(new IncomingHandler(Constants.HANDLER_TYPE_SERVICE, BLEScanService.this));
@@ -56,6 +58,7 @@ public class BLEScanService extends Service {
         Log.i(TAG, "Service onCreate");
         scanFlag = true;
         commuteCycleFlag = false;
+        commuteStatusFlag = false;
         ServiceContext = this;
         failureCount_SendEv = 0;
         lowPowerScanFlag = false;
@@ -90,10 +93,12 @@ public class BLEScanService extends Service {
         RequestDataReceiver = mRegisterReceiver.createReceiver(Constants.BROADCAST_RECEIVER_TYPE_REQEUST_DATA);
         ShowDataReceiver = mRegisterReceiver.createReceiver(Constants.BROADCAST_RECEIVER_TYPE_SHOW_DATA);
         NetworkChnageReceiver = mRegisterReceiver.createReceiver(Constants.BROADCAST_RECEIVER_TYPE_NETWORK_CHANGE);
+        ScreenOffReceiver = mRegisterReceiver.createReceiver(Constants.BROADCAST_RECEIVER_TYPE_SCREEN_OFF);
         registerReceiver(StopSelfReceiver, mRegisterReceiver.createPackageFilter(Constants.BROADCAST_RECEIVER_TYPE_STOP_SERVICE));
         registerReceiver(RequestDataReceiver, mRegisterReceiver.createPackageFilter(Constants.BROADCAST_RECEIVER_TYPE_REQEUST_DATA));
         registerReceiver(ShowDataReceiver, mRegisterReceiver.createPackageFilter(Constants.BROADCAST_RECEIVER_TYPE_SHOW_DATA));
         registerReceiver(NetworkChnageReceiver, mRegisterReceiver.createPackageFilter(Constants.BROADCAST_RECEIVER_TYPE_NETWORK_CHANGE));
+        registerReceiver(ScreenOffReceiver, mRegisterReceiver.createPackageFilter(Constants.BROADCAST_RECEIVER_TYPE_SCREEN_OFF));
 
 
         mBLEServiceUtils.createBluetoothAdapter(getSystemService(this.BLUETOOTH_SERVICE)); // Bluetooth Adapter 생성
@@ -138,6 +143,7 @@ public class BLEScanService extends Service {
         */
         this.mSocketIO.connect();
 
+        Log.d(TAG, "debuging");
         // To Wait for connecting
         try{
             do {
@@ -179,6 +185,8 @@ public class BLEScanService extends Service {
             public void run() {
                 Log.d(TAG, "Service onStartCommand");
 
+                mNotification = GenerateNotification.notification(ServiceContext, "CommutingChecker", "서비스 실행 중", "");
+                startForeground(Constants.NOTIFICATION_ID, mNotification);
 
                 /*
                 Log.d("FilterListSize", String.valueOf(filterlist.size()));
@@ -284,6 +292,21 @@ public class BLEScanService extends Service {
         unregisterReceiver(RequestDataReceiver);
         unregisterReceiver(ShowDataReceiver);
         unregisterReceiver(NetworkChnageReceiver);
+        unregisterReceiver(ScreenOffReceiver);
+        stopForeground(false);
+
+        try {
+            mBLEServiceUtils.timer.cancel();
+            mBLEServiceUtils.timer.purge();
+            mBLEServiceUtils.timer = null;
+            mBLEServiceUtils.leaveWorkTimer.cancel();
+            mBLEServiceUtils.leaveWorkTimer.purge();
+            mBLEServiceUtils.leaveWorkTimer = null;
+            timerHandler.removeCallbacksAndMessages(null);
+            leaveWorkTimerHandler.removeCallbacksAndMessages(null);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         if(mSocketIO.connected() == true)
             mSocketIO.close();
         GenerateNotification.generateNotification(this, "서비스 종료", "서비스가 종료되었습니다.", "");

@@ -27,8 +27,8 @@ import java.util.TimerTask;
  */
 public class BLEServiceUtils {
     public int threshold_Calibration = 6;
-    private Timer timer, leaveWorkTimer;
-    private int timerSecond = 0;
+    public Timer timer, leaveWorkTimer;
+    private int timerSecond = 0; // , leaveWorkTimerSecond = 0;
     private int leaveWorkCount = 0;
     private Runnable updater, leaveWorkUpdater;
     public BluetoothManager mBluetoothManager;
@@ -242,6 +242,7 @@ public class BLEServiceUtils {
         Runnable r = new Runnable() {
             @Override
             public void run() {
+                Log.d(TAG, "comeToWorkCheckTime(): start commuting's algorithm");
                 List<DeviceInfo> mBLEDevices;
                 List<Boolean> checkThreeTime = new ArrayList<Boolean>();
                 DeviceInfo mDeviceInfo1 = null, mDeviceInfo2 = null, mDeviceInfo3 = null;
@@ -456,7 +457,7 @@ public class BLEServiceUtils {
     private void leaveWorkTimerStart(final DeviceInfo deviceInfo1, final DeviceInfo deviceInfo2, final DeviceInfo deviceInfo3) {
         standByLeaveWorkFlag = true;
         leaveWorkTimer = new Timer();
-        timerSecond = 0;
+        // leaveWorkTimerSecond = 0;
         leaveWorkCount = 0;
         ((BLEScanService) mContext).restartScan(ScanSettings.SCAN_MODE_LOW_POWER);
 
@@ -466,18 +467,22 @@ public class BLEServiceUtils {
         leaveWorkTimer.schedule(new TimerTask() {
             @Override
             public void run() {
+                Log.d(TAG, "leaveWorkTimer schelduling");
                 leaveWorkChecker(deviceInfo1, deviceInfo2, deviceInfo3);
-                timerSecond++;
+                // leaveWorkTimerSecond++;
             }
-        }, 0, 3000);
+        }, 3000, 3000);
     }
 
     private void leaveWorkTimerStop(final DeviceInfo deviceInfo1, final DeviceInfo deviceInfo2, final DeviceInfo deviceInfo3) {
         Log.d(TAG, "leaveWorkTimerStop(): Timer Stop");
         leaveWorkTimer.cancel();
+        leaveWorkTimer.purge();
         leaveWorkTimer = null;
 
-        ((BLEScanService) mContext).leaveWorkTimerHandler.removeCallbacks(leaveWorkUpdater);
+        // ((BLEScanService) mContext).leaveWorkTimerHandler.removeCallbacks(leaveWorkUpdater);
+        ((BLEScanService) mContext).leaveWorkTimerHandler.removeCallbacksAndMessages(leaveWorkUpdater);
+        // ((BLEScanService) mContext).leaveWorkTimerHandler.removeMessages(0);
         leaveWorkUpdater = null;
         sendEvent(deviceInfo1, deviceInfo2, deviceInfo3, false);
         standByLeaveWorkFlag = false;
@@ -487,16 +492,7 @@ public class BLEServiceUtils {
         leaveWorkUpdater = new Runnable() {
             @Override
             public void run() {
-                if(timerSecond <= 1){
-                    return;
-                    // Thread.interrupted();
-                }
-
-                if(!((BLEScanService) mContext).scanFlag) {
-                    leaveWorkTimer.cancel();
-                }
-
-                Log.d(TAG, "leaveWorkChecker(): currentBeacons size(): " + currentBeacons.size());
+             Log.d(TAG, "leaveWorkChecker(): currentBeacons size(): " + currentBeacons.size());
                 Log.d("Awesometic", "leaveWorkChecker(): currentBeacons size(): " + currentBeacons.size());
                 if (BLEScanService.commuteStatusFlag && currentBeacons.size() != 3) {
                     if(leaveWorkCount > 2) {
@@ -543,18 +539,22 @@ public class BLEServiceUtils {
     timer.schedule(new TimerTask() {
             @Override
             public void run() {
+                Log.d(TAG, "comeToWorkTimer schelduling");
                 timerTextUpdate(deviceInfo1, deviceInfo2, deviceInfo3);
                 timerSecond++;
             }
-        }, 0, 3000);
+        }, 3000, 3000);
     }
 
     private void timerStop() {
         Log.d(TAG, "timerStop(): stop timer(ComeToWork)");
         timer.cancel();
+        timer.purge();
         timer = null;
 
-        ((BLEScanService) mContext).timerHandler.removeCallbacks(updater);
+        // ((BLEScanService) mContext).timerHandler.removeCallbacks(updater);
+        ((BLEScanService) mContext).timerHandler.removeCallbacksAndMessages(updater);
+        // ((BLEScanService) mContext).timerHandler.removeMessages(0);
         updater = null;
     }
 
@@ -562,18 +562,9 @@ public class BLEServiceUtils {
         updater = new Runnable() {
             @Override
             public void run() {
-                if(timerSecond < 1){
-                    return;
-                    // Thread.interrupted();
-                }
+//                if(standByLeaveWorkFlag)
+//                    return;
 
-                if(standByLeaveWorkFlag)
-                    return;
-
-                if(!((BLEScanService) mContext).scanFlag)
-                    timerStop();
-
-                //timerText.setText(timerSecond + " 초");
                 if(currentBeacons.size() != 3){ // 출근 범위를 벗어났을 경우 - 출근 조건을 만족하지 못함
                     Log.d(TAG, "timerTextUpdate(): comeToWork is failed(StandByAttendance))");
                     timerStop();

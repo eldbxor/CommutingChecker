@@ -1,5 +1,6 @@
 package com.example.taek.commutingchecker.utils;
 
+import android.bluetooth.le.ScanSettings;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -19,6 +20,7 @@ import com.example.taek.commutingchecker.ui.SetupFragment;
  */
 public class RegisterReceiver {
     Context mContext;
+    String TAG = "RegisterReceiver";
 
     public RegisterReceiver(Context context) {
         mContext = context;
@@ -43,6 +45,7 @@ public class RegisterReceiver {
                     }
                 };
                 return broadcastReceiver;
+
             case Constants.BROADCAST_RECEIVER_TYPE_SHOW_DATA:
                 broadcastReceiver = new BroadcastReceiver() {
                     @Override
@@ -74,6 +77,7 @@ public class RegisterReceiver {
                     }
                 };
                 return broadcastReceiver;
+
             case Constants.BROADCAST_RECEIVER_TYPE_NETWORK_CHANGE:
                 broadcastReceiver = new BroadcastReceiver() {
                     @Override
@@ -139,6 +143,16 @@ public class RegisterReceiver {
                     }
                 };
                 return broadcastReceiver;
+
+            case Constants.BROADCAST_RECEIVER_TYPE_SCREEN_OFF:
+                broadcastReceiver = new BroadcastReceiver() {
+                    @Override
+                    public void onReceive(Context context, Intent intent) {
+                        // anything action
+                    }
+                };
+                return broadcastReceiver;
+
             case Constants.BROADCAST_RECEIVER_TYPE_COME_TO_WORK_STATE:
                 broadcastReceiver = new BroadcastReceiver() {
                     @Override
@@ -152,6 +166,7 @@ public class RegisterReceiver {
                     }
                 };
                 return broadcastReceiver;
+
             case Constants.BROADCAST_RECEIVER_TYPE_LEAVE_WORK_STATE:
                 broadcastReceiver = new BroadcastReceiver() {
                     @Override
@@ -165,6 +180,7 @@ public class RegisterReceiver {
                     }
                 };
                 return broadcastReceiver;
+
             case Constants.BROADCAST_RECEIVER_TYPE_STAND_BY_COME_TO_WORK_STATE:
                 broadcastReceiver = new BroadcastReceiver() {
                     @Override
@@ -205,6 +221,10 @@ public class RegisterReceiver {
                 intentFilter = new IntentFilter();
                 intentFilter.addAction("android.intent.action.STOP_SERVICE");
                 intentFilter.addDataScheme("StopSelf");
+                return intentFilter;
+
+            case Constants.BROADCAST_RECEIVER_TYPE_SCREEN_OFF:
+                intentFilter = new IntentFilter(Intent.ACTION_SCREEN_OFF);
                 return intentFilter;
 
             case Constants.BROADCAST_RECEIVER_TYPE_COME_TO_WORK_STATE:
