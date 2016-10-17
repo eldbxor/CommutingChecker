@@ -16,7 +16,11 @@ import com.example.taek.commutingchecker.ui.MainActivity;
  */
 public class GenerateNotification {
     public static Notification notification(Context context, String ticker, String contentTitle, String contentText) {
+        PendingIntent intent = PendingIntent.getActivity(context, 0,
+                new Intent(context, MainActivity.class), 0);
+
         Notification notification = new NotificationCompat.Builder(context)
+                .setContentIntent(intent)
                 .setTicker(ticker)
                 .setContentTitle(contentTitle)
                 .setContentText(contentText)
@@ -26,7 +30,10 @@ public class GenerateNotification {
         return notification;
     }
     public static void generateNotification(Context context, String ticker, String contentTitle, String contentText) {
+        PendingIntent intent = PendingIntent.getActivity(context, 0,
+                new Intent(context, MainActivity.class), 0);
         android.support.v4.app.NotificationCompat.Builder mBuilder = new android.support.v4.app.NotificationCompat.Builder(context)
+                .setContentIntent(intent)
                 .setTicker(ticker)
                 .setContentTitle(contentTitle)
                 .setContentText(contentText)
