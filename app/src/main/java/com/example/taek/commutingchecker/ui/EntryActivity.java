@@ -3,9 +3,12 @@ package com.example.taek.commutingchecker.ui;
 import android.app.FragmentManager;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.widget.Toast;
 
 import com.example.taek.commutingchecker.R;
 import com.example.taek.commutingchecker.utils.SocketIO;
+
+import org.json.JSONArray;
 
 /**
  * Created by Awesometic on 2016-07-02.
@@ -15,10 +18,14 @@ public class EntryActivity extends AppCompatActivity {
     private SignupFragment fragSignup;
     private WaitFragment fragWait;
 
+    public static JSONArray departmentListJsonArr;
+    public static JSONArray positionListJsonArr;
+
     public static boolean amIRegistered;
     public static boolean permitted;
 
     public static boolean isGettingEmployeeDataFinished;
+    public static boolean isSignupRequestSuccess;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,9 +36,10 @@ public class EntryActivity extends AppCompatActivity {
         fragSignup = SignupFragment.newInstance();
         fragWait = WaitFragment.newInstance();
 
-        FragmentManager fragmentManager = getFragmentManager();
-
         isGettingEmployeeDataFinished = false;
+        isSignupRequestSuccess = false;
+
+        FragmentManager fragmentManager = getFragmentManager();
 
         try {
             MainActivity.mSocket = new SocketIO(this);
@@ -50,11 +58,19 @@ public class EntryActivity extends AppCompatActivity {
             MainActivity.mSocket.amIRegistered(MainActivity.myMacAddress);
 
             // Wait for receiving "amIRegistered" data through socket.io
+            int timerCount = 0;
             while (true) {
-                Thread.sleep(100);
+                if (timerCount == 100) {
+                    Toast.makeText(this.getApplicationContext(), "서버와 연결할 수 없습니다. 잠시 후 다시 시도하세요.", Toast.LENGTH_LONG).show();
 
-                if (isGettingEmployeeDataFinished) {
+                    MainActivity.mSocket.close();
+                    MainActivity.mainActivity.finish();
+                    this.finish();
+                } else if (isGettingEmployeeDataFinished) {
                     break;
+                } else {
+                    Thread.sleep(100);
+                    timerCount++;
                 }
             }
 
@@ -68,7 +84,6 @@ public class EntryActivity extends AppCompatActivity {
                     .replace(R.id.content_entry_frame, fragSignup)
                     .detach(fragSignup).attach(fragSignup)
                     .commit();
-            MainActivity.mainActivity.finish();
 
         } else if (permitted == false) {
             // If registered but not permitted
@@ -76,6 +91,7 @@ public class EntryActivity extends AppCompatActivity {
                     .replace(R.id.content_entry_frame, fragWait)
                     .detach(fragWait).attach(fragWait)
                     .commit();
+
             MainActivity.mainActivity.finish();
 
         } else {

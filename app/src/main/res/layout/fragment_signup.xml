@@ -9,13 +9,41 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context=".ui.EntryActivity">
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="가입이 되어있지 않은 스마트폰입니다."
+        android:id="@+id/signup_notice"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"
+        android:textAlignment="center" />
+
+    <Button
+        android:layout_width="150dp"
+        android:layout_height="55dp"
+        android:text="가입 신청"
+        android:id="@+id/signup_signupButton"
+        android:textAllCaps="false"
+        android:layout_alignParentBottom="true"
+        android:layout_alignEnd="@+id/signup_position" />
+
+    <Spinner
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/signup_position"
+        android:layout_below="@+id/signup_department"
+        android:layout_alignStart="@+id/signup_department"
+        android:layout_alignEnd="@+id/signup_department" />
+
     <EditText
         android:layout_width="300dp"
         android:layout_height="50dp"
         android:id="@+id/signup_smartphoneAddr"
         android:hint="블루투스 주소"
-        android:layout_marginTop="88dp"
-        android:layout_alignParentTop="true"
+        android:layout_marginTop="130dp"
+        android:layout_below="@+id/signup_notice"
         android:layout_alignStart="@+id/signup_employee_number" />
 
     <EditText
@@ -30,56 +58,26 @@
         android:layout_width="300dp"
         android:layout_height="50dp"
         android:id="@+id/signup_name"
-        android:layout_centerHorizontal="true"
         android:hint="이름"
-        android:layout_below="@+id/signup_employee_number" />
+        android:layout_below="@+id/signup_employee_number"
+        android:layout_centerHorizontal="true" />
 
     <EditText
         android:layout_width="300dp"
         android:layout_height="50dp"
         android:id="@+id/signup_password"
-        android:layout_centerHorizontal="true"
         android:inputType="textPassword"
         android:hint="비밀번호"
-        android:layout_below="@+id/signup_name" />
+        android:layout_below="@+id/signup_name"
+        android:layout_alignStart="@+id/signup_name" />
 
-    <EditText
-        android:layout_width="300dp"
-        android:layout_height="50dp"
-        android:id="@+id/signup_department"
-        android:layout_centerHorizontal="true"
-        android:inputType="text"
-        android:hint="부서"
-        android:layout_below="@+id/signup_password" />
-
-    <EditText
-        android:layout_width="300dp"
-        android:layout_height="50dp"
-        android:id="@+id/signup_position"
-        android:inputType="text"
-        android:hint="직급"
-        android:layout_below="@+id/signup_department"
-        android:layout_alignEnd="@+id/signup_signupButton" />
-
-    <Button
-        android:layout_width="150dp"
-        android:layout_height="55dp"
-        android:text="가입 신청"
-        android:id="@+id/signup_signupButton"
-        android:textAllCaps="false"
-        android:layout_below="@+id/signup_position"
-        android:layout_alignEnd="@+id/signup_department" />
-
-    <TextView
-        android:layout_width="wrap_content"
+    <Spinner
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="가입이 되어있지 않은 스마트폰입니다."
-        android:id="@+id/signup_notice"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentEnd="true"
-        android:singleLine="true"
-        android:textAlignment="center" />
+        android:id="@+id/signup_department"
+        android:layout_marginTop="22dp"
+        android:layout_below="@+id/signup_password"
+        android:layout_alignStart="@+id/signup_password"
+        android:layout_alignEnd="@+id/signup_password" />
 
 </RelativeLayout>
