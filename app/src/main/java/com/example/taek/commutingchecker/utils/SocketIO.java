@@ -144,6 +144,7 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
                     content.put("BeaconData2", data.get("BeaconData2"));
                     content.put("BeaconData3", data.get("BeaconData3"));
                     content.put("SmartphoneAddress", data.get("SmartphoneAddress"));
+                    // content.put("DateTime", data.get("DateTime"));
                     if (isComeToWork) {
                         content.put("Commute", "true");
                     } else {
@@ -175,9 +176,10 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
                             Log.d("SendEvent", "Success");
                             if(isComeToWork == true) {
                                 Log.d("ComeToWork", "comeToWork is registered");
-                                GenerateNotification.generateNotification(BLEScanService.ServiceContext, "CommutingChecker", "출근 등록", "출근이 등록되었습니다.");
+                                // GenerateNotification.generateNotification(BLEScanService.ServiceContext, "CommutingChecker", "출근 등록", "출근이 등록되었습니다.");
                             }else {
-                                GenerateNotification.generateNotification(BLEScanService.ServiceContext, "CommutingChecker", "퇴근 등록", "퇴근이 등록되었습니다.");
+                                Log.d("LeaveWork", "comeToWork is registered");
+                                // GenerateNotification.generateNotification(BLEScanService.ServiceContext, "CommutingChecker", "퇴근 등록", "퇴근이 등록되었습니다.");
                             }
                         }else {
                             if(BLEScanService.failureCount_SendEv < 2) {
@@ -190,9 +192,123 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
                                 BLEScanService.failureCount_SendEv = 0;
                                 if(isComeToWork == true) {
                                     Log.d("ComeToWork", "comeToWork isn't registered");
-                                    GenerateNotification.generateNotification(BLEScanService.ServiceContext, "CommutingChecker", "출근 등록 실패", "출근 등록을 실패하였습니다.");
+                                    // GenerateNotification.generateNotification(BLEScanService.ServiceContext, "CommutingChecker", "출근 등록 실패", "출근 등록을 실패하였습니다.");
                                 }else{
-                                    GenerateNotification.generateNotification(BLEScanService.ServiceContext, "CommutingChecker", "퇴근 등록 실패", "퇴근 등록을 실패하였습니다.");
+                                    Log.d("LeaveWork", "comeToWork is registered");
+                                    // GenerateNotification.generateNotification(BLEScanService.ServiceContext, "CommutingChecker", "퇴근 등록 실패", "퇴근 등록을 실패하였습니다.");
+                                }
+                            }
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        Log.d("Awesometic", "sendCommutingEvent - exception caught (result analyze)");
+                    }
+                }
+            });
+
+                            /*
+                GenerateNotification.generateNotification(BLEScanService.ServiceContext, "서버에 데이터 전송", "서버에 데이터를 전송하였습니다.",
+                        data.get("BeaconDeviceAddress1") + ", "
+                        + data.get("BeaconDeviceAddress2") + ", "
+                        + data.get("BeaconDeviceAddress3") + ", "
+                        + data.get("BeaconData1") + ", "
+                        + data.get("BeaconData2") + ", "
+                        + data.get("BeaconData3") + ", "
+                        + data.get("SmartphoneAddress"));
+                        //+ ", " + data.get("DateTime")); */
+
+            //this.close();
+
+        } else {
+            Log.d("Awesometic", "sendCommutingEvent - socket isn't connected");
+            mSocket.connect();
+            data.put("isComeToWork", String.valueOf(isComeToWork));
+            insertQueueData(data);
+        }
+    }
+
+    // 이벤트 보내기
+    public void sendCommutingEventInQueue(final Map<String, String> data, final boolean isComeToWork) {
+        if (mSocket.connected()) {
+            if (analyzer.serversPublicKey != null) {
+                try {
+                    JSONObject content = new JSONObject();
+                    content.put("SmartphoneAddress", BLEScanService.myMacAddress);
+                                   /*
+                content.put("BeaconDeviceAddress1", mDeviceInfo1.Address);
+                    content.put("BeaconDeviceAddress2", mDeviceInfo2.Address);
+                    content.put("BeaconDeviceAddress3", mDeviceInfo3.Address);
+                    content.put("BeaconData1", mDeviceInfo1.ScanRecord);
+                    content.put("BeaconData2", mDeviceInfo2.ScanRecord);
+                    content.put("BeaconData3", mDeviceInfo3.ScanRecord);
+                    content.put("SmartphoneAddress", BLEScanService.myMacAddress);
+                    content.put("DateTime", CurrentTime.currentTime());
+                 */
+                    content.put("BeaconDeviceAddress1", data.get("BeaconDeviceAddress1"));
+                    content.put("BeaconDeviceAddress2", data.get("BeaconDeviceAddress2"));
+                    content.put("BeaconDeviceAddress3", data.get("BeaconDeviceAddress3"));
+                /*
+                Gateway 1 (pi2): f0 f4 c1 76 a6 23 42 ef ac 3a 66 f2 1a 11 99 3e 00 02 00 01
+Gateway 2 (pi2): bf 0c c4 a4 eb 9f 4f 06 b7 16 1f 5f f4 9a 8f 47 00 02 00 02
+Gateway 3 (pi3): 70 9b d6 40 42 d1 4b 1a 99 0a 36 d4 a1 e5 27 d8 00 03 00 01
+Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
+                 */
+                    content.put("BeaconData1", data.get("BeaconData1"));
+                    content.put("BeaconData2", data.get("BeaconData2"));
+                    content.put("BeaconData3", data.get("BeaconData3"));
+                    content.put("SmartphoneAddress", data.get("SmartphoneAddress"));
+                    content.put("SmartphoneDatetime", data.get("DateTime"));
+                    if (isComeToWork) {
+                        content.put("Commute", "true");
+                    } else {
+                        content.put("Commute", "false");
+                    }
+                    //content.put("DateTime", data.get("DateTime"));
+                    Log.d("Awesometic", "sendCommutingEvent - send message to server");
+                    mSocket.emit("circumstance_overdue", analyzer.encryptSendJson(content));
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                    Log.d("Awesometic", "sendCommutingEvent - exception caught (JSON envelopment)");
+                }
+
+            } else {
+                Log.d("Awesometic", "sendCommutingEvent - server's public key is not initialized");
+                getServersRsaPublicKey();
+            }
+
+            mSocket.on("circumstance_overdue_answer", new Emitter.Listener() {
+                @Override
+                public void call(Object... args) {
+                    try {
+                        JSONObject resultJson = (JSONObject) args[0];
+                        JSONObject contentJson = new JSONObject(analyzer.extractContentFromReceivedJson(resultJson));
+
+                        Boolean isSuccess = contentJson.getBoolean("requestSuccess");
+                        if(isSuccess) {
+                            BLEScanService.failureCount_SendEv = 0;
+                            Log.d("SendEvent", "Success");
+                            if(isComeToWork == true) {
+                                Log.d("ComeToWork", "comeToWork is registered");
+                                // GenerateNotification.generateNotification(BLEScanService.ServiceContext, "CommutingChecker", "출근 등록", "출근이 등록되었습니다.");
+                            }else {
+                                Log.d("LeaveWork", "comeToWork is registered");
+                                // GenerateNotification.generateNotification(BLEScanService.ServiceContext, "CommutingChecker", "퇴근 등록", "퇴근이 등록되었습니다.");
+                            }
+                        }else {
+                            if(BLEScanService.failureCount_SendEv < 2) {
+                                BLEScanService.failureCount_SendEv++;
+                                sendCommutingEventInQueue(data, isComeToWork);
+                                return;
+                            }
+                            else{
+                                Log.d("SendEvent", "failed");
+                                BLEScanService.failureCount_SendEv = 0;
+                                if(isComeToWork == true) {
+                                    Log.d("ComeToWork", "comeToWork isn't registered");
+                                    // GenerateNotification.generateNotification(BLEScanService.ServiceContext, "CommutingChecker", "출근 등록 실패", "출근 등록을 실패하였습니다.");
+                                }else{
+                                    Log.d("LeaveWork", "comeToWork is registered");
+                                    // GenerateNotification.generateNotification(BLEScanService.ServiceContext, "CommutingChecker", "퇴근 등록 실패", "퇴근 등록을 실패하였습니다.");
                                 }
                             }
                         }
@@ -561,16 +677,15 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
     }
 
     public void sendQueueData() {
-        if (mSocketDataQueue.isEmpty())
+        if (mSocketDataQueue.isEmpty()) {
             return;
-
-        if(!mSocketDataQueue.isEmpty()) {
+        }else {
             Map<String, String> map = (HashMap<String, String>) mSocketDataQueue.remove();
             String isComeToWork = map.get("isComeToWork");
             if (map.containsKey("isComeToWork")) {
                 map.remove("isComeToWork");
             }
-            sendCommutingEvent(map, Boolean.valueOf(isComeToWork));
+            sendCommutingEventInQueue(map, Boolean.valueOf(isComeToWork));
         }
         /*
         for (int i = 0; i < mSocketDataQueue.size(); i++) {

@@ -15,6 +15,7 @@ import android.content.Intent;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.PowerManager;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -46,6 +47,8 @@ public class BLEScanService extends Service {
     private BroadcastReceiver StopSelfReceiver, RequestDataReceiver, ShowDataReceiver, NetworkChnageReceiver, ScreenOffReceiver;
     public List<Map<String, String>> EssentialDataArray; // 서버에서 받아온 비콘 데이터
     private Notification mNotification;
+    private PowerManager mPowerManager;
+    PowerManager.WakeLock mWakeLock;
 
     // Target we publish for clients to send messages to IncomingHandler.
     // private Messenger incomingMessenger = new Messenger(new IncomingHandler(Constants.HANDLER_TYPE_SERVICE, BLEScanService.this));
@@ -63,6 +66,8 @@ public class BLEScanService extends Service {
         failureCount_SendEv = 0;
         lowPowerScanFlag = false;
 
+        mPowerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
+        mWakeLock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
         mBLEServiceUtils = new BLEServiceUtils(ServiceContext);
 
         // 비콘 Mac 주소를 저장할 ArrayList
@@ -103,6 +108,9 @@ public class BLEScanService extends Service {
 
         mBLEServiceUtils.createBluetoothAdapter(getSystemService(this.BLUETOOTH_SERVICE)); // Bluetooth Adapter 생성
         mBLEServiceUtils.enableBluetooth(); // Bluetooth 사용
+
+        // Bluetooth wakeLock
+        mWakeLock.acquire();
 
         // waiting for stating bluetooth on
         try{
@@ -276,6 +284,7 @@ public class BLEScanService extends Service {
                 return;
             } else {
                 Log.d(TAG, "restartScan(): change scanMode");
+                settings = null;
                 scanLeDevice(false);
                 settings = mBLEServiceUtils.setPeriod(scanMode);
                 scanLeDevice(true);
@@ -287,6 +296,7 @@ public class BLEScanService extends Service {
     public void onDestroy(){
         Log.i(TAG, "Service onDestroy");
         scanFlag = false;
+        mWakeLock.release();
         scanLeDevice(false); // 스캔 중지
         unregisterReceiver(StopSelfReceiver);
         unregisterReceiver(RequestDataReceiver);
