@@ -549,12 +549,18 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
                             EntryActivity.permitted = permitted;
                             MainActivity.employee_name = name;
                             MainActivity.employee_number = employee_number;
-
-                            EntryActivity.isGettingEmployeeDataFinished = true;
                         } else {
+                            JSONArray departmentListJsonArr = contentJson.getJSONArray("departmentListJsonArr");
+                            JSONArray positionListJsonArr = contentJson.getJSONArray("positionListJsonArr");
+
                             Log.d("Awesometic", "amIRegistered - false");
                             EntryActivity.amIRegistered = false;
+                            EntryActivity.departmentListJsonArr = departmentListJsonArr;
+                            EntryActivity.positionListJsonArr = positionListJsonArr;
                         }
+
+                        EntryActivity.isGettingEmployeeDataFinished = true;
+
                     } catch (Exception e) {
                         e.printStackTrace();
                         Log.d("Awesometic", "amIRegistered - receive fail");
@@ -600,10 +606,12 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
 
                         boolean requestSuccess = contentJson.getBoolean("requestSuccess");
 
-                        if (requestSuccess)
+                        if (requestSuccess) {
                             Log.d("Awesometic", "signupRequest - Success");
-                        else
+                        } else {
                             Log.d("Awesometic", "signupRequest - Fail - Something Wrong");
+                        }
+                        EntryActivity.isSignupRequestSuccess = requestSuccess;
 
                     } catch (JSONException e) {
                         e.printStackTrace();
