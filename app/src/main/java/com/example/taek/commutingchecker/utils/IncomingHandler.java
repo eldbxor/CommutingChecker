@@ -1,6 +1,5 @@
 package com.example.taek.commutingchecker.utils;
 
-import android.content.ComponentName;
 import android.content.Context;
 import android.os.Build;
 import android.os.Handler;
@@ -92,6 +91,26 @@ public class IncomingHandler extends Handler{
                             }
                         }, 2000);
                         break;
+
+                    case Constants.HANDLE_MESSAGE_TYPE_CALIBRATION_RESULT:
+                        Log.d("MessengerCommunication", "Activity receive 6");
+                        try {
+                            MainActivity.strOfCalibrationResult = String.valueOf(msg.obj);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                        break;
+
+                    case Constants.HANDLE_MESSAGE_TYPE_PRESENT_COORDINATE:
+                        Log.d("MessengerCommunication", "Activity receive 7");
+                        int coordinate[] = (int []) msg.obj;
+                        try {
+                            ThresholdAdjustmentFragment.tvCoordinateX.setText(coordinate[0]);
+                            ThresholdAdjustmentFragment.tvCoordinateY.setText(coordinate[1]);
+                            ThresholdAdjustmentFragment.tvCoordinateZ.setText(coordinate[2]);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
                 }
                 break;
 

@@ -413,18 +413,25 @@ public class BLEServiceUtils {
                             break;
                         }
                     } else if (callbackType == Constants.CALLBACK_TYPE_CALIBRATION_SERVICE) {
+                        try {
+                            int coordinate[] = {mDeviceInfo1.Rssi, mDeviceInfo2.Rssi, mDeviceInfo3.Rssi};
+                            ((CalibrationService) mContext).replyToActivityMessenger.send(Message.obtain(null, Constants.HANDLE_MESSAGE_TYPE_PRESENT_COORDINATE, coordinate));
+                        } catch (RemoteException e) {
+                            e.printStackTrace();
+                        }
+
                         if(times >= 2){ // 출근존을 지났을 때
                             try {
                                 ((CalibrationService) mContext).replyToActivityMessenger.send(Message.obtain(null, Constants.HANDLE_MESSAGE_TYPE_SETTEXT_ATTENDANCE_ZONE));
                                 Log.d("MessengerCommunication", "Service send 3");
-                            }catch(RemoteException e){
+                            } catch(RemoteException e) {
                                 Log.d("replyToActivity", e.toString());
                             }
                         }else{
                             try {
                                 ((CalibrationService) mContext).replyToActivityMessenger.send(Message.obtain(null, Constants.HANDLE_MESSAGE_TYPE_SETTEXT_NOT_ATTENDANCE_ZONE));
                                 Log.d("MessengerCommunication", "Service send 4");
-                            }catch(RemoteException e){
+                            } catch(RemoteException e) {
                                 Log.d("replyToActivity", e.toString());
                             }
                         }

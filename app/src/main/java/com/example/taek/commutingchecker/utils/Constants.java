@@ -30,6 +30,8 @@ public class Constants {
     public static final int HANDLE_MESSAGE_TYPE_SETTEXT_ATTENDANCE_ZONE = 3;
     public static final int HANDLE_MESSAGE_TYPE_SETTEXT_NOT_ATTENDANCE_ZONE = 4;
     public static final int HANDLE_MESSAGE_TYPE_REGISTER_CALIBRATION = 5;
+    public static final int HANDLE_MESSAGE_TYPE_CALIBRATION_RESULT = 6;
+    public static final int HANDLE_MESSAGE_TYPE_PRESENT_COORDINATE = 7;
 
     // BroadCastReceiver Type
     public static final int BROADCAST_RECEIVER_TYPE_REQEUST_DATA = 1;

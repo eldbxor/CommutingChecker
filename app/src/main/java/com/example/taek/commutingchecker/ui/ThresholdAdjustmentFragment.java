@@ -26,8 +26,8 @@ public class ThresholdAdjustmentFragment extends Fragment {
     private View rootView;
 
     Button btnCalibrationEnd;
-    TextView tvThreshold;
-    public static TextView tvCheckThreshold;
+    TextView tvThreshold, tvCalibrationResult;
+    public static TextView tvCheckThreshold, tvCoordinateX, tvCoordinateY, tvCoordinateZ;
     SeekBar sbThreshold;
     public static Fragment fragment;
 
@@ -52,7 +52,13 @@ public class ThresholdAdjustmentFragment extends Fragment {
         tvThreshold = (TextView) rootView.findViewById(R.id.threshold);
         sbThreshold = (SeekBar) rootView.findViewById(R.id.seekBar);
         tvCheckThreshold = (TextView) rootView.findViewById(R.id.tvCheckThreshold);
+        tvCalibrationResult = (TextView) rootView.findViewById(R.id.tvStrOfCalibrationResult);
+        tvCoordinateX = (TextView) rootView.findViewById(R.id.tvCoordinateX);
+        tvCoordinateY = (TextView) rootView.findViewById(R.id.tvCoordinateY);
+        tvCoordinateZ = (TextView) rootView.findViewById(R.id.tvCoordinateZ);
         fragment = this;
+
+        tvCalibrationResult.setText(MainActivity.strOfCalibrationResult);
 
         btnCalibrationEnd.setOnClickListener(new View.OnClickListener() {
             @Override

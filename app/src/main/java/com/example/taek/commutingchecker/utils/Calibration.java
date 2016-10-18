@@ -5,7 +5,6 @@ import android.os.Message;
 import android.os.RemoteException;
 import android.util.Log;
 
-import com.example.taek.commutingchecker.services.BLEScanService;
 import com.example.taek.commutingchecker.services.CalibrationService;
 
 import java.util.ArrayList;
@@ -108,9 +107,17 @@ public class Calibration {
                 sumOfRssi1 = sumOfRssi1 / rssi1.size();
                 sumOfRssi2 = sumOfRssi2 / rssi2.size();
                 sumOfRssi3 = sumOfRssi3 / rssi3.size();
+                String strOfCalibrationResult = "(" + String.valueOf(sumOfRssi1) + ", " + String.valueOf(sumOfRssi2) + ", " + String.valueOf(sumOfRssi3) + ")";
 
                 Log.d("Rssi 값 배열", rssi1.toString() + ", " + rssi2.toString() + ", " + rssi3.toString());
                 Log.d("Rssi 값 평균", String.valueOf(sumOfRssi1) + ", " + String.valueOf(sumOfRssi2) + ", " + String.valueOf(sumOfRssi3));
+
+                try {
+                    mCalibrationService.replyToActivityMessenger.send(Message.obtain(null, Constants.HANDLE_MESSAGE_TYPE_CALIBRATION_RESULT, strOfCalibrationResult));
+                    Log.d("MessengerCommunication", "Service send 6");
+                }catch(RemoteException e){
+                    Log.d("replyToActivity", e.toString());
+                }
 
                 /*
                 while(count_error < 30){
