@@ -14,6 +14,7 @@ import android.util.Log;
 
 import com.example.taek.commutingchecker.services.BLEScanService;
 import com.example.taek.commutingchecker.services.CalibrationService;
+import com.example.taek.commutingchecker.ui.PopupActivity;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -223,6 +224,12 @@ public class BLEServiceUtils {
         ScanSettings settings = null;
 
         if(Build.VERSION.SDK_INT >= 21){
+            if (scanMode == ScanSettings.SCAN_MODE_LOW_POWER) {
+                BLEScanService.lowPowerScanFlag = true;
+            } else {
+                BLEScanService.lowPowerScanFlag = false;
+            }
+
             if(Build.VERSION.SDK_INT == Build.VERSION_CODES.M){
                 settings = new ScanSettings.Builder()
                         .setScanMode(scanMode)
@@ -236,6 +243,14 @@ public class BLEServiceUtils {
         }
 
         return settings;
+    }
+
+    public void wakeScreen(Context context) {
+        // 팝업으로 사용할 액티비티를 호출할 인텐트를 작성한다.
+        Intent popupIntent = new Intent(context, PopupActivity.class)
+                .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        // 그리고 호출한다.
+        context.startActivity(popupIntent);
     }
 
     public void comeToWorkCheckTime(final int callbackType) {

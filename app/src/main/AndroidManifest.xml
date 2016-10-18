@@ -39,7 +39,9 @@
         <service
             android:name=".services.CalibrationService"
             android:enabled="true"
-            android:exported="true"/>
+            android:exported="true" />
+
+        <activity android:name=".ui.PopupActivity"></activity>
     </application>
 
 </manifest>

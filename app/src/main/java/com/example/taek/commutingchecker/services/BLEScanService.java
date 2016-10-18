@@ -44,11 +44,11 @@ public class BLEScanService extends Service {
     public BLEServiceUtils mBLEServiceUtils;
     private String TAG = "BLEScanService";
     private Thread commutingThread; // 출퇴근 등록 쓰레드
-    private BroadcastReceiver StopSelfReceiver, RequestDataReceiver, ShowDataReceiver, NetworkChnageReceiver, ScreenOffReceiver;
+    private BroadcastReceiver StopSelfReceiver, RequestDataReceiver, ShowDataReceiver, NetworkChangeReceiver, ScreenOffReceiver;
     public List<Map<String, String>> EssentialDataArray; // 서버에서 받아온 비콘 데이터
     private Notification mNotification;
-    private PowerManager mPowerManager;
-    PowerManager.WakeLock mWakeLock;
+    public PowerManager mPowerManager;
+    public PowerManager.WakeLock mWakeLock;
 
     // Target we publish for clients to send messages to IncomingHandler.
     // private Messenger incomingMessenger = new Messenger(new IncomingHandler(Constants.HANDLER_TYPE_SERVICE, BLEScanService.this));
@@ -64,10 +64,9 @@ public class BLEScanService extends Service {
         commuteStatusFlag = false;
         ServiceContext = this;
         failureCount_SendEv = 0;
-        lowPowerScanFlag = false;
 
         mPowerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
-        mWakeLock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
+
         mBLEServiceUtils = new BLEServiceUtils(ServiceContext);
 
         // 비콘 Mac 주소를 저장할 ArrayList
@@ -97,20 +96,20 @@ public class BLEScanService extends Service {
 
         RequestDataReceiver = mRegisterReceiver.createReceiver(Constants.BROADCAST_RECEIVER_TYPE_REQEUST_DATA);
         ShowDataReceiver = mRegisterReceiver.createReceiver(Constants.BROADCAST_RECEIVER_TYPE_SHOW_DATA);
-        NetworkChnageReceiver = mRegisterReceiver.createReceiver(Constants.BROADCAST_RECEIVER_TYPE_NETWORK_CHANGE);
+        NetworkChangeReceiver = mRegisterReceiver.createReceiver(Constants.BROADCAST_RECEIVER_TYPE_NETWORK_CHANGE);
         ScreenOffReceiver = mRegisterReceiver.createReceiver(Constants.BROADCAST_RECEIVER_TYPE_SCREEN_OFF);
         registerReceiver(StopSelfReceiver, mRegisterReceiver.createPackageFilter(Constants.BROADCAST_RECEIVER_TYPE_STOP_SERVICE));
         registerReceiver(RequestDataReceiver, mRegisterReceiver.createPackageFilter(Constants.BROADCAST_RECEIVER_TYPE_REQEUST_DATA));
         registerReceiver(ShowDataReceiver, mRegisterReceiver.createPackageFilter(Constants.BROADCAST_RECEIVER_TYPE_SHOW_DATA));
-        registerReceiver(NetworkChnageReceiver, mRegisterReceiver.createPackageFilter(Constants.BROADCAST_RECEIVER_TYPE_NETWORK_CHANGE));
+        registerReceiver(NetworkChangeReceiver, mRegisterReceiver.createPackageFilter(Constants.BROADCAST_RECEIVER_TYPE_NETWORK_CHANGE));
         registerReceiver(ScreenOffReceiver, mRegisterReceiver.createPackageFilter(Constants.BROADCAST_RECEIVER_TYPE_SCREEN_OFF));
 
 
         mBLEServiceUtils.createBluetoothAdapter(getSystemService(this.BLUETOOTH_SERVICE)); // Bluetooth Adapter 생성
         mBLEServiceUtils.enableBluetooth(); // Bluetooth 사용
 
-        // Bluetooth wakeLock
-        mWakeLock.acquire();
+        // Service wakeLock
+        acquireWakeLock(PowerManager.PARTIAL_WAKE_LOCK);
 
         // waiting for stating bluetooth on
         try{
@@ -122,10 +121,10 @@ public class BLEScanService extends Service {
             e.printStackTrace();
         }
 
-        if(mBLEServiceUtils.mBluetoothAdapter != null){ // && mBluetoothAdapter.isEnabled()){
-            if(Build.VERSION.SDK_INT >= 21){
+        if (mBLEServiceUtils.mBluetoothAdapter != null) { // && mBluetoothAdapter.isEnabled()){
+            if (Build.VERSION.SDK_INT >= 21) {
                 mBLEServiceUtils.mBLEScanner = mBLEServiceUtils.mBluetoothAdapter.getBluetoothLeScanner();
-                settings = mBLEServiceUtils.setPeriod(ScanSettings.SCAN_MODE_LOW_LATENCY);
+                settings = mBLEServiceUtils.setPeriod(ScanSettings.SCAN_MODE_LOW_POWER);
                 filters = new ArrayList<ScanFilter>();
             }
 
@@ -208,7 +207,7 @@ public class BLEScanService extends Service {
                 while(scanFlag) {
                     if (lowPowerScanFlag) {
                         try {
-                            Thread.sleep(3000);
+                            Thread.sleep(1000);
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
@@ -225,13 +224,17 @@ public class BLEScanService extends Service {
                     // 3개의 비콘 정보가 없을 경우 continue
                     if (mBLEDevices.size() != 3) {
                         continue;
-                    } else {
-                        lowPowerScanFlag = false;
                     }
 
                     // 0.5초 동안 3번 Rssi 체크 후 2번 이상 적합하면 sendCommutingEvent() 메서드 실행
                     if (!commuteCycleFlag && !commuteStatusFlag) {
+                        // Low Latency 모드로 스캔하기 위한 Screen on
+                        mBLEServiceUtils.wakeScreen(ServiceContext);
+
+                        // low Latency 스캔 모드로 변경
                         restartScan(ScanSettings.SCAN_MODE_LOW_LATENCY);
+
+                        // 출근 알고리즘 실행
                         mBLEServiceUtils.comeToWorkCheckTime(Constants.CALLBACK_TYPE_BLE_SCAN_SERVICE);
                     }
 
@@ -292,16 +295,32 @@ public class BLEScanService extends Service {
         }
     }
 
+    public void acquireWakeLock(int wakeLockMode) {
+        if (mWakeLock != null) {
+            if (mWakeLock.isHeld()) {
+                mWakeLock.release();
+            }
+            mWakeLock = null;
+        }
+
+        mWakeLock = mPowerManager.newWakeLock(wakeLockMode, TAG);
+        mWakeLock.acquire();
+    }
+
     @Override
     public void onDestroy(){
         Log.i(TAG, "Service onDestroy");
         scanFlag = false;
-        mWakeLock.release();
+        if (mWakeLock != null) {
+            if (mWakeLock.isHeld()) {
+                mWakeLock.release();
+            }
+        }
         scanLeDevice(false); // 스캔 중지
         unregisterReceiver(StopSelfReceiver);
         unregisterReceiver(RequestDataReceiver);
         unregisterReceiver(ShowDataReceiver);
-        unregisterReceiver(NetworkChnageReceiver);
+        unregisterReceiver(NetworkChangeReceiver);
         unregisterReceiver(ScreenOffReceiver);
         stopForeground(false);
 

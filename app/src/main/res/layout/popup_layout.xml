@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/main"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="#80000000">
+
+    <RelativeLayout
+        android:id="@+id/alert_"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:background="@drawable/bg_alert2">
+        <!-- android:background="@drawable/commuting"> -->
+
+        <TextView
+            android:id="@+id/alert_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:text="Commuting Checker"
+            android:textAppearance="?android:attr/textAppearanceLarge"/>
+
+        <ImageView
+            android:layout_width="70dp"
+            android:layout_height="70dp"
+            android:layout_above="@id/alert_title"
+            android:layout_centerVertical="true"
+            android:layout_centerHorizontal="true"
+            android:src="@drawable/commuting"
+            android:layout_marginBottom="10dp"/>
+
+        <TextView
+            android:id="@+id/alert_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/alert_title"
+            android:layout_centerHorizontal="true"
+            android:text="Waiting for come to work"/>
+
+        <TableLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/alert_text"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="20dp">
+
+            <TableRow>
+                <Button
+                    android:id="@+id/btn_open_activity"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginRight="50dp"
+                    android:layout_centerHorizontal="true"
+                    android:layout_below="@id/alert_text"
+                    android:background="#00ff0000"
+                    android:text="open"/>
+
+                <Button
+                    android:id="@+id/btn_close_alert"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_centerHorizontal="true"
+                    android:layout_below="@id/alert_text"
+                    android:background="#00ff0000"
+                    android:text="close"/>
+            </TableRow>
+        </TableLayout>
+
+    </RelativeLayout>
+
+</RelativeLayout>
