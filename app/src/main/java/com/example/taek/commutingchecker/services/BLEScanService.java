@@ -306,17 +306,22 @@ public class BLEScanService extends Service {
         stopForeground(false);
 
         try {
-            mBLEServiceUtils.timer.cancel();
-            mBLEServiceUtils.timer.purge();
-            mBLEServiceUtils.timer = null;
-            mBLEServiceUtils.leaveWorkTimer.cancel();
-            mBLEServiceUtils.leaveWorkTimer.purge();
-            mBLEServiceUtils.leaveWorkTimer = null;
-            timerHandler.removeCallbacksAndMessages(null);
+            if (mBLEServiceUtils.timer != null) {
+                mBLEServiceUtils.timer.cancel();
+                mBLEServiceUtils.timer.purge();
+                mBLEServiceUtils.timer = null;
+            }
+            if (mBLEServiceUtils.leaveWorkTimer != null) {
+                mBLEServiceUtils.leaveWorkTimer.cancel();
+                mBLEServiceUtils.leaveWorkTimer.purge();
+                mBLEServiceUtils.leaveWorkTimer = null;
+            }
             leaveWorkTimerHandler.removeCallbacksAndMessages(null);
+            timerHandler.removeCallbacksAndMessages(null);
         } catch (Exception e) {
             e.printStackTrace();
         }
+
         if(mSocketIO.connected() == true)
             mSocketIO.close();
         GenerateNotification.generateNotification(this, "CommutingChecker", "서비스 종료", "서비스가 종료되었습니다.");
