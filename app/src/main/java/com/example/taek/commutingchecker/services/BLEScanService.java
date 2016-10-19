@@ -16,6 +16,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.PowerManager;
+import android.os.Vibrator;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -49,6 +50,7 @@ public class BLEScanService extends Service {
     private Notification mNotification;
     public PowerManager mPowerManager;
     public PowerManager.WakeLock mWakeLock;
+    public Vibrator mVibrator;
 
     // Target we publish for clients to send messages to IncomingHandler.
     // private Messenger incomingMessenger = new Messenger(new IncomingHandler(Constants.HANDLER_TYPE_SERVICE, BLEScanService.this));
@@ -67,6 +69,7 @@ public class BLEScanService extends Service {
         failureCount_SendEv = 0;
 
         mPowerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
+        mVibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
 
         mBLEServiceUtils = new BLEServiceUtils(ServiceContext);
 

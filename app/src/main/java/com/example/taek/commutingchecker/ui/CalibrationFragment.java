@@ -77,7 +77,7 @@ public class CalibrationFragment extends Fragment {
                         MainActivity.connectMessenger();
 
                         //timerStart();
-                        btnCalibrationStart.setText("RESET");
+                        // btnCalibrationStart.setText("RESET");
 
                         break;
 
@@ -86,7 +86,6 @@ public class CalibrationFragment extends Fragment {
 
                         timerStop();
 
-                        //timerStop();
                         btnCalibrationStart.setText("START");
 
                         break;

@@ -247,6 +247,9 @@ public class BLEServiceUtils {
 
     public void wakeScreen(Context context) {
         if(!((BLEScanService) mContext).screenOnFlag) {
+            //  진동으로 화면을 켜야한다고 사용자에게 알림
+            ((BLEScanService) mContext).mVibrator.vibrate(1000);
+
             // 팝업으로 사용할 액티비티를 호출할 인텐트를 작성한다.
             Intent popupIntent = new Intent(context, PopupActivity.class)
                     .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -322,8 +325,10 @@ public class BLEServiceUtils {
                 }
 
                 while(true) {
-                    if(!((BLEScanService) mContext).scanFlag) {
-                        break;
+                    if (callbackType == Constants.CALLBACK_TYPE_BLE_SCAN_SERVICE) {
+                        if (!((BLEScanService) mContext).scanFlag) {
+                            break;
+                        }
                     }
 
                     int count_for = 0;

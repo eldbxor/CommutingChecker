@@ -19,7 +19,7 @@ public class GenerateNotification {
         PendingIntent intent = PendingIntent.getActivity(context, 0,
                 new Intent(context, MainActivity.class), 0);
 
-        Notification notification = new NotificationCompat.Builder(context)
+        Notification notification = new android.support.v4.app.NotificationCompat.Builder(context)
                 .setContentIntent(intent)
                 .setTicker(ticker)
                 .setContentTitle(contentTitle)

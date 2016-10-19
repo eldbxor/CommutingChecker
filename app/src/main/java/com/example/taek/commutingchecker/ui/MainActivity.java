@@ -95,6 +95,8 @@ public class MainActivity extends AppCompatActivity
                 Log.d("MessengerCommunication", "connected to service");
                 MainActivity.messenger = new Messenger(service);
                 CalibrationFragment.timerStart();
+
+                CalibrationFragment.btnCalibrationStart.setText("RESET");
             }
 
             @Override
@@ -356,6 +358,11 @@ public class MainActivity extends AppCompatActivity
         unregisterReceiver(ComeToWorkStateReceiver);
         unregisterReceiver(LeaveWorkStateReceiver);
         unregisterReceiver(StandByComeToWorkStateReceiver);
+
+        if (conn != null) {
+            unbindService(conn);
+            conn = null;
+        }
 
         try {
             mSocket.close();

@@ -13,6 +13,8 @@ import com.example.taek.commutingchecker.ui.CalibrationFragment;
 import com.example.taek.commutingchecker.ui.MainActivity;
 import com.example.taek.commutingchecker.ui.ThresholdAdjustmentFragment;
 
+import java.util.ArrayList;
+
 /**
  * Created by Taek on 2016-08-31.
  */
@@ -103,14 +105,16 @@ public class IncomingHandler extends Handler{
 
                     case Constants.HANDLE_MESSAGE_TYPE_PRESENT_COORDINATE:
                         Log.d("MessengerCommunication", "Activity receive 7");
-                        int coordinate[] = (int []) msg.obj;
-                        try {
-                            ThresholdAdjustmentFragment.tvCoordinateX.setText(coordinate[0]);
-                            ThresholdAdjustmentFragment.tvCoordinateY.setText(coordinate[1]);
-                            ThresholdAdjustmentFragment.tvCoordinateZ.setText(coordinate[2]);
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
+                        final int coordinate[] = (int []) msg.obj;
+                        ThresholdAdjustmentFragment.fragment.getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                ThresholdAdjustmentFragment.tvCoordinateX.setText(String.valueOf(coordinate[0]));
+                                ThresholdAdjustmentFragment.tvCoordinateY.setText(String.valueOf(coordinate[1]));
+                                ThresholdAdjustmentFragment.tvCoordinateZ.setText(String.valueOf(coordinate[2]));
+                            }
+                        });
+                        break;
                 }
                 break;
 
