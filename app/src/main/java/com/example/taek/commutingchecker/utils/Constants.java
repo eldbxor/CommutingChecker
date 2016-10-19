@@ -42,6 +42,8 @@ public class Constants {
     public static final int BROADCAST_RECEIVER_TYPE_LEAVE_WORK_STATE = 6;
     public static final int BROADCAST_RECEIVER_TYPE_STAND_BY_COME_TO_WORK_STATE = 7;
     public static final int BROADCAST_RECEIVER_TYPE_SCREEN_OFF = 8;
+    public static final int BROADCAST_RECEIVER_TYPE_SCREEN_ON = 9;
+    public static final int BROADCAST_RECEIVER_TYPE_CLOSE_ALERT = 10;
 
     // NetworkStatus Type
     public static final int NETWORK_TYPE_WIFI = 1;

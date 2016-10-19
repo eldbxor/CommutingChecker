@@ -33,7 +33,7 @@ import java.util.Map;
 public class BLEScanService extends Service {
     public static String myMacAddress; // 스마트폰 블루투스 Mac 주소
     public static Context ServiceContext;
-    public static boolean scanFlag, commuteCycleFlag, commuteStatusFlag, lowPowerScanFlag, networkDisconnectedFlag;
+    public static boolean scanFlag, commuteCycleFlag, commuteStatusFlag, lowPowerScanFlag, networkDisconnectedFlag, screenOnFlag;
     public static int failureCount_SendEv; // sendCommutingEvent's Failure Count
     public SocketIO mSocketIO; // Jason을 이용한 서버와의 통신 클래스
     public List<DeviceInfo> mBLEDevices; // 비콘 디바이스 정보를 갖는 ArrayList
@@ -44,7 +44,7 @@ public class BLEScanService extends Service {
     public BLEServiceUtils mBLEServiceUtils;
     private String TAG = "BLEScanService";
     private Thread commutingThread; // 출퇴근 등록 쓰레드
-    private BroadcastReceiver StopSelfReceiver, RequestDataReceiver, ShowDataReceiver, NetworkChangeReceiver, ScreenOffReceiver;
+    private BroadcastReceiver StopSelfReceiver, RequestDataReceiver, ShowDataReceiver, NetworkChangeReceiver, ScreenOnReceiver, ScreenOffReceiver;
     public List<Map<String, String>> EssentialDataArray; // 서버에서 받아온 비콘 데이터
     private Notification mNotification;
     public PowerManager mPowerManager;
@@ -63,6 +63,7 @@ public class BLEScanService extends Service {
         commuteCycleFlag = false;
         commuteStatusFlag = false;
         ServiceContext = this;
+        screenOnFlag = true;
         failureCount_SendEv = 0;
 
         mPowerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
@@ -98,11 +99,13 @@ public class BLEScanService extends Service {
         ShowDataReceiver = mRegisterReceiver.createReceiver(Constants.BROADCAST_RECEIVER_TYPE_SHOW_DATA);
         NetworkChangeReceiver = mRegisterReceiver.createReceiver(Constants.BROADCAST_RECEIVER_TYPE_NETWORK_CHANGE);
         ScreenOffReceiver = mRegisterReceiver.createReceiver(Constants.BROADCAST_RECEIVER_TYPE_SCREEN_OFF);
+        ScreenOnReceiver = mRegisterReceiver.createReceiver(Constants.BROADCAST_RECEIVER_TYPE_SCREEN_ON);
         registerReceiver(StopSelfReceiver, mRegisterReceiver.createPackageFilter(Constants.BROADCAST_RECEIVER_TYPE_STOP_SERVICE));
         registerReceiver(RequestDataReceiver, mRegisterReceiver.createPackageFilter(Constants.BROADCAST_RECEIVER_TYPE_REQEUST_DATA));
         registerReceiver(ShowDataReceiver, mRegisterReceiver.createPackageFilter(Constants.BROADCAST_RECEIVER_TYPE_SHOW_DATA));
         registerReceiver(NetworkChangeReceiver, mRegisterReceiver.createPackageFilter(Constants.BROADCAST_RECEIVER_TYPE_NETWORK_CHANGE));
         registerReceiver(ScreenOffReceiver, mRegisterReceiver.createPackageFilter(Constants.BROADCAST_RECEIVER_TYPE_SCREEN_OFF));
+        registerReceiver(ScreenOnReceiver, mRegisterReceiver.createPackageFilter(Constants.BROADCAST_RECEIVER_TYPE_SCREEN_ON));
 
 
         mBLEServiceUtils.createBluetoothAdapter(getSystemService(this.BLUETOOTH_SERVICE)); // Bluetooth Adapter 생성
@@ -322,6 +325,7 @@ public class BLEScanService extends Service {
         unregisterReceiver(ShowDataReceiver);
         unregisterReceiver(NetworkChangeReceiver);
         unregisterReceiver(ScreenOffReceiver);
+        unregisterReceiver(ScreenOnReceiver);
         stopForeground(false);
 
         try {

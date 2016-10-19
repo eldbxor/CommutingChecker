@@ -13,6 +13,7 @@ import android.widget.Toast;
 import com.example.taek.commutingchecker.R;
 import com.example.taek.commutingchecker.services.BLEScanService;
 import com.example.taek.commutingchecker.ui.MainActivity;
+import com.example.taek.commutingchecker.ui.PopupActivity;
 import com.example.taek.commutingchecker.ui.SetupFragment;
 
 /**
@@ -147,7 +148,22 @@ public class RegisterReceiver {
                 broadcastReceiver = new BroadcastReceiver() {
                     @Override
                     public void onReceive(Context context, Intent intent) {
-                        // anything action
+                        ((BLEScanService) mContext).screenOnFlag = false;
+                        Log.d(TAG, "createReceiver(): screen off, screenOnFlag = " + String.valueOf(((BLEScanService) mContext).screenOnFlag));
+
+                        if (BLEScanService.commuteCycleFlag && !BLEScanService.commuteStatusFlag) {
+                            ((BLEScanService) mContext).mBLEServiceUtils.wakeScreen(BLEScanService.ServiceContext);
+                        }
+                    }
+                };
+                return broadcastReceiver;
+
+            case Constants.BROADCAST_RECEIVER_TYPE_SCREEN_ON:
+                broadcastReceiver = new BroadcastReceiver() {
+                    @Override
+                    public void onReceive(Context context, Intent intent) {
+                        ((BLEScanService) mContext).screenOnFlag = true;
+                        Log.d(TAG, "createReceiver(): screen on, screenOnFlag = " + String.valueOf(((BLEScanService) mContext).screenOnFlag));
                     }
                 };
                 return broadcastReceiver;
@@ -193,6 +209,20 @@ public class RegisterReceiver {
                     }
                 };
                 return broadcastReceiver;
+
+            case Constants.BROADCAST_RECEIVER_TYPE_CLOSE_ALERT:
+                broadcastReceiver = new BroadcastReceiver() {
+                    @Override
+                    public void onReceive(Context context, Intent intent) {
+                        // close alert
+                        PopupActivity.finishFlag = true;
+                        // ((PopupActivity) mContext).turnOffScreen();
+                        Log.d(TAG, "createReceiver(): PopupActivity's finishFlag = " + String.valueOf(PopupActivity.finishFlag));
+                        /*
+                        ((PopupActivity) mContext).turnOffScreen();
+                        ((PopupActivity) mContext).finish(); */
+                    }
+                };
         }
         return null;
     }
@@ -226,6 +256,10 @@ public class RegisterReceiver {
                 intentFilter = new IntentFilter(Intent.ACTION_SCREEN_OFF);
                 return intentFilter;
 
+            case Constants.BROADCAST_RECEIVER_TYPE_SCREEN_ON:
+                intentFilter = new IntentFilter(Intent.ACTION_SCREEN_ON);
+                return intentFilter;
+
             case Constants.BROADCAST_RECEIVER_TYPE_COME_TO_WORK_STATE:
                 intentFilter = new IntentFilter();
                 intentFilter.addAction("android.intent.action.COME_TO_WORK_STATE");
@@ -242,6 +276,12 @@ public class RegisterReceiver {
                 intentFilter = new IntentFilter();
                 intentFilter.addAction("android.intent.action.STAND_BY_COME_TO_WORK_STATE");
                 intentFilter.addDataScheme("standByComeToWork");
+                return intentFilter;
+
+            case Constants.BROADCAST_RECEIVER_TYPE_CLOSE_ALERT:
+                intentFilter = new IntentFilter();
+                intentFilter.addAction("android.intent.action.CLOSE_ALERT");
+                intentFilter.addDataScheme("closeAlert");
                 return intentFilter;
         }
         return null;

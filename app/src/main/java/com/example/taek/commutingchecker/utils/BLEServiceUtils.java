@@ -246,11 +246,13 @@ public class BLEServiceUtils {
     }
 
     public void wakeScreen(Context context) {
-        // 팝업으로 사용할 액티비티를 호출할 인텐트를 작성한다.
-        Intent popupIntent = new Intent(context, PopupActivity.class)
-                .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        // 그리고 호출한다.
-        context.startActivity(popupIntent);
+        if(!((BLEScanService) mContext).screenOnFlag) {
+            // 팝업으로 사용할 액티비티를 호출할 인텐트를 작성한다.
+            Intent popupIntent = new Intent(context, PopupActivity.class)
+                    .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            // 그리고 호출한다.
+            context.startActivity(popupIntent);
+        }
     }
 
     public void comeToWorkCheckTime(final int callbackType) {
@@ -489,7 +491,7 @@ public class BLEServiceUtils {
         leaveWorkTimer.schedule(new TimerTask() {
             @Override
             public void run() {
-                Log.d(TAG, "leaveWorkTimer schelduling");
+                Log.d(TAG, "leaveWorkTimer scheduling");
                 leaveWorkChecker(deviceInfo1, deviceInfo2, deviceInfo3);
                 // leaveWorkTimerSecond++;
             }
@@ -561,7 +563,7 @@ public class BLEServiceUtils {
     timer.schedule(new TimerTask() {
             @Override
             public void run() {
-                Log.d(TAG, "comeToWorkTimer schelduling");
+                Log.d(TAG, "comeToWorkTimer scheduling");
                 timerTextUpdate(deviceInfo1, deviceInfo2, deviceInfo3);
                 timerSecond++;
             }
@@ -637,6 +639,12 @@ public class BLEServiceUtils {
                 Intent intent = new Intent("android.intent.action.COME_TO_WORK_STATE");
                 intent.setData(Uri.parse("comeToWork:"));
                  mContext.sendBroadcast(intent);
+
+                // 팝업 지우기
+                intent = null;
+                intent = new Intent("android.intent.action.CLOSE_ALERT");
+                intent.setData(Uri.parse("closeAlert"));
+                mContext.sendBroadcast(intent);
 
                 GenerateNotification.generateNotification(mContext, "CommutingChecker", "출근 등록", "출근이 등록되었습니다.");
             } else {

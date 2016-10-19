@@ -1,21 +1,33 @@
 package com.example.taek.commutingchecker.ui;
 
+import android.content.BroadcastReceiver;
 import android.content.Intent;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.TextView;
 
 import com.example.taek.commutingchecker.R;
+import com.example.taek.commutingchecker.utils.Constants;
+import com.example.taek.commutingchecker.utils.RegisterReceiver;
+
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class PopupActivity extends AppCompatActivity {
+    public static boolean finishFlag;
     private TextView tv_alert_title, tv_alert_text;
     private Button btn_open_activity, btn_close_alert;
     private Handler mHandler;
     private Runnable mRunnable;
+    BroadcastReceiver CloseAlertReceiver;
+    RegisterReceiver mRegisterReceiver;
+    // Timer timer;
+    String TAG = "PopupActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,21 +38,38 @@ public class PopupActivity extends AppCompatActivity {
         tv_alert_text = (TextView)findViewById(R.id.alert_text);
         btn_open_activity = (Button) findViewById(R.id.btn_open_activity);
         btn_close_alert = (Button) findViewById(R.id.btn_close_alert);
+        finishFlag = false;
+        mRegisterReceiver = new RegisterReceiver(this);
+        CloseAlertReceiver = mRegisterReceiver.createReceiver(Constants.BROADCAST_RECEIVER_TYPE_CLOSE_ALERT);
+        registerReceiver(CloseAlertReceiver, mRegisterReceiver.createPackageFilter(Constants.BROADCAST_RECEIVER_TYPE_CLOSE_ALERT));
 
-        // 화면을 깨우는 부분
+        /*
+        timer = new Timer();
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                Log.d(TAG, "onCreate(): timer scheduling");
+
+                if(finishFlag) {
+                    turnOffScreen();
+
+                    finish();
+                }
+            }
+        }, 3000, 3000);
+*/
+
         mRunnable = new Runnable() {
             @Override
             public void run() {
-                try {
-                    turnOffScreen();
-                    PopupActivity.this.finish();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+                turnOffScreen();
+
+                PopupActivity.this.finish();
             }
         };
         mHandler = new Handler();
         mHandler.postDelayed(mRunnable, 60000); // 1분 뒤에 화면을 끄고 종료
+
         wakeScreen();
 
         btn_open_activity.setOnClickListener(new View.OnClickListener() {
@@ -56,12 +85,12 @@ public class PopupActivity extends AppCompatActivity {
         btn_close_alert.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                PopupActivity.this.finish();
+                finish();
             }
         });
     }
 
-    private void wakeScreen() {
+    public void wakeScreen() {
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
                 // 키잠금 해제하기
                 | WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD
@@ -69,9 +98,11 @@ public class PopupActivity extends AppCompatActivity {
                 | WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
                 // 화면 유지하기
                 | WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
+        Log.d(TAG, "wakeScreen(): turn on the screen");
     }
 
-    private void turnOffScreen() {
+    public void turnOffScreen() {
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
                 // 키잠금 해제하기
                 | WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD
@@ -79,5 +110,33 @@ public class PopupActivity extends AppCompatActivity {
                 | WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
                 // 화면 유지하기
                 | WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
+        Log.d(TAG, "turnOffScreen(): turn off the screen");
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        /*
+        try {
+            if (timer != null) {
+                timer.cancel();
+                timer.purge();
+                timer = null;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } */
+
+        try {
+            Log.d(TAG, "unregisterReceiver");
+            if (CloseAlertReceiver != null) {
+                unregisterReceiver(CloseAlertReceiver);
+                CloseAlertReceiver = null;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        Log.d(TAG, "onDestroy(): finish PopupActivity");
     }
 }
