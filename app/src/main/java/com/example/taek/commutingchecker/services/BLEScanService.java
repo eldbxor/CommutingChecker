@@ -12,9 +12,11 @@ import android.bluetooth.le.ScanSettings;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.nfc.Tag;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
 import android.os.PowerManager;
 import android.os.Vibrator;
 import android.util.Log;
@@ -34,7 +36,7 @@ import java.util.Map;
 public class BLEScanService extends Service {
     public static String myMacAddress; // 스마트폰 블루투스 Mac 주소
     public static Context ServiceContext;
-    public static boolean scanFlag, commuteCycleFlag, commuteStatusFlag, lowPowerScanFlag, networkDisconnectedFlag, screenOnFlag;
+    public static boolean scanFlag, commuteCycleFlag, commuteStatusFlag, lowPowerScanFlag, networkDisconnectedFlag, screenOnFlag, isRunningCommutingThreadFlag;
     public static int failureCount_SendEv; // sendCommutingEvent's Failure Count
     public SocketIO mSocketIO; // Jason을 이용한 서버와의 통신 클래스
     public List<DeviceInfo> mBLEDevices; // 비콘 디바이스 정보를 갖는 ArrayList
@@ -51,10 +53,93 @@ public class BLEScanService extends Service {
     public PowerManager mPowerManager;
     public PowerManager.WakeLock mWakeLock;
     public Vibrator mVibrator;
+    public SendMessageHandler mSendMessageHandler;
+    public CommutingThread mCommutingThread;
 
-    // Target we publish for clients to send messages to IncomingHandler.
-    // private Messenger incomingMessenger = new Messenger(new IncomingHandler(Constants.HANDLER_TYPE_SERVICE, BLEScanService.this));
+    class SendMessageHandler extends Handler {
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
 
+            switch (msg.what) {
+                case 1:
+                    Log.d(TAG, "SendMessageHandler - handleMessage()");
+                    if (mCommutingThread == null) {
+                        mCommutingThread = new CommutingThread();
+                        mCommutingThread.start();
+                    } else {
+                        if (!(mCommutingThread.isRunning)) {
+                            mCommutingThread = null;
+                            mCommutingThread = new CommutingThread();
+                            mCommutingThread.start();
+                        }
+                    }
+                    break;
+                case 2:
+                    break;
+            }
+        }
+    }
+
+    class CommutingThread extends Thread implements Runnable {
+        private boolean isRunning = false;
+        private int failureCount = 0;
+
+        public CommutingThread() {
+            isRunning = true;
+        }
+
+        public void stopThread() {
+            Log.d(TAG, "CommutingThread - stopThread()");
+            isRunning = false;
+        }
+
+        @Override
+        public void run() {
+            super.run();
+
+            Log.d(TAG, "CommutingThread - run()");
+            isRunningCommutingThreadFlag = true;
+
+            while (isRunning) {
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+                if(failureCount == 10) {
+                    stopThread();
+                    break;
+                }
+                // 3개의 비콘 정보가 없을 경우 continue
+                if (mBLEDevices.size() != 3) {
+                    Log.d(TAG, "CommutingThread - run(): failureCount++");
+                    failureCount++;
+                    continue;
+                } else if (mBLEDevices.size() == 0) { // 비콘이 검색되지 않으면 Low power 모드로 스캔
+                    restartScan(ScanSettings.SCAN_MODE_LOW_POWER);
+                }
+
+                // 0.5초 동안 3번 Rssi 체크 후 2번 이상 적합하면 sendCommutingEvent() 메서드 실행
+                if (!commuteCycleFlag && !commuteStatusFlag) {
+                    // Low Latency 모드로 스캔하기 위한 Screen on
+                    mBLEServiceUtils.wakeScreen(ServiceContext);
+
+                    // low Latency 스캔 모드로 변경
+                    restartScan(ScanSettings.SCAN_MODE_LOW_LATENCY);
+
+                    // 출근 알고리즘 실행
+                    mBLEServiceUtils.comeToWorkCheckTime(Constants.CALLBACK_TYPE_BLE_SCAN_SERVICE);
+
+                    stopThread();
+                    break;
+                }
+            }
+        }
+    }
+
+    // 생성자
     public BLEScanService() {
     }
 
@@ -66,7 +151,10 @@ public class BLEScanService extends Service {
         commuteStatusFlag = false;
         ServiceContext = this;
         screenOnFlag = true;
+        isRunningCommutingThreadFlag = false;
         failureCount_SendEv = 0;
+
+        mSendMessageHandler = new SendMessageHandler();
 
         mPowerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
         mVibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
@@ -210,6 +298,7 @@ public class BLEScanService extends Service {
                 // 스캔 시작
                 scanLeDevice(true);
 
+/*
                 while(scanFlag) {
                     if (lowPowerScanFlag) {
                         try {
@@ -230,6 +319,8 @@ public class BLEScanService extends Service {
                     // 3개의 비콘 정보가 없을 경우 continue
                     if (mBLEDevices.size() != 3) {
                         continue;
+                    } else if (mBLEDevices.size() == 0) { // 비콘이 검색되지 않으면 Low power 모드로 스캔
+                        restartScan(ScanSettings.SCAN_MODE_LOW_POWER);
                     }
 
                     // 0.5초 동안 3번 Rssi 체크 후 2번 이상 적합하면 sendCommutingEvent() 메서드 실행
@@ -248,6 +339,7 @@ public class BLEScanService extends Service {
                     //scanLeDevice(false);
                     //scanFlag = false;
                 }
+*/
             } // End of while
         };
 
@@ -350,7 +442,7 @@ public class BLEScanService extends Service {
 
         if(mSocketIO.connected() == true)
             mSocketIO.close();
-        GenerateNotification.generateNotification(this, "CommutingChecker", "서비스 종료", "서비스가 종료되었습니다.");
+        GenerateNotification.generateNotification(this, "CommutingChecker", "CommutingChecker", "서비스가 종료되었습니다.");
     }
 
     // api 21 이상
@@ -359,6 +451,11 @@ public class BLEScanService extends Service {
         @Override
         public void onScanResult(int callbackType, ScanResult result) {
             super.onScanResult(callbackType, result);
+            if (!isRunningCommutingThreadFlag) {
+                Log.d(TAG, "mScanCallback(): sendEmptyMesage()");
+                mSendMessageHandler.sendEmptyMessage(1);
+            }
+
 //            isCallbackRunning = true;
             /*
             Log.d("ScanRecord", "Running");

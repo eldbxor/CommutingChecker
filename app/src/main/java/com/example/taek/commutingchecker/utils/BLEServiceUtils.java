@@ -430,7 +430,7 @@ public class BLEServiceUtils {
                         if (times >= 2) { // 출근존을 지났을 때
                             // BLEServiceUtils.sendCommutingEvent(mDeviceInfo1, mDeviceInfo2, mDeviceInfo3, true);
                             Log.d("ComeToWork", "comeToWork's zone");
-                            GenerateNotification.generateNotification(BLEScanService.ServiceContext, "CommutingChecker", "출근 대기 중", "출근 대기 중입니다.");
+                            GenerateNotification.generateNotification(BLEScanService.ServiceContext, "CommutingChecker", "CommutingChecker", "출근 대기 중입니다.");
                             timerStart(mDeviceInfo1, mDeviceInfo2, mDeviceInfo3);
                             break;
                         }
@@ -597,7 +597,7 @@ public class BLEServiceUtils {
                 if(currentBeacons.size() != 3){ // 출근 범위를 벗어났을 경우 - 출근 조건을 만족하지 못함
                     Log.d(TAG, "timerTextUpdate(): comeToWork is failed(StandByAttendance))");
                     timerStop();
-                    GenerateNotification.generateNotification(((BLEScanService) mContext), "CommutingChecker", "출근 실패", "출근대기 중 범위를 벗어났습니다.");
+                    // GenerateNotification.generateNotification(((BLEScanService) mContext), "CommutingChecker", "출근 실패", "출근대기 중 범위를 벗어났습니다.");
                     BLEScanService.commuteStatusFlag = false;
                     BLEScanService.commuteCycleFlag = false;
 
@@ -606,7 +606,8 @@ public class BLEServiceUtils {
                     intent.setData(Uri.parse("leaveWork:"));
                     ((BLEScanService) mContext).sendBroadcast(intent);
 
-                    GenerateNotification.generateNotification(mContext, "CommutingChecker", "CommutingChecker", "퇴근이 등록되었습니다.");
+                    GenerateNotification.generateNotification(mContext, "CommutingChecker", "CommutingChecker", "퇴근 상태");
+                    ((BLEScanService) mContext).isRunningCommutingThreadFlag = false;
 
                 } else if (timerSecond == 10) { // 출근 조건을 만족했을 경우 ( real second == timerSecond * 3 )
                     Log.d(TAG, "timerTextUpdate(): comeToWork success");
@@ -651,7 +652,7 @@ public class BLEServiceUtils {
                 intent.setData(Uri.parse("closeAlert"));
                 mContext.sendBroadcast(intent);
 
-                GenerateNotification.generateNotification(mContext, "CommutingChecker", "출근 등록", "출근이 등록되었습니다.");
+                GenerateNotification.generateNotification(mContext, "CommutingChecker", "CommutingChecker", "출근 상태");
             } else {
                 BLEScanService.commuteStatusFlag = false;
                 BLEScanService.commuteCycleFlag = false;
@@ -661,6 +662,9 @@ public class BLEServiceUtils {
                 Intent intent = new Intent("android.intent.action.LEAVE_WORK_STATE");
                 intent.setData(Uri.parse("leaveWork:"));
                 mContext.sendBroadcast(intent);
+
+                GenerateNotification.generateNotification(mContext, "CommutingChecker", "CommutingChecker", "퇴근 상태");
+                ((BLEScanService) mContext).isRunningCommutingThreadFlag = false;
             }
         }
     }

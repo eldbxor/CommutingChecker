@@ -283,6 +283,6 @@ public class CalibrationService extends Service {
         scanLeDevice(false); // 스캔 중지
         if(mSocketIO.connected() == true)
             mSocketIO.close();
-        GenerateNotification.generateNotification(this, "CommutingChecker", "서비스 종료", "서비스가 종료되었습니다.");
+        GenerateNotification.generateNotification(this, "CommutingChecker", "CommutingChecker", "서비스가 종료되었습니다.");
     }
 }
