@@ -51,5 +51,6 @@ public class Constants {
     public static final int NETWORK_TYPE_NOT_CONNECTED = 0;
 
     // Notification ID
-    public static final int NOTIFICATION_ID = 1;
+    public static final int NOTIFICATION_ID_TYPE_COMMUTING_STATE = 1;
+    public static final int NOTIFICATION_ID_TYPE_ERROR_MESSAGE = 2;
 }

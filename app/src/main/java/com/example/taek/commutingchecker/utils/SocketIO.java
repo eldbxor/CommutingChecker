@@ -18,6 +18,7 @@ import org.json.JSONObject;
 
 import java.net.URISyntaxException;
 import java.security.PublicKey;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -30,6 +31,7 @@ import io.socket.emitter.Emitter;
 public class SocketIO {
 
     io.socket.client.Socket mSocket;
+    private Runnable mRunnable; // 큐에 있는 데이터를 서버로 전송하는 runnable 객체
 
     /** 2016. 7. 27
      * Awesometic
@@ -63,6 +65,33 @@ public class SocketIO {
     public void connect() {
         if(!mSocket.connected()) {
             mSocket.connect();
+
+            if (!(mSocketDataQueue.isEmpty())) { // 큐에 전송할 데이터가 남아있을 때
+                mRunnable = new Runnable() {
+                    @Override
+                    public void run() {
+                        while (!mSocket.connected()) {
+                            try {
+                                Thread.sleep(1000);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                        }
+
+                        while (!(mSocketDataQueue.isEmpty())) { // 서버의 과부하를 방지하기 위해 0.5초의 딜레이를 주어 전송
+                            try {
+                                Thread.sleep(500);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+
+                            sendQueueData();
+                        }
+                    }
+                };
+
+                ((BLEScanService) mContext).sendCommutingEventInQueueHandler.post(mRunnable);
+            }
         }else {
             Log.d("Service' onCreate(): ", "Socket is already connected");
         }
@@ -171,7 +200,7 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
                         JSONObject contentJson = new JSONObject(analyzer.extractContentFromReceivedJson(resultJson));
 
                         Boolean isSuccess = contentJson.getBoolean("requestSuccess");
-                        if(isSuccess) {
+                        if(isSuccess) { // 서버에 등록이 되었을 때
                             BLEScanService.failureCount_SendEv = 0;
                             Log.d("SendEvent", "Success");
                             if(isComeToWork == true) {
@@ -181,7 +210,15 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
                                 Log.d("LeaveWork", "comeToWork is registered");
                                 // GenerateNotification.generateNotification(BLEScanService.ServiceContext, "CommutingChecker", "퇴근 등록", "퇴근이 등록되었습니다.");
                             }
-                        }else {
+                        }else { // 서버에 등록이 실패하였을 경우
+                            if(isComeToWork == true) {
+                                Log.d("ComeToWork", "comeToWork isn't registered");
+                                GenerateNotification.generateNotification(BLEScanService.ServiceContext, "CommutingChecker", "출근 등록 실패", "출근 등록을 실패하였습니다.", Constants.NOTIFICATION_ID_TYPE_ERROR_MESSAGE);
+                            }else{
+                                Log.d("LeaveWork", "comeToWork is registered");
+                                GenerateNotification.generateNotification(BLEScanService.ServiceContext, "CommutingChecker", "퇴근 등록 실패", "퇴근 등록을 실패하였습니다.", Constants.NOTIFICATION_ID_TYPE_ERROR_MESSAGE);
+                            }
+                            /*
                             if(BLEScanService.failureCount_SendEv < 2) {
                                 BLEScanService.failureCount_SendEv++;
                                 sendCommutingEvent(data, isComeToWork);
@@ -197,7 +234,7 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
                                     Log.d("LeaveWork", "comeToWork is registered");
                                     // GenerateNotification.generateNotification(BLEScanService.ServiceContext, "CommutingChecker", "퇴근 등록 실패", "퇴근 등록을 실패하였습니다.");
                                 }
-                            }
+                            } */
                         }
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -219,11 +256,13 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
 
             //this.close();
 
-        } else {
+        } else { // if socket is not connected
+            /*
             Log.d("Awesometic", "sendCommutingEvent - socket isn't connected");
             mSocket.connect();
             data.put("isComeToWork", String.valueOf(isComeToWork));
             insertQueueData(data);
+            */
         }
     }
 
@@ -284,7 +323,7 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
                         JSONObject contentJson = new JSONObject(analyzer.extractContentFromReceivedJson(resultJson));
 
                         Boolean isSuccess = contentJson.getBoolean("requestSuccess");
-                        if(isSuccess) {
+                        if(isSuccess) { // 서버에 데이터 등록이 되었을 경우
                             BLEScanService.failureCount_SendEv = 0;
                             Log.d("SendEvent", "Success");
                             if(isComeToWork == true) {
@@ -294,7 +333,16 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
                                 Log.d("LeaveWork", "comeToWork is registered");
                                 // GenerateNotification.generateNotification(BLEScanService.ServiceContext, "CommutingChecker", "퇴근 등록", "퇴근이 등록되었습니다.");
                             }
-                        }else {
+                        }else { // 서버에 데이터 등록이 실패했을 경우
+                            if(isComeToWork == true) {
+                                Log.d("ComeToWork", "comeToWork isn't registered");
+                                GenerateNotification.generateNotification(BLEScanService.ServiceContext, "CommutingChecker", "출근 등록 실패", "출근 등록을 실패하였습니다.", Constants.NOTIFICATION_ID_TYPE_ERROR_MESSAGE);
+                            }else{
+                                Log.d("LeaveWork", "comeToWork is registered");
+                                GenerateNotification.generateNotification(BLEScanService.ServiceContext, "CommutingChecker", "퇴근 등록 실패", "퇴근 등록을 실패하였습니다.", Constants.NOTIFICATION_ID_TYPE_ERROR_MESSAGE);
+                            }
+                            
+                            /*
                             if(BLEScanService.failureCount_SendEv < 2) {
                                 BLEScanService.failureCount_SendEv++;
                                 sendCommutingEventInQueue(data, isComeToWork);
@@ -310,7 +358,7 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
                                     Log.d("LeaveWork", "comeToWork is registered");
                                     // GenerateNotification.generateNotification(BLEScanService.ServiceContext, "CommutingChecker", "퇴근 등록 실패", "퇴근 등록을 실패하였습니다.");
                                 }
-                            }
+                            } */
                         }
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -333,10 +381,11 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
             //this.close();
 
         } else {
+            /*
             Log.d("Awesometic", "sendCommutingEvent - socket isn't connected");
             mSocket.connect();
             data.put("isComeToWork", String.valueOf(isComeToWork));
-            insertQueueData(data);
+            insertQueueData(data); */
         }
     }
 

@@ -43,7 +43,7 @@ public class BLEScanService extends Service {
     private ScanSettings settings; // BLE 스캔 옵션 세팅
     public List<ScanFilter> filters; // BLE 스캔 필터
     public List<String> filterlist; // Api21 이하 버전용 BLE 스캔 필터
-    public Handler timerHandler, leaveWorkTimerHandler;
+    public Handler timerHandler, leaveWorkTimerHandler, sendCommutingEventInQueueHandler;
     public BLEServiceUtils mBLEServiceUtils;
     private String TAG = "BLEScanService";
     private Thread commutingThread; // 출퇴근 등록 쓰레드
@@ -175,6 +175,7 @@ public class BLEScanService extends Service {
 
         timerHandler = new Handler();
         leaveWorkTimerHandler = new Handler();
+        sendCommutingEventInQueueHandler = new Handler();
 
         // 리시버 등록
         RegisterReceiver mRegisterReceiver = new RegisterReceiver(ServiceContext);
@@ -287,7 +288,7 @@ public class BLEScanService extends Service {
                 Log.d(TAG, "Service onStartCommand");
 
                 mNotification = GenerateNotification.notification(ServiceContext, "CommutingChecker", "CommutingChecker", "서비스 실행 중");
-                startForeground(Constants.NOTIFICATION_ID, mNotification);
+                startForeground(Constants.NOTIFICATION_ID_TYPE_COMMUTING_STATE, mNotification);
 
                 /*
                 Log.d("FilterListSize", String.valueOf(filterlist.size()));
@@ -442,7 +443,7 @@ public class BLEScanService extends Service {
 
         if(mSocketIO.connected() == true)
             mSocketIO.close();
-        GenerateNotification.generateNotification(this, "CommutingChecker", "CommutingChecker", "서비스가 종료되었습니다.");
+        GenerateNotification.generateNotification(this, "CommutingChecker", "CommutingChecker", "서비스가 종료되었습니다.", Constants.NOTIFICATION_ID_TYPE_COMMUTING_STATE);
     }
 
     // api 21 이상

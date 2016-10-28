@@ -430,7 +430,7 @@ public class BLEServiceUtils {
                         if (times >= 2) { // 출근존을 지났을 때
                             // BLEServiceUtils.sendCommutingEvent(mDeviceInfo1, mDeviceInfo2, mDeviceInfo3, true);
                             Log.d("ComeToWork", "comeToWork's zone");
-                            GenerateNotification.generateNotification(BLEScanService.ServiceContext, "CommutingChecker", "CommutingChecker", "출근 대기 중입니다.");
+                            GenerateNotification.generateNotification(BLEScanService.ServiceContext, "CommutingChecker", "CommutingChecker", "출근 대기 중입니다.", Constants.NOTIFICATION_ID_TYPE_COMMUTING_STATE);
                             timerStart(mDeviceInfo1, mDeviceInfo2, mDeviceInfo3);
                             break;
                         }
@@ -606,7 +606,7 @@ public class BLEServiceUtils {
                     intent.setData(Uri.parse("leaveWork:"));
                     ((BLEScanService) mContext).sendBroadcast(intent);
 
-                    GenerateNotification.generateNotification(mContext, "CommutingChecker", "CommutingChecker", "퇴근 상태");
+                    GenerateNotification.generateNotification(mContext, "CommutingChecker", "CommutingChecker", "퇴근 상태", Constants.NOTIFICATION_ID_TYPE_COMMUTING_STATE);
                     ((BLEScanService) mContext).isRunningCommutingThreadFlag = false;
 
                 } else if (timerSecond == 10) { // 출근 조건을 만족했을 경우 ( real second == timerSecond * 3 )
@@ -636,7 +636,18 @@ public class BLEServiceUtils {
             data.put("SmartphoneAddress", BLEScanService.myMacAddress);
             data.put("DateTime", CurrentTime.currentTime());
 
-            ((BLEScanService) mContext).mSocketIO.sendCommutingEvent(data, isComeToWork);
+            if (((BLEScanService) mContext).mSocketIO.connected()) {
+                ((BLEScanService) mContext).mSocketIO.sendCommutingEvent(data, isComeToWork);
+            } else { // if socket is not connected
+                if (isComeToWork) {
+                    data.put("Commute", "true");
+                } else {
+                    data.put("Commute", "false");
+                }
+
+                ((BLEScanService) mContext).mSocketIO.insertQueueData(data);
+            }
+
             if (isComeToWork) {
                 BLEScanService.commuteStatusFlag = true;
                 BLEScanService.commuteCycleFlag = true;
@@ -652,7 +663,7 @@ public class BLEServiceUtils {
                 intent.setData(Uri.parse("closeAlert"));
                 mContext.sendBroadcast(intent);
 
-                GenerateNotification.generateNotification(mContext, "CommutingChecker", "CommutingChecker", "출근 상태");
+                GenerateNotification.generateNotification(mContext, "CommutingChecker", "CommutingChecker", "출근 상태", Constants.NOTIFICATION_ID_TYPE_COMMUTING_STATE);
             } else {
                 BLEScanService.commuteStatusFlag = false;
                 BLEScanService.commuteCycleFlag = false;
@@ -663,7 +674,7 @@ public class BLEServiceUtils {
                 intent.setData(Uri.parse("leaveWork:"));
                 mContext.sendBroadcast(intent);
 
-                GenerateNotification.generateNotification(mContext, "CommutingChecker", "CommutingChecker", "퇴근 상태");
+                GenerateNotification.generateNotification(mContext, "CommutingChecker", "CommutingChecker", "퇴근 상태", Constants.NOTIFICATION_ID_TYPE_COMMUTING_STATE);
                 ((BLEScanService) mContext).isRunningCommutingThreadFlag = false;
             }
         }

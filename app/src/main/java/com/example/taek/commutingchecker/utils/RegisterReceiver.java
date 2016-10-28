@@ -61,17 +61,17 @@ public class RegisterReceiver {
                                                 // + BLEScanService.EssentialDataArray.get(0).get("beacon_address2").toString() + ": "
                                                 + ((BLEScanService) mContext).EssentialDataArray.get(0).get("coordinateY").toString() + ", "
                                                 //+ BLEScanService.EssentialDataArray.get(0).get("beacon_address3").toString() + ": "
-                                                + ((BLEScanService) mContext).EssentialDataArray.get(0).get("coordinateZ").toString());
+                                                + ((BLEScanService) mContext).EssentialDataArray.get(0).get("coordinateZ").toString(), Constants.NOTIFICATION_ID_TYPE_COMMUTING_STATE);
                                 Log.d("ShowData", ((BLEScanService) mContext).EssentialDataArray.get(0).get("coordinateX").toString() + ", " +
                                         ((BLEScanService) mContext).EssentialDataArray.get(0).get("coordinateY").toString() + ", " +
                                         ((BLEScanService) mContext).EssentialDataArray.get(0).get("coordinateZ").toString());
                             }else{
-                                GenerateNotification.generateNotification(BLEScanService.ServiceContext, "CommutingChecker", "ShowData", "No Data");
+                                GenerateNotification.generateNotification(BLEScanService.ServiceContext, "CommutingChecker", "ShowData", "No Data", Constants.NOTIFICATION_ID_TYPE_COMMUTING_STATE);
                                 //Toast.makeText(BLEScanService.ServiceContext, "no data", Toast.LENGTH_SHORT).show();
                             }
                         }catch (Exception e){
                             e.printStackTrace();
-                            GenerateNotification.generateNotification(BLEScanService.ServiceContext, "CommutingChecker", "ShowData", "ShowData failed");
+                            GenerateNotification.generateNotification(BLEScanService.ServiceContext, "CommutingChecker", "ShowData", "ShowData failed", Constants.NOTIFICATION_ID_TYPE_COMMUTING_STATE);
                             //Toast.makeText(BLEScanService.ServiceContext, "서비스 실행상태가 아닙니다.", Toast.LENGTH_LONG).show();
                         }
                     }

@@ -40,7 +40,7 @@ public class Calibration {
                     }
                     if (mCalibrationService.mBLEDevices.size() < 3) {
                         if (count_error == 10) {
-                            GenerateNotification.generateNotification(mCalibrationService, "CommutingChecker", "Calibration Error", "비콘 데이터가 없습니다 잠시후 재시도 해주십시오.");
+                            GenerateNotification.generateNotification(mCalibrationService, "CommutingChecker", "Calibration Error", "비콘 데이터가 없습니다 잠시후 재시도 해주십시오.", Constants.NOTIFICATION_ID_TYPE_COMMUTING_STATE);
                             mCalibrationService.CalibrationFlag = false;
                             return;
                         }else {

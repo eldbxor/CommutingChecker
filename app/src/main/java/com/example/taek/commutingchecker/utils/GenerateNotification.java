@@ -29,7 +29,7 @@ public class GenerateNotification {
 
         return notification;
     }
-    public static void generateNotification(Context context, String ticker, String contentTitle, String contentText) {
+    public static void generateNotification(Context context, String ticker, String contentTitle, String contentText, int notificationID) {
         PendingIntent intent = PendingIntent.getActivity(context, 0,
                 new Intent(context, MainActivity.class), 0);
         android.support.v4.app.NotificationCompat.Builder mBuilder = new android.support.v4.app.NotificationCompat.Builder(context)
@@ -65,6 +65,6 @@ public class GenerateNotification {
 */
         NotificationManager notificationManager = (NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE);
 
-        notificationManager.notify(Constants.NOTIFICATION_ID, mBuilder.build());
+        notificationManager.notify(notificationID, mBuilder.build());
     }
 }
