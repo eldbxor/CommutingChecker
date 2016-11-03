@@ -42,6 +42,8 @@ public class SocketIO {
     Analyzer analyzer;
     public Context mContext;
     private SocketDataQueue mSocketDataQueue;
+    private String TAG = "SocketIO";
+    private boolean queueHandlerRunningState;
 
     // 생성자
     public SocketIO(Context context) {
@@ -55,6 +57,8 @@ public class SocketIO {
 
             mSocketDataQueue = new SocketDataQueue();
 
+            queueHandlerRunningState = false;
+
         } catch (URISyntaxException e){
             e.printStackTrace();
             Log.d("connectSocket", "Error");
@@ -62,40 +66,45 @@ public class SocketIO {
     }
 
     // 소켓 연결
-    public void connect() {
+    public void connect(final int callbackType) {
         if(!mSocket.connected()) {
+            Log.d(TAG, "connect(): connecting...");
             mSocket.connect();
 
-            if (!(mSocketDataQueue.isEmpty())) { // 큐에 전송할 데이터가 남아있을 때
-                mRunnable = new Runnable() {
-                    @Override
-                    public void run() {
-                        while (!mSocket.connected()) {
-                            try {
-                                Thread.sleep(1000);
-                            } catch (InterruptedException e) {
-                                e.printStackTrace();
-                            }
-                        }
-
-                        while (!(mSocketDataQueue.isEmpty())) { // 서버의 과부하를 방지하기 위해 0.5초의 딜레이를 주어 전송
-                            try {
-                                Thread.sleep(500);
-                            } catch (InterruptedException e) {
-                                e.printStackTrace();
+            if (callbackType == Constants.CALLBACK_TYPE_BLE_SCAN_SERVICE) { // BLEScanService 에서만 동작
+                if (!(mSocketDataQueue.isEmpty()) && queueHandlerRunningState == false) { // 큐에 전송할 데이터가 남아있을 때
+                    mRunnable = new Runnable() {
+                        @Override
+                        public void run() {
+                            Log.d(TAG, "connect(): sendCommutingEventInQueueHandler is running");
+                            queueHandlerRunningState = true;
+                            while (!mSocket.connected() || !isServersPublicKeyInitialized()) {
+                                try {
+                                    Thread.sleep(1000);
+                                } catch (InterruptedException e) {
+                                    e.printStackTrace();
+                                }
                             }
 
-                            sendQueueData();
-                        }
-                    }
-                };
+                            while (!(mSocketDataQueue.isEmpty())) { // 서버의 과부하를 방지하기 위해 0.5초의 딜레이를 주어 전송
+                                try {
+                                    Thread.sleep(500);
+                                } catch (InterruptedException e) {
+                                    e.printStackTrace();
+                                }
 
-                ((BLEScanService) mContext).sendCommutingEventInQueueHandler.post(mRunnable);
+                                sendQueueData();
+                                queueHandlerRunningState = false;
+                            }
+                        }
+                    };
+
+                    ((BLEScanService) mContext).sendCommutingEventInQueueHandler.postDelayed(mRunnable, 5000);
+                }
+            } else {
+                Log.d(TAG, "connect(): Socket is already connected");
             }
-        }else {
-            Log.d("Service' onCreate(): ", "Socket is already connected");
         }
-        Log.d("NetworkStatus", "connecting...");
     }
 
     // Get RSA public key from the server
@@ -204,18 +213,18 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
                             BLEScanService.failureCount_SendEv = 0;
                             Log.d("SendEvent", "Success");
                             if(isComeToWork == true) {
-                                Log.d("ComeToWork", "comeToWork is registered");
+                                Log.d(TAG, "sendCommutingEvent(): comeToWork is registered");
                                 // GenerateNotification.generateNotification(BLEScanService.ServiceContext, "CommutingChecker", "출근 등록", "출근이 등록되었습니다.");
                             }else {
-                                Log.d("LeaveWork", "comeToWork is registered");
+                                Log.d(TAG, "sendCommutingEvent(): leaveWork is registered");
                                 // GenerateNotification.generateNotification(BLEScanService.ServiceContext, "CommutingChecker", "퇴근 등록", "퇴근이 등록되었습니다.");
                             }
                         }else { // 서버에 등록이 실패하였을 경우
                             if(isComeToWork == true) {
-                                Log.d("ComeToWork", "comeToWork isn't registered");
+                                Log.d(TAG, "sendCommutingEvent(): comeToWork isn't registered");
                                 GenerateNotification.generateNotification(BLEScanService.ServiceContext, "CommutingChecker", "출근 등록 실패", "출근 등록을 실패하였습니다.", Constants.NOTIFICATION_ID_TYPE_ERROR_MESSAGE);
                             }else{
-                                Log.d("LeaveWork", "comeToWork is registered");
+                                Log.d(TAG, "sendCommutingEvent(): leaveWork is registered");
                                 GenerateNotification.generateNotification(BLEScanService.ServiceContext, "CommutingChecker", "퇴근 등록 실패", "퇴근 등록을 실패하였습니다.", Constants.NOTIFICATION_ID_TYPE_ERROR_MESSAGE);
                             }
                             /*
@@ -238,7 +247,7 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
                         }
                     } catch (Exception e) {
                         e.printStackTrace();
-                        Log.d("Awesometic", "sendCommutingEvent - exception caught (result analyze)");
+                        Log.d(TAG, "sendCommutingEvent(): exception caught (result analyze)");
                     }
                 }
             });
@@ -303,15 +312,15 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
                         content.put("Commute", "false");
                     }
                     //content.put("DateTime", data.get("DateTime"));
-                    Log.d("Awesometic", "sendCommutingEvent - send message to server");
+                    Log.d(TAG, "sendCommutingEventInQueue - send message to server");
                     mSocket.emit("circumstance_overdue", analyzer.encryptSendJson(content));
                 } catch (JSONException e) {
                     e.printStackTrace();
-                    Log.d("Awesometic", "sendCommutingEvent - exception caught (JSON envelopment)");
+                    Log.d(TAG, "sendCommutingEventInQueue - exception caught (JSON envelopment)");
                 }
 
             } else {
-                Log.d("Awesometic", "sendCommutingEvent - server's public key is not initialized");
+                Log.d(TAG, "sendCommutingEventInQueue - server's public key is not initialized");
                 getServersRsaPublicKey();
             }
 
@@ -327,21 +336,21 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
                             BLEScanService.failureCount_SendEv = 0;
                             Log.d("SendEvent", "Success");
                             if(isComeToWork == true) {
-                                Log.d("ComeToWork", "comeToWork is registered");
+                                Log.d(TAG, "sendCommutingEventInQueue(): comeToWork is registered");
                                 // GenerateNotification.generateNotification(BLEScanService.ServiceContext, "CommutingChecker", "출근 등록", "출근이 등록되었습니다.");
                             }else {
-                                Log.d("LeaveWork", "comeToWork is registered");
+                                Log.d(TAG, "sendCommutingEventInQueue(): leaveWork is registered");
                                 // GenerateNotification.generateNotification(BLEScanService.ServiceContext, "CommutingChecker", "퇴근 등록", "퇴근이 등록되었습니다.");
                             }
                         }else { // 서버에 데이터 등록이 실패했을 경우
                             if(isComeToWork == true) {
-                                Log.d("ComeToWork", "comeToWork isn't registered");
+                                Log.d(TAG, "sendCommutingEventInQueue(): comeToWork isn't registered");
                                 GenerateNotification.generateNotification(BLEScanService.ServiceContext, "CommutingChecker", "출근 등록 실패", "출근 등록을 실패하였습니다.", Constants.NOTIFICATION_ID_TYPE_ERROR_MESSAGE);
                             }else{
-                                Log.d("LeaveWork", "comeToWork is registered");
+                                Log.d(TAG, "sendCommutingEventInQueue(): leaveWork is registered");
                                 GenerateNotification.generateNotification(BLEScanService.ServiceContext, "CommutingChecker", "퇴근 등록 실패", "퇴근 등록을 실패하였습니다.", Constants.NOTIFICATION_ID_TYPE_ERROR_MESSAGE);
                             }
-                            
+
                             /*
                             if(BLEScanService.failureCount_SendEv < 2) {
                                 BLEScanService.failureCount_SendEv++;
@@ -362,7 +371,7 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
                         }
                     } catch (Exception e) {
                         e.printStackTrace();
-                        Log.d("Awesometic", "sendCommutingEvent - exception caught (result analyze)");
+                        Log.d(TAG, "sendCommutingEventInQueue(): exception caught (result analyze)");
                     }
                 }
             });
@@ -738,11 +747,19 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
             return;
         }else {
             Map<String, String> map = (HashMap<String, String>) mSocketDataQueue.remove();
-            String isComeToWork = map.get("isComeToWork");
-            if (map.containsKey("isComeToWork")) {
-                map.remove("isComeToWork");
+            String commute = map.get("Commute");
+            boolean isComeToWork;
+            if (commute.equals("true")) {
+                isComeToWork = true;
+            } else {
+                isComeToWork = false;
             }
-            sendCommutingEventInQueue(map, Boolean.valueOf(isComeToWork));
+
+            if (map.containsKey("Commute")) {
+                map.remove("Commute");
+            }
+            sendCommutingEventInQueue(map, isComeToWork);
+            Log.d(TAG, "sendQueueData(): send data in queue, isComeToWork = " + String.valueOf(isComeToWork));
         }
         /*
         for (int i = 0; i < mSocketDataQueue.size(); i++) {
@@ -772,6 +789,7 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
 
     public void insertQueueData(Object obj) {
         if (!mSocketDataQueue.contains(obj)) {
+            Log.d(TAG, "insertQueueData(): insert data in queue");
             mSocketDataQueue.insert(obj);
         }
     }

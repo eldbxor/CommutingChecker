@@ -86,16 +86,20 @@ public class RegisterReceiver {
                         int status_int = NetworkUtil.getConnectivityStatus(context);
                         switch (status_int) {
                             case Constants.NETWORK_TYPE_NOT_CONNECTED:
+                                Log.d(TAG, "Network's state is changed(NETWORK_TYPE_NOT_CONNECTED)");
                                 ((BLEScanService) mContext).networkDisconnectedFlag = true;
+                                ((BLEScanService) mContext).mSocketIO.close();
+                                // ((BLEScanService) mContext).sendCommutingEventInQueueHandler.removeCallbacksAndMessages(null);
                                 Toast.makeText(context, status_str, Toast.LENGTH_SHORT).show();
                                 break;
                             case Constants.NETWORK_TYPE_MOBILE:
+                                Log.d(TAG, "Network's state is changed(NETWORK_TYPE_MOBILE)");
                                 if(((BLEScanService) mContext).networkDisconnectedFlag) {
                                     ((BLEScanService) mContext).networkDisconnectedFlag = false;
                                     try {
                                         while (!((BLEScanService) mContext).mSocketIO.connected()) {
                                             Thread.sleep(500);
-                                            ((BLEScanService) mContext).mSocketIO.connect();
+                                            ((BLEScanService) mContext).mSocketIO.connect(Constants.CALLBACK_TYPE_BLE_SCAN_SERVICE);
                                         }
                                         // Getting a new public key from server
                                         ((BLEScanService) mContext).mSocketIO.removePublicKey();
@@ -115,12 +119,13 @@ public class RegisterReceiver {
                                 }
                                 break;
                             case Constants.NETWORK_TYPE_WIFI:
+                                Log.d(TAG, "Network's state is changed(NETWORK_TYPE_WIFI)");
                                 if(((BLEScanService) mContext).networkDisconnectedFlag) {
                                     ((BLEScanService) mContext).networkDisconnectedFlag = false;
                                     try {
                                         while (!((BLEScanService) mContext).mSocketIO.connected()) {
                                             Thread.sleep(500);
-                                            ((BLEScanService) mContext).mSocketIO.connect();
+                                            ((BLEScanService) mContext).mSocketIO.connect(Constants.CALLBACK_TYPE_BLE_SCAN_SERVICE);
                                         }
                                         // Getting a new public key from server
                                         ((BLEScanService) mContext).mSocketIO.removePublicKey();

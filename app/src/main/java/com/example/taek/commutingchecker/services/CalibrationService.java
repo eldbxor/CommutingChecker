@@ -119,7 +119,7 @@ public class CalibrationService extends Service {
         }else
             Log.d("Service's SocketIO", "already connected");
         */
-        this.mSocketIO.connect();
+        this.mSocketIO.connect(Constants.CALLBACK_TYPE_CALIBRATION_SERVICE);
         Log.d(TAG, "onCreate(): waiting for connecting a socket");
 
         // To Wait for connecting

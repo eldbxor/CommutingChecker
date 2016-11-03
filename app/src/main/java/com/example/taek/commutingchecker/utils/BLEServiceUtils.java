@@ -636,10 +636,10 @@ public class BLEServiceUtils {
             data.put("SmartphoneAddress", BLEScanService.myMacAddress);
             data.put("DateTime", CurrentTime.currentTime());
 
-            if (((BLEScanService) mContext).mSocketIO.connected()) {
+            if (((BLEScanService) mContext).mSocketIO.connected() || NetworkUtil.getConnectivityStatus(mContext) != Constants.NETWORK_TYPE_NOT_CONNECTED) {
                 ((BLEScanService) mContext).mSocketIO.sendCommutingEvent(data, isComeToWork);
             } else { // if socket is not connected
-                if (isComeToWork) {
+                if (isComeToWork == true) {
                     data.put("Commute", "true");
                 } else {
                     data.put("Commute", "false");

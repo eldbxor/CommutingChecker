@@ -243,7 +243,7 @@ public class BLEScanService extends Service {
         }else
             Log.d("Service's SocketIO", "already connected");
         */
-        this.mSocketIO.connect();
+        this.mSocketIO.connect(Constants.CALLBACK_TYPE_BLE_SCAN_SERVICE);
 
         Log.d(TAG, "debuging");
         // To Wait for connecting
@@ -437,6 +437,7 @@ public class BLEScanService extends Service {
             }
             leaveWorkTimerHandler.removeCallbacksAndMessages(null);
             timerHandler.removeCallbacksAndMessages(null);
+            sendCommutingEventInQueueHandler.removeCallbacksAndMessages(null);
         } catch (Exception e) {
             e.printStackTrace();
         }
