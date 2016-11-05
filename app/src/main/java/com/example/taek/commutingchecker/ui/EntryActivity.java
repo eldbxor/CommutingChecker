@@ -6,6 +6,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.widget.Toast;
 
 import com.example.taek.commutingchecker.R;
+import com.example.taek.commutingchecker.utils.Constants;
 import com.example.taek.commutingchecker.utils.SocketIO;
 
 import org.json.JSONArray;
@@ -43,7 +44,7 @@ public class EntryActivity extends AppCompatActivity {
 
         try {
             MainActivity.mSocket = new SocketIO(this);
-            MainActivity.mSocket.connect();
+            MainActivity.mSocket.connect(Constants.CALLBACK_TYPE_MAIN_ACTIVITY);
 
             do {
                 Thread.sleep(100);
