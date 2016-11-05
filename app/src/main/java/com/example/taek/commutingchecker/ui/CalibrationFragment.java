@@ -39,10 +39,9 @@ public class CalibrationFragment extends Fragment {
 
     public static Button btnCalibrationStart;
 
-    private Timer timer;
-    private TextView timerText;
+    public static TextView timerText;
     public static int timerSecond = 0;
-    private final Handler timerHandler = new Handler();
+    public static Handler timerHandler = new Handler();
     public static ProgressBar progressBar;
 
     public static CalibrationFragment newInstance() {
@@ -65,6 +64,8 @@ public class CalibrationFragment extends Fragment {
         btnCalibrationStart = (Button) rootView.findViewById(R.id.btn_calibration_start);
 
         progressBar = (ProgressBar) rootView.findViewById(R.id.calibrationProgressBar);
+
+        timerText = (TextView) rootView.findViewById(R.id.timer_text);
 
         btnCalibrationStart.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -142,17 +143,19 @@ public class CalibrationFragment extends Fragment {
         }
     }
 
-    private void timerTextUpdate() {
+    public static void timerTextUpdate() {
         Runnable updater = new Runnable() {
             @Override
             public void run() {
-                timerText.setText(timerSecond + " 초");
+                int percent = timerSecond * 100 / 60;
+                timerText.setText(percent + "%");
 
+                /*
                 if (timerSecond == 30) {
                     timerStop();
 
                     btnCalibrationStart.setText("NEXT");
-                }
+                } */
             }
         };
         timerHandler.post(updater);
