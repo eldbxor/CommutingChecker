@@ -93,14 +93,14 @@ public class SignupFragment extends Fragment {
 
             ++departmentItemsIndex;
         }
-        
+
         int positionItemsIndex = 0;
         for (String key : positionItemsHashMap.keySet()) {
             positionItems[positionItemsIndex] = positionItemsHashMap.get(key);
 
             ++positionItemsIndex;
         }
-        
+
         ArrayAdapter<String> departmentSpinnerAdapter = new ArrayAdapter<>(this.getActivity(), android.R.layout.simple_spinner_dropdown_item, departmentItems);
         ArrayAdapter<String> positionSpinnerAdapter = new ArrayAdapter<>(this.getActivity(), android.R.layout.simple_spinner_dropdown_item, positionItems);
 
