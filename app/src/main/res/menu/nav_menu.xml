@@ -3,15 +3,19 @@
     <group android:checkableBehavior="none">
         <item
             android:id="@+id/nav_main"
-            android:title="HOME" />
+            android:title="Home" />
         <item
             android:id="@+id/nav_setup"
-            android:title="설정" />
+            android:title="Setup" />
         <item
-            android:id="@+id/nav_chart_movement"
-            android:title="사무실 이동 현황" />
+            android:id="@+id/nav_population_of_each_department"
+            android:title="부서별 인원 수" />
         <item
-            android:id="@+id/nav_chart_work"
-            android:title="직원 근무 현황" />
+            android:id="@+id/nav_Otherattend"
+            android:title="담당 사원" />
+        <item
+            android:id="@+id/nav_chart3"
+            android:title="chart3" />
+
     </group>
 </menu>
