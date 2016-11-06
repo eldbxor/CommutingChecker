@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Commuting Checker</string>
+    <string name="scan_service">BLEScanService</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="n_11050035">컴퓨터 학과 \n 11050035</string>
+</resources>
