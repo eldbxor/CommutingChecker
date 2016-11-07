@@ -40,8 +40,11 @@ public class IncomingHandler extends Handler{
 
                     case Constants.HANDLE_MESSAGE_TYPE_ADD_TIMESECOND:
                         Log.d("MessengerCommunication", "Activity receive 2");
-                        CalibrationFragment.timerSecond++;
-                        CalibrationFragment.progressBar.setProgress(CalibrationFragment.timerSecond);
+                        if (CalibrationFragment.timerSecond <= 60) {
+                            CalibrationFragment.timerSecond++;
+                            CalibrationFragment.progressBar.setProgress(CalibrationFragment.timerSecond);
+                            CalibrationFragment.timerTextUpdate();
+                            }
                         break;
 
                     case Constants.HANDLE_MESSAGE_TYPE_SETTEXT_ATTENDANCE_ZONE:
