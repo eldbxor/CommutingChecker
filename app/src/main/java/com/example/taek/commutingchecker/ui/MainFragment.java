@@ -22,7 +22,7 @@ public class MainFragment extends Fragment {
 
     public MainFragment() { }
 
-//    @Override
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
     }

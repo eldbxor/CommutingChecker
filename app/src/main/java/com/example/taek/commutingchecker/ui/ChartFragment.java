@@ -2,7 +2,6 @@ package com.example.taek.commutingchecker.ui;
 
 import android.app.Fragment;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -50,7 +49,7 @@ public class ChartFragment extends Fragment {
             //nav_movement
 
             //nav_work
-            case "부서별 인원 수":
+            case "직원 근무 현황":
                 SocketIO.ChartSignal signal = SocketIO.ChartSignal.POPULATION;
 
                 return populationOfEachDepartment(inflater, container, savedInstanceState, signal);

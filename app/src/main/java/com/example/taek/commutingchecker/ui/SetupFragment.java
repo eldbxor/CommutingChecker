@@ -29,7 +29,7 @@ import java.util.List;
 public class SetupFragment extends Fragment {
 
     Intent intent;
-    public static Button showData, request, calibration, checkRunning, thresholdcheck;
+    public static Button showData, request, calibration, checkRunning;
     public static Switch bleScanSwitch;
     public static TextView commutingState;
 
@@ -57,7 +57,6 @@ public class SetupFragment extends Fragment {
         calibration = (Button) rootView.findViewById(R.id.Calibration);
         checkRunning = (Button) rootView.findViewById(R.id.CheckRunning);
         commutingState = (TextView) rootView.findViewById(R.id.commutingState);
-        thresholdcheck = (Button) rootView.findViewById(R.id.ThresholdCheck);
 
         // if service is running switch off
         if(isRunningProcess(getActivity(), "com.example.taek.commutingchecker:remote"))
@@ -124,24 +123,8 @@ public class SetupFragment extends Fragment {
             }
         });
 
-        thresholdcheck.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                ThresholdAdjustmentFragment thresholdAdjustmentFragment = new ThresholdAdjustmentFragment();
-                FragmentManager fragmentManager = getFragmentManager();
-                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-                fragmentTransaction.replace(R.id.content_frame, thresholdAdjustmentFragment);
-                fragmentTransaction.commit();
-            }
-        });
-
-
-
         return rootView;
     }
-
-
-
 
     // 서비스 프로세스 실행 상태 확인
     private boolean isRunningProcess(Context context, String packageName){

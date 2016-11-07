@@ -5,98 +5,18 @@
     android:layout_height="match_parent"
     tools:context=".ui.MainActivity">
 
-    <TextView
-        android:id="@+id/editText"
-        android:layout_width="250dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="40dp"
-        android:textSize="18pt"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentStart="true"
-        android:text="사용자 정보"
-        android:layout_gravity="left|top"
-        tools:ignore="ObsoleteLayoutParam,RtlHardcoded" />
-
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_marginTop="100dp"
-        android:layout_height="339dp"
-        android:background="@color/colorContour"
-        android:layout_gravity="right|top">
+        android:layout_height="match_parent"
+        android:layout_gravity="center">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="이름"
-            android:id="@+id/user_name"
-            android:layout_marginTop="39dp"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentStart="true"
-            android:layout_marginStart="37dp" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="현재위치"
-            android:id="@+id/Location"
-            android:layout_marginTop="38dp"
-            android:layout_below="@+id/user_name"
-            android:layout_alignStart="@+id/user_name" />
-
-        <EditText
-            android:layout_width="match_parent"
-            android:layout_height="40dp"
             android:textAppearance="?android:attr/textAppearanceLarge"
-            android:text="사무실 또는 부서명"
-            android:id="@+id/user_secLocation"
-            android:layout_marginTop="28dp"
-            android:layout_marginRight="40dp"
-            android:background="@color/colorWhite"
-            android:editable="false"
-            android:layout_below="@+id/Location"
-            android:layout_alignStart="@+id/Location" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="출근 시간"
-            android:id="@+id/user_attdtime"
-            android:layout_marginTop="42dp"
-            android:layout_below="@+id/user_secLocation"
-            android:layout_alignEnd="@+id/Location" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="기타사항"
-            android:id="@+id/user_etc"
-            android:layout_marginTop="34dp"
-            android:layout_below="@+id/user_attdtime"
-            android:layout_alignStart="@+id/user_attdtime"
-            tools:ignore="HardcodedText" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="출근여부"
-            android:id="@+id/user_attendance"
-            android:layout_marginLeft="37dp"
-            android:layout_gravity="right|top"
-            android:layout_alignTop="@+id/Location"
-            android:layout_toEndOf="@+id/Location"
-            android:layout_marginStart="28dp" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="직책"
-            android:id="@+id/user_position"
-            android:layout_gravity="right|top"
-            android:layout_alignTop="@+id/user_name"
-            android:layout_alignStart="@+id/user_attendance" />
-
-
+            android:id="@+id/textView"
+            android:text="Main Fragment"
+            android:layout_centerVertical="true"
+            android:layout_centerHorizontal="true" />
     </RelativeLayout>
-
-
 </FrameLayout>
