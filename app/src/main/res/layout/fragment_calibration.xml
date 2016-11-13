@@ -13,10 +13,9 @@ tools:context=".ui.MainActivity">
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textAppearance="?android:attr/textAppearanceLarge"
         android:id="@+id/textView"
-        android:textColor="@color/colorBlack"
-        android:text="Measure the coordinates of the work zone"
+        android:text="Calibration Fragment"
         android:layout_centerVertical="true"
         android:layout_centerHorizontal="true" />
 
@@ -32,7 +31,7 @@ tools:context=".ui.MainActivity">
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="0%"
+        android:text="Timer Text"
         android:id="@+id/timer_text"
         android:layout_below="@+id/textView"
         android:layout_centerHorizontal="true" />
