@@ -12,7 +12,7 @@
             android:title="부서별 인원 수" />
         <item
             android:id="@+id/nav_Otherattend"
-            android:title="담당 사원" />
+            android:title="타학생 입퇴실" />
         <item
             android:id="@+id/nav_chart3"
             android:title="chart3" />
