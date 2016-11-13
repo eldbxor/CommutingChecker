@@ -11,13 +11,14 @@
         android:orientation="vertical">
 
         <TextView
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingTop="10dp"
             android:paddingLeft="10dp"
             android:paddingBottom="5dp"
             android:textSize="15dp"
             android:text="Settings"
+            android:background="@color/colorContour"
             android:textColor="@color/colorSetupText"/>
 
         <Switch
@@ -74,10 +75,6 @@
             android:textSize="18dp"
             android:text="Check Running"/>
 
-        <FrameLayout
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@color/colorContour"/>
 
         <TextView
             android:id="@+id/commutingState"
