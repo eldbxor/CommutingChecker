@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/main"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="@color/colorBlack">
+
+    <RelativeLayout
+        android:id="@+id/alert_"
+        android:layout_width="300dp"
+        android:layout_height="120dp"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:gravity="center"
+        android:background="@color/colorPrimary">
+
+        <ImageView
+            android:id="@+id/imageView_commuting"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="10dp"
+            android:src="@drawable/commuting"/>
+
+        <TextView
+            android:id="@+id/alert_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@+id/imageView_commuting"
+            android:layout_below="@+id/alert_title"
+            android:text="Waiting for come to work"
+            android:textSize="15dp"/>
+
+        <TextView
+            android:id="@+id/alert_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Commuting Checker"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:layout_alignTop="@+id/imageView_commuting"
+            android:layout_toEndOf="@+id/imageView_commuting" />
+
+        <Button
+            android:id="@+id/btn_open_activity"
+            android:layout_width="150dp"
+            android:layout_height="wrap_content"
+            android:background="#00ff0000"
+            android:text="open"
+            android:layout_alignTop="@+id/btn_close_alert"
+            android:layout_toEndOf="@+id/btn_close_alert" />
+
+        <Button
+            android:id="@+id/btn_close_alert"
+            android:layout_width="150dp"
+            android:layout_height="wrap_content"
+            android:background="#00ff0000"
+            android:text="close"
+            android:layout_below="@+id/imageView_commuting"
+            android:layout_alignParentStart="true" />
+
+
+    </RelativeLayout>
+
+</RelativeLayout>
