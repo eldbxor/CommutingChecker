@@ -349,7 +349,7 @@ public class MainActivity extends AppCompatActivity
                         .detach(fragOtherattend).attach(fragOtherattend)
                         .commit();
                 break;
-            case R.id.nav_chart3:
+            case R.id.attendence_each_people:
                 fragmentManager.beginTransaction()
                         .replace(R.id.content_frame, fragChart)
                         .detach(fragChart).attach(fragChart)

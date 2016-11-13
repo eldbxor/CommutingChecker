@@ -123,6 +123,8 @@ public class SetupFragment extends Fragment {
             }
         });
 
+
+
         return rootView;
     }
 
