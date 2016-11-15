@@ -1,6 +1,10 @@
 package com.example.taek.commutingchecker.ui;
 
+import android.app.Fragment;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -34,7 +38,7 @@ public class Other_customAdapt extends BaseAdapter {
 
     // position에 위치한 데이터를 화면에 출력하는데 사용될 View를 리턴. : 필수 구현
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
+    public View getView(int position, View convertView, final ViewGroup parent) {
         final int pos = position;
         final Context context = parent.getContext();
 
@@ -50,18 +54,22 @@ public class Other_customAdapt extends BaseAdapter {
 
 
         // Data Set(listViewItemList)에서 position에 위치한 데이터 참조 획득
-        Other_listItem listViewItem = listViewItemList.get(position);
+        final Other_listItem listViewItem = listViewItemList.get(position);
 
         // 아이템 내 각 위젯에 데이터 반영
         icon_ImageView.setImageDrawable(listViewItem.getIcon());
         name_TextView.setText(listViewItem.getName());
 
-
         Button add_btn = (Button) convertView.findViewById(R.id.other_button) ;
+        add_btn.setText(listViewItem.bgetName());
+
         add_btn.setOnClickListener(new Button.OnClickListener() {
             @Override
             public void onClick(View v) {
-                name_TextView.setText("HELLO?");
+
+                //Intent intent = new Intent( context.getApplicationContext(), ShowEachInfo.class );
+                //context.startActivity(intent);
+
             }
         });
 
@@ -81,13 +89,15 @@ public class Other_customAdapt extends BaseAdapter {
     }
 
     // 아이템 데이터 추가를 위한 함수. 개발자가 원하는대로 작성 가능.
-    public void addItem(Drawable icon, String name, Button btn) {
+    public void addItem(Drawable icon, String name, Button btn, String bname) {
         Other_listItem item = new Other_listItem();
 
         item.setIcon(icon);
         item.setName(name);
         item.setBtn(btn);
+        item.bsetName(bname);
 
         listViewItemList.add(item);
     }
+
 }

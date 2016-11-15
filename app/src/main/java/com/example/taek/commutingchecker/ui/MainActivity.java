@@ -270,6 +270,7 @@ public class MainActivity extends AppCompatActivity
 
         // Set the menu of the Navigation View
         navigationView.inflateMenu(R.menu.nav_menu);
+        int check = navigationView.getMenu().size();
 
         getFragmentManager().beginTransaction()
                 .replace(R.id.content_frame, fragMain)
@@ -349,7 +350,7 @@ public class MainActivity extends AppCompatActivity
                         .detach(fragOtherattend).attach(fragOtherattend)
                         .commit();
                 break;
-            case R.id.nav_chart3:
+            case R.id.attendence_each_people:
                 fragmentManager.beginTransaction()
                         .replace(R.id.content_frame, fragChart)
                         .detach(fragChart).attach(fragChart)

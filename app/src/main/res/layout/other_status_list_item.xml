@@ -21,10 +21,14 @@
 
     <Button
         android:id="@+id/other_button"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
+        android:layout_width="121dp"
+        android:layout_height="wrap_content"
         android:text="구현 계획"
-        android:layout_weight="1" />
+        android:elevation="0dp"
+        android:textSize="14sp"
+        android:background="@drawable/btn_status1"
+        android:padding="4dp"
+        android:fontFamily="sans-serif-medium" />
 
 
 </LinearLayout>

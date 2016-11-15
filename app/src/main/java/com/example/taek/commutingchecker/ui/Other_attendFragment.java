@@ -26,6 +26,9 @@ public class Other_attendFragment extends Fragment {
     Other_customAdapt adapter;
     Other_listItem item;
 
+//    hardcording 용 배열
+    static String[] h_name = new String[5];
+    static String[] h_state = new String[5];
 
     public static Other_attendFragment newInstance() {
         Other_attendFragment fragment = new Other_attendFragment();
@@ -49,19 +52,32 @@ public class Other_attendFragment extends Fragment {
 
         data = new ArrayList<Other_listItem>();
 
+        h_name[0] = "양덕규";
+        h_name[1] = "이유택";
+        h_name[2] = "백소영";
+        h_name[3] = "강은정";
+        h_name[4] = "김선광";
 
+        h_state[0] ="입실";
+        h_state[1] ="입실";
+        h_state[2] ="퇴실";
+        h_state[3] ="퇴실";
+        h_state[4] ="퇴실";
 
-        for(int i=0; i<100; i++)
+        for(int i=0; i<5; i++)
         {
             item = new Other_listItem();
-            item.setIcon(ContextCompat.getDrawable(rootView.getContext(), R.drawable.commuting));
-            item.setName("check: "+ i);
+            item.setIcon(ContextCompat.getDrawable(rootView.getContext(), R.drawable.logo));
+            item.setName("이름: "+ h_name[i]);
+            item.bsetName( h_state[i].toString());
 
-            adapter.addItem(item.getIcon(),item.getName(),item.getBtn());
+            adapter.addItem(item.getIcon(),item.getName(),item.getBtn(),item.bgetName());
+
             data.add(item);
 
         }
         list.setAdapter(adapter);
+
 
 
         return rootView;
@@ -70,5 +86,9 @@ public class Other_attendFragment extends Fragment {
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+    }
+
+    public Button[] getAdd_btn() {
+        return add_btn;
     }
 }
