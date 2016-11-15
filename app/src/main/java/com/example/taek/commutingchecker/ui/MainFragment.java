@@ -18,6 +18,7 @@ import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.StringTokenizer;
 
 /**
  * Created by Awesometic on 2016-06-09.
@@ -56,14 +57,21 @@ public class MainFragment extends Fragment {
         rv.setHasFixedSize(true);
         rv.setLayoutManager(mLinearLayoutManager);
 
-        //하드코딩용 데이터
-        for(int i=0; i<10; i++) {
-            String title = "TAG_TITLE" + i;
-            String content = "TAG_CONTENT" + i;
+        ArrayList<String> titles = new ArrayList<String>();
+            titles.add(0,"금일 첫 입실");
+            titles.add(1,"금일 마지막 퇴실");
+            titles.add(2,"금일 근무시간");
+            titles.add(3,"금일 초과근무");
 
+
+
+        //하드코딩용 데이터
+        for(int i=0; i<4; i++) {
+            String content = "TAG_CONTENT" + i;
+            Log.d("check :" , titles.get(i));
             //HashMap에 붙이기
             HashMap<String,String> posts = new HashMap<String,String>();
-            posts.put(TAG_TITLE,title);
+            posts.put(TAG_TITLE,titles.get(i));
             posts.put(TAG_CONTENT, content);
 
             //ArrayList에 HashMap 붙이기

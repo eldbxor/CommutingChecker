@@ -271,7 +271,6 @@ public class MainActivity extends AppCompatActivity
         // Set the menu of the Navigation View
         navigationView.inflateMenu(R.menu.nav_menu);
         int check = navigationView.getMenu().size();
-        Log.d("tks-1", check +"");
 
         getFragmentManager().beginTransaction()
                 .replace(R.id.content_frame, fragMain)

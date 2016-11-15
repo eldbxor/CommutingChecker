@@ -67,7 +67,7 @@ public class Other_attendFragment extends Fragment {
         for(int i=0; i<5; i++)
         {
             item = new Other_listItem();
-            item.setIcon(ContextCompat.getDrawable(rootView.getContext(), R.drawable.commuting));
+            item.setIcon(ContextCompat.getDrawable(rootView.getContext(), R.drawable.logo));
             item.setName("이름: "+ h_name[i]);
             item.bsetName( h_state[i].toString());
 

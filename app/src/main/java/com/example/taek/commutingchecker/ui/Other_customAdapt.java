@@ -67,8 +67,8 @@ public class Other_customAdapt extends BaseAdapter {
             @Override
             public void onClick(View v) {
 
-                Intent intent = new Intent( context.getApplicationContext(), ShowEachInfo.class );
-                context.startActivity(intent);
+                //Intent intent = new Intent( context.getApplicationContext(), ShowEachInfo.class );
+                //context.startActivity(intent);
 
             }
         });
