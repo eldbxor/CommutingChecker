@@ -220,7 +220,8 @@ public class RegisterReceiver {
                     @Override
                     public void onReceive(Context context, Intent intent) {
                         // close alert
-                        PopupActivity.finishFlag = true;
+                        // PopupActivity.finishFlag = true;
+                        ((PopupActivity) mContext).finishFlag = true;
                         // ((PopupActivity) mContext).turnOffScreen();
                         Log.d(TAG, "createReceiver(): PopupActivity's finishFlag = " + String.valueOf(PopupActivity.finishFlag));
                         /*
@@ -228,6 +229,7 @@ public class RegisterReceiver {
                         ((PopupActivity) mContext).finish(); */
                     }
                 };
+                return broadcastReceiver;
         }
         return null;
     }

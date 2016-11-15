@@ -43,7 +43,12 @@
             android:exported="true" />
 
         <activity
-            android:name=".ui.PopupActivity">
+            android:name=".ui.PopupActivity"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.CLOSE_ALERT" />
+            </intent-filter>
         </activity>
     </application>
 
