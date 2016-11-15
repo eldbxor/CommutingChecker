@@ -53,7 +53,7 @@ public class SetupFragment extends Fragment {
         bleScanSwitch = (Switch) rootView.findViewById(R.id.BLEScanSwitch);
         intent = new Intent(getActivity(), BLEScanService.class);
         request = (Button) rootView.findViewById(R.id.Request);
-        showData = (Button) rootView.findViewById(R.id.Show_EssentialData);
+            showData = (Button) rootView.findViewById(R.id.Show_EssentialData);
         calibration = (Button) rootView.findViewById(R.id.Calibration);
         checkRunning = (Button) rootView.findViewById(R.id.CheckRunning);
         commutingState = (TextView) rootView.findViewById(R.id.commutingState);
