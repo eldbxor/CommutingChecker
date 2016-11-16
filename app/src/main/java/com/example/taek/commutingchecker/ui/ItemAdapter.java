@@ -1,7 +1,9 @@
 package com.example.taek.commutingchecker.ui;
 
+import android.app.FragmentManager;
 import android.content.Context;
 import android.os.Build;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -21,6 +23,7 @@ import java.util.HashMap;
 public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
     Context context;
     ArrayList<HashMap<String,String>> noticeList; //공지사항 정보 담겨있음
+    private MainFragment2 fragMain;
 
     public ItemAdapter(Context context, ArrayList<HashMap<String,String>> noticeList) {
         this.context = context;
@@ -41,6 +44,26 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
         holder.tv_content.setText(noticeItem.get("content")); //내용
         Log.e("onCreate1[title]", "" + noticeItem.get("title"));
         Log.e("onCreate1[content]", "" + noticeItem.get("content"));
+        if(position==4) {
+            holder.cv.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    fragMain = MainFragment2.newInstance();
+                    AppCompatActivity activity = (AppCompatActivity) v.getContext();
+                    FragmentManager fragmentManager = activity.getFragmentManager();
+                    fragmentManager.beginTransaction()
+                            .replace(R.id.content_frame, fragMain)
+                            .detach(fragMain).attach(fragMain)
+                            .addToBackStack(null).commit();
+
+                    //MainFragment2 fragMain2 = new MainFragment2();
+                    //activity.getSupportFragmentManager().beginTransaction()
+                    //        .replace(R.id.EP_user_name, fragMain2)
+                    //        .addToBackStack(null).commit();
+                }
+            });
+        }
+
     }
 
     @Override
@@ -58,6 +81,7 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
             tv_title = (TextView) v.findViewById(R.id.tv_title);
             tv_content = (TextView) v.findViewById(R.id.tv_content);
             cv = (CardView) v.findViewById(R.id.cv);
+
         }
     }
 }
