@@ -11,6 +11,7 @@ import com.example.taek.commutingchecker.services.CalibrationService;
 import com.example.taek.commutingchecker.ui.ChartFragment;
 import com.example.taek.commutingchecker.ui.EntryActivity;
 import com.example.taek.commutingchecker.ui.MainActivity;
+import com.example.taek.commutingchecker.ui.MainFragment;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -691,19 +692,12 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
         if (mSocket.connected()) {
             if (analyzer.serversPublicKey != null) {
                 try {
-                    switch (signal) {
-                        case POPULATION:
-                            JSONObject content = new JSONObject();
-                            content.put("SmartphoneAddress", BLEScanService.myMacAddress);
-                            content.put("Signal", signal.toString());
+                    JSONObject content = new JSONObject();
+                    content.put("SmartphoneAddress", BLEScanService.myMacAddress);
+                    content.put("Signal", signal.toString());
 
-                            mSocket.emit("requestChartData", analyzer.encryptSendJson(content));
+                    mSocket.emit("requestChartData", analyzer.encryptSendJson(content));
 
-                            break;
-
-                        default:
-                            break;
-                    }
                 } catch (JSONException e) {
                     e.printStackTrace();
                     Log.d("Awesometic", "requestChartData - exception caught (JSON envelopment)");
@@ -719,16 +713,7 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
                     try {
                         JSONObject resultJson = (JSONObject) args[0];
                         JSONArray contentJsonArray = new JSONArray(analyzer.extractContentFromReceivedJson(resultJson));
-/*
-                        Log.d("Awesometic", contentJson.toString());
-                        StringBuilder result = new StringBuilder(contentJson.toString());
-                        result.insert(0, "{ \"data\":");
-                        result.insert(result.length(), "}");
-*/
 
-//                        Log.d("Awesometic", result.toString());
-
-//                        JSONObject chartData = new JSONObject(result.toString());
                         ChartFragment.chartData = contentJsonArray;
                         ChartFragment.chartDataReceived = true;
                     } catch (JSONException e) {
@@ -741,6 +726,80 @@ Gateway 4 (pi3): b1 2a 7a b6 d0 12 49 92 88 09 43 4d d1 34 30 19 00 03 00 02
             Log.d("Awesometic", "requestChartData - socket isn't connected");
         }
     }
+
+    public void requestTodayCommuteInfo() {
+        if (mSocket.connected()) {
+            if (analyzer.serversPublicKey != null) {
+                try {
+                    JSONObject content = new JSONObject();
+                    content.put("SmartphoneAddress", BLEScanService.myMacAddress);
+                    content.put("Signal", "TODAYCOMMUTEINFO");
+
+                    mSocket.emit("requestChartData", analyzer.encryptSendJson(content));
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                    Log.d("Awesometic", "requestTodayCommuteInfo - exception caught (JSON envelopment)");
+                }
+            } else {
+                Log.d("Awesometic", "requestTodayCommuteInfo - server's public key is not initialized");
+            }
+
+            mSocket.on("requestTodayCommuteInfo_answer", new Emitter.Listener() {
+                @Override
+                public void call(Object... args) {
+                    try {
+                        JSONObject resultJson = (JSONObject) args[0];
+                        JSONObject contentJson = new JSONObject(analyzer.extractContentFromReceivedJson(resultJson));
+
+                        MainFragment.todayCommuteInfoJson = contentJson;
+                        MainFragment.todayCommuteInfoReceived = true;
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+
+        } else {
+            Log.d("Awesometic", "requestTodayCommuteInfo - socket isn't connected");
+        }
+    }
+
+//    public void requestAvgCommuteInfo() {
+//        if (mSocket.connected()) {
+//            if (analyzer.serversPublicKey != null) {
+//                try {
+//                    JSONObject content = new JSONObject();
+//                    content.put("SmartphoneAddress", BLEScanService.myMacAddress);
+//                    content.put("Signal", "AVGCOMMUTEINFO");
+//
+//                    mSocket.emit("requestChartData", analyzer.encryptSendJson(content));
+//                } catch (JSONException e) {
+//                    e.printStackTrace();
+//                    Log.d("Awesometic", "requestAvgCommuteInfo - exception caught (JSON envelopment)");
+//                }
+//            } else {
+//                Log.d("Awesometic", "requestAvgCommuteInfo - server's public key is not initialized");
+//            }
+//
+//            mSocket.on("requestAvgCommuteInfo_answer", new Emitter.Listener() {
+//                @Override
+//                public void call(Object... args) {
+//                    try {
+//                        JSONObject resultJson = (JSONObject) args[0];
+//                        JSONArray contentJsonArray = new JSONArray(analyzer.extractContentFromReceivedJson(resultJson));
+//
+//                        MainFragment.todayCommuteInfoJsonArray = contentJsonArray;
+//                        MainFragment.todayCommuteInfoReceived = true;
+//                    } catch (JSONException e) {
+//                        e.printStackTrace();
+//                    }
+//                }
+//            });
+//
+//        } else {
+//            Log.d("Awesometic", "requestAvgCommuteInfo - socket isn't connected");
+//        }
+//    }
 
     public void sendQueueData() {
         if (mSocketDataQueue.isEmpty()) {
