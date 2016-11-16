@@ -80,7 +80,6 @@ public class MainActivity extends AppCompatActivity
     public static String employee_number;
     public static String employee_name;
 
-
     // String of Calibration's result
     public static String strOfCalibrationResult;
 

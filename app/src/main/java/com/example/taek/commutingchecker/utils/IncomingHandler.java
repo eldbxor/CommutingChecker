@@ -44,7 +44,7 @@ public class IncomingHandler extends Handler{
                             CalibrationFragment.timerSecond++;
                             CalibrationFragment.progressBar.setProgress(CalibrationFragment.timerSecond);
                             CalibrationFragment.timerTextUpdate();
-                        }
+                            }
                         break;
 
                     case Constants.HANDLE_MESSAGE_TYPE_SETTEXT_ATTENDANCE_ZONE:

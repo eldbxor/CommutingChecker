@@ -7,6 +7,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.TextView;
@@ -27,6 +28,7 @@ public class PopupActivity extends AppCompatActivity {
     BroadcastReceiver CloseAlertReceiver;
     RegisterReceiver mRegisterReceiver;
     // Timer timer;
+    Window window;
     String TAG = "PopupActivity";
 
     @Override
@@ -43,12 +45,12 @@ public class PopupActivity extends AppCompatActivity {
         CloseAlertReceiver = mRegisterReceiver.createReceiver(Constants.BROADCAST_RECEIVER_TYPE_CLOSE_ALERT);
         registerReceiver(CloseAlertReceiver, mRegisterReceiver.createPackageFilter(Constants.BROADCAST_RECEIVER_TYPE_CLOSE_ALERT));
 
-        /*
+/*
         timer = new Timer();
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
-                Log.d(TAG, "onCreate(): timer scheduling");
+                Log.d(TAG, "onCreate(): timer scheduling, finishFlag - " + String.valueOf(finishFlag));
 
                 if(finishFlag) {
                     turnOffScreen();
@@ -59,6 +61,7 @@ public class PopupActivity extends AppCompatActivity {
         }, 3000, 3000);
 */
 
+/*
         mRunnable = new Runnable() {
             @Override
             public void run() {
@@ -69,7 +72,7 @@ public class PopupActivity extends AppCompatActivity {
         };
         mHandler = new Handler();
         mHandler.postDelayed(mRunnable, 60000); // 1분 뒤에 화면을 끄고 종료
-
+*/
         wakeScreen();
 
         btn_open_activity.setOnClickListener(new View.OnClickListener() {
@@ -88,6 +91,28 @@ public class PopupActivity extends AppCompatActivity {
                 finish();
             }
         });
+
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (!finishFlag) {
+                    try {
+                        Thread.sleep(3000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        turnOffScreen();
+
+                        finish();
+                    }
+                });
+            }
+        });
+        thread.start();
     }
 
     public void wakeScreen() {
@@ -117,7 +142,7 @@ public class PopupActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        /*
+/*
         try {
             if (timer != null) {
                 timer.cancel();
@@ -126,8 +151,8 @@ public class PopupActivity extends AppCompatActivity {
             }
         } catch (Exception e) {
             e.printStackTrace();
-        } */
-
+        }
+*/
         try {
             Log.d(TAG, "unregisterReceiver");
             if (CloseAlertReceiver != null) {

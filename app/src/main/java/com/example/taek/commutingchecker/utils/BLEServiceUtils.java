@@ -660,7 +660,7 @@ public class BLEServiceUtils {
                 // 팝업 지우기
                 intent = null;
                 intent = new Intent("android.intent.action.CLOSE_ALERT");
-                intent.setData(Uri.parse("closeAlert"));
+                intent.setData(Uri.parse("closeAlert:"));
                 mContext.sendBroadcast(intent);
 
                 GenerateNotification.generateNotification(mContext, "CommutingChecker", "CommutingChecker", "출근 상태", Constants.NOTIFICATION_ID_TYPE_COMMUTING_STATE);
