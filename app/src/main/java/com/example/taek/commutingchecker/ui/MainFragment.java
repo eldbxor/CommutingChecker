@@ -10,6 +10,8 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.taek.commutingchecker.R;
+import com.example.taek.commutingchecker.utils.Constants;
+import com.example.taek.commutingchecker.utils.SocketIO;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -60,14 +62,19 @@ public class MainFragment extends Fragment {
         rv.setLayoutManager(mLinearLayoutManager);
 
         try {
-            do {
-                Thread.sleep(100);
-            } while (MainActivity.mSocket.connected() == false);
+            if (MainActivity.mSocket.connected() == false) {
+                MainActivity.mSocket.connect(Constants.CALLBACK_TYPE_MAIN_ACTIVITY);
+                do {
+                    Thread.sleep(100);
+                } while (MainActivity.mSocket.connected() == false);
+            }
 
-            MainActivity.mSocket.getServersRsaPublicKey();
-            do {
-                Thread.sleep(100);
-            } while (MainActivity.mSocket.isServersPublicKeyInitialized() == false);
+            if (MainActivity.mSocket.isServersPublicKeyInitialized() == false) {
+                MainActivity.mSocket.getServersRsaPublicKey();
+                do {
+                    Thread.sleep(100);
+                } while (MainActivity.mSocket.isServersPublicKeyInitialized() == false);
+            }
 
             MainActivity.mSocket.requestTodayCommuteInfo();
             do {
