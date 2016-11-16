@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:padding="16dp"
+    android:orientation="vertical">
+
+    <TextView
+        android:text="사용자 정보"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/textView11"
+        android:textSize="30sp"
+        android:typeface="serif"
+        android:textStyle="normal|bold"
+        android:textAllCaps="false"
+        android:textAlignment="center"
+        android:background="@drawable/main_head" />
+
+    <android.support.v7.widget.RecyclerView
+        android:layout_height="208dp"
+        android:layout_width="fill_parent"
+        android:id="@+id/rv"
+        android:layout_weight="5.71">
+    </android.support.v7.widget.RecyclerView>
+</LinearLayout>
