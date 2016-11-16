@@ -11,8 +11,13 @@ import android.view.ViewGroup;
 
 import com.example.taek.commutingchecker.R;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by Awesometic on 2016-06-09.
@@ -23,12 +28,15 @@ public class MainFragment extends Fragment {
     private RecyclerView rv;
     ArrayList<HashMap<String,String>> itemList;
 
+    public static JSONObject todayCommuteInfoJson = new JSONObject();
+    public static boolean todayCommuteInfoReceived;
 
     private static final String TAG_TITLE = "title";
     private static final String TAG_CONTENT = "content";
 
     public static MainFragment newInstance() {
         MainFragment fragment = new MainFragment();
+        todayCommuteInfoReceived = false;
         return fragment;
     }
 
@@ -44,59 +52,88 @@ public class MainFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_main1, container, false);
-        itemList = new ArrayList<HashMap<String, String>>();
+        itemList = new ArrayList<>();
         mLinearLayoutManager = new LinearLayoutManager(getActivity());
         mLinearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         rv = (RecyclerView) rootView.findViewById(R.id.rv);
         rv.setHasFixedSize(true);
         rv.setLayoutManager(mLinearLayoutManager);
 
-        ArrayList<String> titles = new ArrayList<String>();
-            titles.add(0,"금일 첫 입실");
-            titles.add(1,"금일 마지막 퇴실");
-            titles.add(2,"금일 근무시간");
-            titles.add(3,"금일 초과근무");
-            titles.add(4,"개인 정보 더 보기");
+        try {
+            do {
+                Thread.sleep(100);
+            } while (MainActivity.mSocket.connected() == false);
 
+            MainActivity.mSocket.getServersRsaPublicKey();
+            do {
+                Thread.sleep(100);
+            } while (MainActivity.mSocket.isServersPublicKeyInitialized() == false);
 
+            MainActivity.mSocket.requestTodayCommuteInfo();
+            do {
+                Thread.sleep(100);
+            } while (todayCommuteInfoReceived == false);
+            todayCommuteInfoReceived = false;
 
-        //하드코딩용 데이터
-        for(int i=0; i<5; i++) {
-            String content = "TAG_CONTENT" + i;
-            Log.d("check :" , titles.get(i));
-            //HashMap에 붙이기
-            HashMap<String,String> posts = new HashMap<String,String>();
-            posts.put(TAG_TITLE,titles.get(i));
-            if(i==4){
-                posts.put(TAG_CONTENT,"클릭 시 이동");
-            }else {
-                posts.put(TAG_CONTENT, content);
+            ArrayList<String> titles = new ArrayList<>();
+            titles.add(0,"오늘 첫 입실");
+            titles.add(1,"오늘 마지막 퇴실");
+            titles.add(2,"오늘 근무시간");
+            titles.add(3,"오늘 초과근무");
+            titles.add(4,"사용자 정보 더 보기");
+            
+            ArrayList<String> contents = new ArrayList<>();
+
+            // userList, workplaceList, departmentList, positionList
+            JSONArray userListJsonArray = todayCommuteInfoJson.getJSONArray("userList");
+            
+            for (int i = 0; i < userListJsonArray.length(); i++) {
+                if (userListJsonArray.getJSONObject(i).getString("smartphoneAddress").equals(MainActivity.myMacAddress)) {
+                    JSONObject currentUserCommuteJson = userListJsonArray.getJSONObject(i);
+                    
+                    contents.add(0, convertMsecToReadableFormat(Integer.parseInt(currentUserCommuteJson.getString("firstComeInTime"))));
+                    contents.add(1, convertMsecToReadableFormat(Integer.parseInt(currentUserCommuteJson.getString("lastComeOutTime"))));
+                    contents.add(2, convertMsecToReadableFormat(Integer.parseInt(currentUserCommuteJson.getString("validWorkingTime"))));
+                    contents.add(3, convertMsecToReadableFormat(Integer.parseInt(currentUserCommuteJson.getString("validOverWorkingTime"))));
+
+                    break;
+                }
             }
-            //ArrayList에 HashMap 붙이기
-            itemList.add(posts);
+
+            for(int i = 0; i < 5; i++) {
+                HashMap<String,String> posts = new HashMap<>();
+                
+                posts.put(TAG_TITLE,titles.get(i));
+                if(i == 4){
+                    posts.put(TAG_CONTENT,"클릭 시 이동");
+                } else {
+                    posts.put(TAG_CONTENT, contents.get(i));
+                }
+                
+                itemList.add(posts);
+            }
+
+            ItemAdapter adapter = new ItemAdapter(getActivity(),itemList);
+            Log.e("onCreate[noticeList]", "" + itemList.size());
+
+            rv.setAdapter(adapter);
+            adapter.notifyDataSetChanged();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-
-        ItemAdapter adapter = new ItemAdapter(getActivity(),itemList);
-        Log.e("onCreate[noticeList]", "" + itemList.size());
-
-
-        rv.setAdapter(adapter);
-        adapter.notifyDataSetChanged();
-
-        //TextView textview =/// (TextView) rootView.findViewById(R.id.cv_text);
-        //textview.setText("hello?");
 
         return rootView;
     }
 
-
-
-
+    // TODO: function below may be quite used at other source files, need to move into other class file used as shared library
+    private String convertMsecToReadableFormat(int msec) {
+        return String.format("%02d:%02d:%02d", TimeUnit.MILLISECONDS.toHours(msec),
+                TimeUnit.MILLISECONDS.toMinutes(msec) % TimeUnit.HOURS.toMinutes(1),
+                TimeUnit.MILLISECONDS.toSeconds(msec) % TimeUnit.MINUTES.toSeconds(1));
+    }
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-
-
     }
 }
