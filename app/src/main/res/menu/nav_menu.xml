@@ -11,12 +11,13 @@
         <item
             android:id="@+id/nav_population_of_each_department"
             android:title="부서별 인원 수" />
+        <!--
         <item
             android:id="@+id/nav_Otherattend"
             android:title="타인원 입퇴실" />
         <item
             android:id="@+id/attendence_each_people"
             android:title="개인 출석" />
-
+        -->
     </group>
 </menu>

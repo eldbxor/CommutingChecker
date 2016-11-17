@@ -4,23 +4,20 @@
     android:orientation="vertical"
     android:layout_height="match_parent"
     android:weightSum="1"
-    android:background="@color/colorSetupText"
     android:layout_gravity="center"
-    android:layout_width="fill_parent"
-    android:paddingLeft="10dp"
-    android:paddingRight="10dp"
+    android:layout_width="match_parent"
     android:paddingTop="4dp">
 
     <android.support.v7.widget.CardView
-        android:layout_height="104dp"
-        android:layout_marginBottom="16dp"
-        android:background="@drawable/cv_dg"
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="10dp"
         android:id="@+id/cv"
         android:layout_gravity="center"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_weight="0.04"
-        card_view:cardBackgroundColor="#eceff1"
-        >
+        card_view:cardElevation="6dp"
+        card_view:cardBackgroundColor="#9fa8da"
+        android:layout_height="120dp">
 
         <LinearLayout
             android:orientation="vertical"
@@ -33,16 +30,14 @@
                 android:orientation="vertical"
                 android:layout_height="52dp"
                 android:layout_gravity="center"
-                android:background="#eee"
-                android:layout_width="fill_parent">
+                android:layout_width="fill_parent"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp">
 
                 <RelativeLayout
+                    android:background="@android:color/transparent"
                     android:layout_width="fill_parent"
-                    android:layout_height="match_parent"
-                    android:paddingLeft="16dp"
-                    android:paddingRight="16dp"
-                    android:background="@drawable/cv_dg_up"
-                    android:layout_marginBottom="1dp">
+                    android:layout_height="50dp">
 
                     <LinearLayout
                         android:orientation="vertical"
@@ -58,6 +53,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:textAppearance="?android:attr/textAppearanceMedium"
+                        android:textColor="@color/colorWhite"
                         android:text="Medium Text"
                         android:id="@+id/tv_title"
                         android:textSize="16dp"
@@ -71,15 +67,19 @@
             <LinearLayout
                 android:orientation="vertical"
                 android:layout_height="wrap_content"
-                android:background="#ddd"
                 android:layout_gravity="center"
-                android:layout_width="fill_parent">
+                android:layout_width="fill_parent"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp">
 
                 <RelativeLayout
                     android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
                     android:padding="16dp"
-                    android:background="@drawable/cv_dg_down">
+                    android:paddingBottom="10dp"
+                    android:background="@color/colorWhite"
+                    android:layout_height="50dp"
+                    android:paddingLeft="5dp"
+                    android:paddingRight="5dp">
 
                     <TextView
                         android:layout_width="wrap_content"

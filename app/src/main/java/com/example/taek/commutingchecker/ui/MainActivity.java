@@ -343,6 +343,7 @@ public class MainActivity extends AppCompatActivity
                         .detach(fragChart).attach(fragChart)
                         .commit();
                 break;
+            /*
             case R.id.nav_Otherattend:
                 fragmentManager.beginTransaction()
                         .replace(R.id.content_frame, fragOtherattend)
@@ -355,6 +356,7 @@ public class MainActivity extends AppCompatActivity
                         .detach(fragChart).attach(fragChart)
                         .commit();
                 break;
+                */
             default:
                 break;
         }
