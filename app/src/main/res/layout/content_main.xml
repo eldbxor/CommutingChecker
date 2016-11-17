@@ -22,7 +22,7 @@
         android:layout_width="match_parent"
         android:layout_gravity="center_horizontal|bottom"
         android:id="@+id/linearLayout"
-        android:background="@color/colorPrimaryDark"
+        android:background="#5c6bc0"
         android:orientation="horizontal"
         android:layout_alignParentBottom="true"
         android:layout_alignParentStart="true"

@@ -45,7 +45,7 @@ public class MainFragment extends Fragment {
 
     public MainFragment() {   }
 
-    //    @Override
+//    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
     }
@@ -53,6 +53,7 @@ public class MainFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
         View rootView = inflater.inflate(R.layout.fragment_main1, container, false);
         itemList = new ArrayList<>();
         mLinearLayoutManager = new LinearLayoutManager(getActivity());
@@ -79,6 +80,7 @@ public class MainFragment extends Fragment {
                 } while (MainActivity.mSocket.isServersPublicKeyInitialized() == false);
             }
 
+
             MainActivity.mSocket.requestTodayCommuteInfo();
             do {
                 Thread.sleep(100);
@@ -91,16 +93,17 @@ public class MainFragment extends Fragment {
             titles.add(2,"오늘 근무시간");
             titles.add(3,"오늘 초과근무");
             titles.add(4,"사용자 정보 더 보기");
-
+            
             ArrayList<String> contents = new ArrayList<>();
+
 
             // userList, workplaceList, departmentList, positionList
             JSONArray userListJsonArray = todayCommuteInfoJson.getJSONArray("userList");
-
+            
             for (int i = 0; i < userListJsonArray.length(); i++) {
                 if (userListJsonArray.getJSONObject(i).getString("smartphoneAddress").equals(MainActivity.myMacAddress)) {
                     JSONObject currentUserCommuteJson = userListJsonArray.getJSONObject(i);
-
+                    
                     contents.add(0, convertMsecToReadableFormat(Integer.parseInt(currentUserCommuteJson.getString("firstComeInTime"))));
                     contents.add(1, convertMsecToReadableFormat(Integer.parseInt(currentUserCommuteJson.getString("lastComeOutTime"))));
                     contents.add(2, convertMsecToReadableFormat(Integer.parseInt(currentUserCommuteJson.getString("validWorkingTime"))));
@@ -112,14 +115,14 @@ public class MainFragment extends Fragment {
 
             for(int i = 0; i < 5; i++) {
                 HashMap<String,String> posts = new HashMap<>();
-
+                
                 posts.put(TAG_TITLE,titles.get(i));
                 if(i == 4){
                     posts.put(TAG_CONTENT,"클릭 시 이동");
                 } else {
                     posts.put(TAG_CONTENT, contents.get(i));
                 }
-
+                
                 itemList.add(posts);
             }
 
