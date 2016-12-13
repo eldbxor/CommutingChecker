@@ -2,220 +2,202 @@
 <items version="2" >
 
     <item
-        is-multidex="true"
-        jar="C:\Users\TKs\Desktop\gitub2\CommutingChecker-layout_work\app\build\intermediates\incremental-classes\debug\instant-run-bootstrap.jar"
-        jumboMode="true"
-        optimize="true"
-        revision="23.0.1"
-        sha1="4a1384b2e93b322c9a07307322ee8aa9518cb984">
-        <dex dex="C:\Users\TKs\Desktop\gitub2\CommutingChecker-layout_work\app\build\intermediates\transforms\dex\debug\folders\1000\10\instant-run-bootstrap_7efabddeecebcacfe4565b0c88537390f1fa87d8\classes.dex" />
-    </item>
-    <item
-        is-multidex="true"
-        jar="C:\Users\TKs\AppData\Local\Android\sdk\extras\android\m2repository\com\android\support\support-annotations\23.4.0\support-annotations-23.4.0.jar"
-        jumboMode="true"
-        optimize="true"
-        revision="23.0.1"
-        sha1="ffbe55fdb2bb456b1485831706a9eac3300bb6b8">
-        <dex dex="C:\Users\TKs\Desktop\gitub2\CommutingChecker-layout_work\app\build\intermediates\transforms\dex\debug\folders\1000\10\support-annotations-23.4.0_9112f0202d02d8785095b4cf1aa27cfb3b3517bb\classes.dex" />
-    </item>
-    <item
-        is-multidex="true"
-        jar="C:\Users\TKs\.gradle\caches\modules-2\files-2.1\io.socket\engine.io-client\0.7.0\c1b1d30e2d2231b2eae1438a44943a409b976dac\engine.io-client-0.7.0.jar"
-        jumboMode="true"
-        optimize="true"
-        revision="23.0.1"
-        sha1="c1b1d30e2d2231b2eae1438a44943a409b976dac">
-        <dex dex="C:\Users\TKs\Desktop\gitub2\CommutingChecker-layout_work\app\build\intermediates\transforms\dex\debug\folders\1000\10\engine.io-client-0.7.0_72a50eef88495519a8d69157441b60a7a6be3895\classes.dex" />
-    </item>
-    <item
-        is-multidex="true"
-        jar="C:\Users\TKs\.gradle\caches\modules-2\files-2.1\com.github.PhilJay\MPAndroidChart\v2.2.5\e135072797f494a3b6cb10640dd8c6495261b9ac\MPAndroidChart-v2.2.5.jar"
-        jumboMode="true"
-        optimize="true"
-        revision="23.0.1"
-        sha1="e135072797f494a3b6cb10640dd8c6495261b9ac">
-        <dex dex="C:\Users\TKs\Desktop\gitub2\CommutingChecker-layout_work\app\build\intermediates\transforms\dex\debug\folders\1000\10\MPAndroidChart-v2.2.5_6eca53e9a56400910b2796385cf0f1f6e4dd0eb7\classes.dex" />
-    </item>
-    <item
-        is-multidex="true"
-        jar="C:\Users\TKs\Desktop\gitub2\CommutingChecker-layout_work\app\build\intermediates\exploded-aar\com.crashlytics.sdk.android\beta\1.1.6\jars\classes.jar"
-        jumboMode="true"
-        optimize="true"
-        revision="23.0.1"
-        sha1="0362076a0fa8c125691f759ba4652f11ad31b05a">
-        <dex dex="C:\Users\TKs\Desktop\gitub2\CommutingChecker-layout_work\app\build\intermediates\transforms\dex\debug\folders\1000\10\com.crashlytics.sdk.android-beta-1.1.6_4d33de3b5a5769c5c66cfca526c49998950b9994\classes.dex" />
-    </item>
-    <item
-        is-multidex="true"
-        jar="C:\Users\TKs\Desktop\gitub2\CommutingChecker-layout_work\app\build\intermediates\exploded-aar\io.fabric.sdk.android\fabric\1.3.12\jars\classes.jar"
-        jumboMode="true"
-        optimize="true"
-        revision="23.0.1"
-        sha1="3575e73a22dce98f0bdbcdb475ef55a84606a9a6">
-        <dex dex="C:\Users\TKs\Desktop\gitub2\CommutingChecker-layout_work\app\build\intermediates\transforms\dex\debug\folders\1000\10\io.fabric.sdk.android-fabric-1.3.12_8b922bcedb18275d66be2ce4b1b1899df613a613\classes.dex" />
-    </item>
-    <item
-        is-multidex="true"
-        jar="C:\Users\TKs\Desktop\gitub2\CommutingChecker-layout_work\app\build\intermediates\exploded-aar\com.android.support\support-vector-drawable\23.4.0\jars\classes.jar"
-        jumboMode="true"
-        optimize="true"
-        revision="23.0.1"
-        sha1="c2c594cace5d83a3227b2b6e658ecbfd586d3ed9">
-        <dex dex="C:\Users\TKs\Desktop\gitub2\CommutingChecker-layout_work\app\build\intermediates\transforms\dex\debug\folders\1000\10\com.android.support-support-vector-drawable-23.4.0_ecac84be98e106034c5e144f27da0ce91a0655f2\classes.dex" />
-    </item>
-    <item
-        is-multidex="true"
-        jar="C:\Users\TKs\.gradle\caches\modules-2\files-2.1\com.squareup.okhttp3\okhttp\3.0.1\b34c1f2d993044656e87f88970b6818e99e886ba\okhttp-3.0.1.jar"
-        jumboMode="true"
-        optimize="true"
-        revision="23.0.1"
-        sha1="b34c1f2d993044656e87f88970b6818e99e886ba">
-        <dex dex="C:\Users\TKs\Desktop\gitub2\CommutingChecker-layout_work\app\build\intermediates\transforms\dex\debug\folders\1000\10\okhttp-3.0.1_53305996ab3bd75fa193c0fed963d057f522720a\classes.dex" />
-    </item>
-    <item
-        is-multidex="true"
-        jar="C:\Users\TKs\Desktop\gitub2\CommutingChecker-layout_work\app\build\intermediates\exploded-aar\com.android.support\appcompat-v7\23.4.0\jars\classes.jar"
-        jumboMode="true"
-        optimize="true"
-        revision="23.0.1"
-        sha1="548f06de403a9409f00554b3ee12a9fdea0e236c">
-        <dex dex="C:\Users\TKs\Desktop\gitub2\CommutingChecker-layout_work\app\build\intermediates\transforms\dex\debug\folders\1000\10\com.android.support-appcompat-v7-23.4.0_b6b68f73da80b47be6cc3c79dae4c9d23a1dc4f9\classes.dex" />
-    </item>
-    <item
-        is-multidex="true"
-        jar="C:\Users\TKs\Desktop\gitub2\CommutingChecker-layout_work\app\build\intermediates\exploded-aar\com.crashlytics.sdk.android\crashlytics-core\2.3.10\jars\classes.jar"
-        jumboMode="true"
-        optimize="true"
-        revision="23.0.1"
-        sha1="2f9a9b21b70965cde70f6eb8f2ee68794fb482e6">
-        <dex dex="C:\Users\TKs\Desktop\gitub2\CommutingChecker-layout_work\app\build\intermediates\transforms\dex\debug\folders\1000\10\com.crashlytics.sdk.android-crashlytics-core-2.3.10_bdf124fc4287a1f0de37d09be2048ecde1419e33\classes.dex" />
-    </item>
-    <item
-        is-multidex="true"
-        jar="C:\Users\TKs\Desktop\gitub2\CommutingChecker-layout_work\app\build\intermediates\incremental-runtime-classes\debug\instant-run.jar"
-        jumboMode="true"
-        optimize="true"
-        revision="23.0.1"
-        sha1="06d4e85f2275435b60ab0a9993fe4a5b86c72298">
-        <dex dex="C:\Users\TKs\Desktop\gitub2\CommutingChecker-layout_work\app\build\intermediates\transforms\dex\debug\folders\1000\10\instant-run_12796bd849ba8ab51e79ae5d27777446f48d07f6\classes.dex" />
-    </item>
-    <item
-        is-multidex="true"
-        jar="C:\Users\TKs\.gradle\caches\modules-2\files-2.1\com.squareup.okio\okio\1.6.0\98476622f10715998eacf9240d6b479f12c66143\okio-1.6.0.jar"
-        jumboMode="true"
-        optimize="true"
-        revision="23.0.1"
-        sha1="98476622f10715998eacf9240d6b479f12c66143">
-        <dex dex="C:\Users\TKs\Desktop\gitub2\CommutingChecker-layout_work\app\build\intermediates\transforms\dex\debug\folders\1000\10\okio-1.6.0_01fd1d896b61fd533d3463bf40c781eb740adae1\classes.dex" />
-    </item>
-    <item
-        is-multidex="true"
-        jar="C:\Users\TKs\Desktop\gitub2\CommutingChecker-layout_work\app\build\intermediates\exploded-aar\com.android.support\support-v4\23.4.0\jars\classes.jar"
-        jumboMode="true"
-        optimize="true"
-        revision="23.0.1"
-        sha1="67bd36ee9340ec7c254108936ad16b24bed160cc">
-        <dex dex="C:\Users\TKs\Desktop\gitub2\CommutingChecker-layout_work\app\build\intermediates\transforms\dex\debug\folders\1000\10\com.android.support-support-v4-23.4.0_e61a9af830e43a4c48812e9bdf43235cd41167b1\classes.dex" />
-    </item>
-    <item
-        is-multidex="true"
-        jar="C:\Users\TKs\Desktop\gitub2\CommutingChecker-layout_work\app\build\intermediates\exploded-aar\com.android.support\design\23.4.0\jars\classes.jar"
-        jumboMode="true"
-        optimize="true"
-        revision="23.0.1"
-        sha1="5326d9a850d491714fef8cbfaa9ea3416f0bf0d2">
-        <dex dex="C:\Users\TKs\Desktop\gitub2\CommutingChecker-layout_work\app\build\intermediates\transforms\dex\debug\folders\1000\10\com.android.support-design-23.4.0_a3a5957f382ba6fbd9379b74ec0171907acbc30c\classes.dex" />
-    </item>
-    <item
-        is-multidex="true"
-        jar="C:\Users\TKs\Desktop\gitub2\CommutingChecker-layout_work\app\build\intermediates\exploded-aar\com.android.support\recyclerview-v7\23.4.0\jars\classes.jar"
-        jumboMode="true"
-        optimize="true"
-        revision="23.0.1"
-        sha1="ec75036c3c52e451d0cde50a5aedaf5fd32354a0">
-        <dex dex="C:\Users\TKs\Desktop\gitub2\CommutingChecker-layout_work\app\build\intermediates\transforms\dex\debug\folders\1000\10\com.android.support-recyclerview-v7-23.4.0_5936f4ec3d9ede208a1178b122317678c903950d\classes.dex" />
-    </item>
-    <item
-        is-multidex="true"
-        jar="C:\Users\TKs\Desktop\gitub2\CommutingChecker-layout_work\app\build\intermediates\exploded-aar\com.android.support\cardview-v7\23.0.0\jars\classes.jar"
-        jumboMode="true"
-        optimize="true"
-        revision="23.0.1"
-        sha1="1ccbc26be2c465c622a48310e8092241b01abe80">
-        <dex dex="C:\Users\TKs\Desktop\gitub2\CommutingChecker-layout_work\app\build\intermediates\transforms\dex\debug\folders\1000\10\com.android.support-cardview-v7-23.0.0_8a995e99f094e10afd76a9415d7aaa22f1306032\classes.dex" />
-    </item>
-    <item
-        is-multidex="true"
-        jar="C:\Users\TKs\Desktop\gitub2\CommutingChecker-layout_work\app\build\intermediates\exploded-aar\com.android.support\animated-vector-drawable\23.4.0\jars\classes.jar"
-        jumboMode="true"
-        optimize="true"
-        revision="23.0.1"
-        sha1="de4db3785756bfb0915a9f59a9b3f2fea7407be4">
-        <dex dex="C:\Users\TKs\Desktop\gitub2\CommutingChecker-layout_work\app\build\intermediates\transforms\dex\debug\folders\1000\10\com.android.support-animated-vector-drawable-23.4.0_ef18f17eed5c5039cb2500a4abbca0edcbf2ee81\classes.dex" />
-    </item>
-    <item
-        is-multidex="true"
-        jar="C:\Users\TKs\AppData\Local\Android\sdk\extras\m2repository\com\android\support\constraint\constraint-layout-solver\1.0.0-beta3\constraint-layout-solver-1.0.0-beta3.jar"
-        jumboMode="true"
-        optimize="true"
-        revision="23.0.1"
-        sha1="22c1e9d26251df254de7cc9dee01f5f134b10eba">
-        <dex dex="C:\Users\TKs\Desktop\gitub2\CommutingChecker-layout_work\app\build\intermediates\transforms\dex\debug\folders\1000\10\constraint-layout-solver-1.0.0-beta3_3e25ad70e3b7e242d46f45671249b6a34a46a537\classes.dex" />
-    </item>
-    <item
-        is-multidex="true"
-        jar="C:\Users\TKs\.gradle\caches\modules-2\files-2.1\io.socket\socket.io-client\0.7.0\ce278c97bc9f74c7945d647f6d441d6013163362\socket.io-client-0.7.0.jar"
-        jumboMode="true"
-        optimize="true"
-        revision="23.0.1"
-        sha1="ce278c97bc9f74c7945d647f6d441d6013163362">
-        <dex dex="C:\Users\TKs\Desktop\gitub2\CommutingChecker-layout_work\app\build\intermediates\transforms\dex\debug\folders\1000\10\socket.io-client-0.7.0_b82ab23d5ed19dab5d96bb4cbb751da201f2c7b8\classes.dex" />
-    </item>
-    <item
-        is-multidex="true"
-        jar="C:\Users\TKs\Desktop\gitub2\CommutingChecker-layout_work\app\build\intermediates\exploded-aar\com.android.support.constraint\constraint-layout\1.0.0-beta3\jars\classes.jar"
-        jumboMode="true"
-        optimize="true"
-        revision="23.0.1"
-        sha1="b81d40d208a3308c8e81b2cccd3054238a13d140">
-        <dex dex="C:\Users\TKs\Desktop\gitub2\CommutingChecker-layout_work\app\build\intermediates\transforms\dex\debug\folders\1000\10\com.android.support.constraint-constraint-layout-1.0.0-beta3_a56a98cd78d2ecd1743748856e4be1d487ed163b\classes.dex" />
-    </item>
-    <item
-        is-multidex="true"
-        jar="C:\Users\TKs\Desktop\gitub2\CommutingChecker-layout_work\app\build\intermediates\exploded-aar\com.android.support\support-v4\23.4.0\jars\libs\internal_impl-23.4.0.jar"
-        jumboMode="true"
-        optimize="true"
-        revision="23.0.1"
-        sha1="ea3c07504d2c8f4b13aa17c45c1b68ed9c1c3674">
-        <dex dex="C:\Users\TKs\Desktop\gitub2\CommutingChecker-layout_work\app\build\intermediates\transforms\dex\debug\folders\1000\10\internal_impl-23.4.0_ff09fd40887c1a3beafeac8b4a9ac81883af3db4\classes.dex" />
-    </item>
-    <item
-        is-multidex="true"
-        jar="C:\Users\TKs\.gradle\caches\modules-2\files-2.1\com.squareup.okhttp3\okhttp-ws\3.0.1\bd9b51a0188fc8f14bf840a0d326755545206116\okhttp-ws-3.0.1.jar"
-        jumboMode="true"
+        is-multidex="false"
+        jar="C:\Users\eldbx\.gradle\caches\modules-2\files-2.1\com.squareup.okhttp3\okhttp-ws\3.0.1\bd9b51a0188fc8f14bf840a0d326755545206116\okhttp-ws-3.0.1.jar"
+        jumboMode="false"
         optimize="true"
         revision="23.0.1"
         sha1="bd9b51a0188fc8f14bf840a0d326755545206116">
-        <dex dex="C:\Users\TKs\Desktop\gitub2\CommutingChecker-layout_work\app\build\intermediates\transforms\dex\debug\folders\1000\10\okhttp-ws-3.0.1_49787544ca8f2e46bb06189ddb187bd26de15b16\classes.dex" />
+        <dex dex="C:\Users\eldbx\Documents\Github\CommutingChecker\app\build\intermediates\pre-dexed\debug\okhttp-ws-3.0.1_b0b41c0b0675c9b7f88a57a182ad7e0e6418e1cd.jar" />
     </item>
     <item
-        is-multidex="true"
-        jar="C:\Users\TKs\Desktop\gitub2\CommutingChecker-layout_work\app\build\intermediates\exploded-aar\com.crashlytics.sdk.android\crashlytics\2.5.7\jars\classes.jar"
-        jumboMode="true"
+        is-multidex="false"
+        jar="C:\Users\eldbx\Documents\Github\CommutingChecker\app\build\intermediates\exploded-aar\com.android.support\design\23.4.0\jars\classes.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="23.0.1"
+        sha1="5326d9a850d491714fef8cbfaa9ea3416f0bf0d2">
+        <dex dex="C:\Users\eldbx\Documents\Github\CommutingChecker\app\build\intermediates\pre-dexed\debug\com.android.support-design-23.4.0_5e8f26eb2320fa3a695fa040a82ab9d0ae84fac6.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="C:\Users\eldbx\AppData\Local\Android\sdk\extras\m2repository\com\android\support\constraint\constraint-layout-solver\1.0.0-beta3\constraint-layout-solver-1.0.0-beta3.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="23.0.1"
+        sha1="22c1e9d26251df254de7cc9dee01f5f134b10eba">
+        <dex dex="C:\Users\eldbx\Documents\Github\CommutingChecker\app\build\intermediates\pre-dexed\debug\constraint-layout-solver-1.0.0-beta3_3b97dbfe37a7682eab82ed2d1bce16c9b4be1230.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="C:\Users\eldbx\Documents\Github\CommutingChecker\app\build\intermediates\exploded-aar\com.android.support\support-vector-drawable\23.4.0\jars\classes.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="23.0.1"
+        sha1="c2c594cace5d83a3227b2b6e658ecbfd586d3ed9">
+        <dex dex="C:\Users\eldbx\Documents\Github\CommutingChecker\app\build\intermediates\pre-dexed\debug\com.android.support-support-vector-drawable-23.4.0_33579a6e7101a1eaca4aa6158d764cff64c6e3fc.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="C:\Users\eldbx\.gradle\caches\modules-2\files-2.1\io.socket\socket.io-client\0.7.0\ce278c97bc9f74c7945d647f6d441d6013163362\socket.io-client-0.7.0.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="23.0.1"
+        sha1="ce278c97bc9f74c7945d647f6d441d6013163362">
+        <dex dex="C:\Users\eldbx\Documents\Github\CommutingChecker\app\build\intermediates\pre-dexed\debug\socket.io-client-0.7.0_0787adb4df965ba062d3445c2a6f9c5c5cb3090d.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="C:\Users\eldbx\.gradle\caches\modules-2\files-2.1\io.socket\engine.io-client\0.7.0\c1b1d30e2d2231b2eae1438a44943a409b976dac\engine.io-client-0.7.0.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="23.0.1"
+        sha1="c1b1d30e2d2231b2eae1438a44943a409b976dac">
+        <dex dex="C:\Users\eldbx\Documents\Github\CommutingChecker\app\build\intermediates\pre-dexed\debug\engine.io-client-0.7.0_2fe190ea5f87f18dcc2d2dd1f691708d45ced144.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="C:\Users\eldbx\.gradle\caches\modules-2\files-2.1\com.github.PhilJay\MPAndroidChart\v2.2.5\e135072797f494a3b6cb10640dd8c6495261b9ac\MPAndroidChart-v2.2.5.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="23.0.1"
+        sha1="e135072797f494a3b6cb10640dd8c6495261b9ac">
+        <dex dex="C:\Users\eldbx\Documents\Github\CommutingChecker\app\build\intermediates\pre-dexed\debug\MPAndroidChart-v2.2.5_ec10930e598482451dd8f575b14e756c07885f83.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="C:\Users\eldbx\Documents\Github\CommutingChecker\app\build\intermediates\exploded-aar\com.android.support\cardview-v7\23.0.0\jars\classes.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="23.0.1"
+        sha1="1ccbc26be2c465c622a48310e8092241b01abe80">
+        <dex dex="C:\Users\eldbx\Documents\Github\CommutingChecker\app\build\intermediates\pre-dexed\debug\com.android.support-cardview-v7-23.0.0_d419daae7220dc016a2c340b539a2066d7f04f8b.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="C:\Users\eldbx\Documents\Github\CommutingChecker\app\build\intermediates\exploded-aar\com.android.support\recyclerview-v7\23.4.0\jars\classes.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="23.0.1"
+        sha1="ec75036c3c52e451d0cde50a5aedaf5fd32354a0">
+        <dex dex="C:\Users\eldbx\Documents\Github\CommutingChecker\app\build\intermediates\pre-dexed\debug\com.android.support-recyclerview-v7-23.4.0_b88fb6d9481668b174a5642547f68b8eba8b83c2.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="C:\Users\eldbx\.gradle\caches\modules-2\files-2.1\com.squareup.okio\okio\1.6.0\98476622f10715998eacf9240d6b479f12c66143\okio-1.6.0.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="23.0.1"
+        sha1="98476622f10715998eacf9240d6b479f12c66143">
+        <dex dex="C:\Users\eldbx\Documents\Github\CommutingChecker\app\build\intermediates\pre-dexed\debug\okio-1.6.0_6e4639171ee9ae092dea8f9147c737ea7ebf8cf1.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="C:\Users\eldbx\Documents\Github\CommutingChecker\app\build\intermediates\exploded-aar\io.fabric.sdk.android\fabric\1.3.12\jars\classes.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="23.0.1"
+        sha1="3575e73a22dce98f0bdbcdb475ef55a84606a9a6">
+        <dex dex="C:\Users\eldbx\Documents\Github\CommutingChecker\app\build\intermediates\pre-dexed\debug\io.fabric.sdk.android-fabric-1.3.12_2f3e049fdb1ea92fe33563539853ac2acc4db722.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="C:\Users\eldbx\Documents\Github\CommutingChecker\app\build\intermediates\exploded-aar\com.android.support\support-v4\23.4.0\jars\classes.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="23.0.1"
+        sha1="67bd36ee9340ec7c254108936ad16b24bed160cc">
+        <dex dex="C:\Users\eldbx\Documents\Github\CommutingChecker\app\build\intermediates\pre-dexed\debug\com.android.support-support-v4-23.4.0_589bde12468b036d2e28d1137f50d30ecb407910.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="C:\Users\eldbx\Documents\Github\CommutingChecker\app\build\intermediates\exploded-aar\com.android.support.constraint\constraint-layout\1.0.0-beta3\jars\classes.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="23.0.1"
+        sha1="b81d40d208a3308c8e81b2cccd3054238a13d140">
+        <dex dex="C:\Users\eldbx\Documents\Github\CommutingChecker\app\build\intermediates\pre-dexed\debug\com.android.support.constraint-constraint-layout-1.0.0-beta3_1670890dd13951731c9bd7ae6e6e5d0b52ed0b57.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="C:\Users\eldbx\Documents\Github\CommutingChecker\app\build\intermediates\exploded-aar\com.crashlytics.sdk.android\beta\1.1.6\jars\classes.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="23.0.1"
+        sha1="0362076a0fa8c125691f759ba4652f11ad31b05a">
+        <dex dex="C:\Users\eldbx\Documents\Github\CommutingChecker\app\build\intermediates\pre-dexed\debug\com.crashlytics.sdk.android-beta-1.1.6_2695c6c3c63dd29e8d06362ebf4490acd00b1c52.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="C:\Users\eldbx\AppData\Local\Android\sdk\extras\android\m2repository\com\android\support\support-annotations\23.4.0\support-annotations-23.4.0.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="23.0.1"
+        sha1="ffbe55fdb2bb456b1485831706a9eac3300bb6b8">
+        <dex dex="C:\Users\eldbx\Documents\Github\CommutingChecker\app\build\intermediates\pre-dexed\debug\support-annotations-23.4.0_92df738eb49ead5971347c23a95037f45d577388.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="C:\Users\eldbx\Documents\Github\CommutingChecker\app\build\intermediates\exploded-aar\com.android.support\appcompat-v7\23.4.0\jars\classes.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="23.0.1"
+        sha1="548f06de403a9409f00554b3ee12a9fdea0e236c">
+        <dex dex="C:\Users\eldbx\Documents\Github\CommutingChecker\app\build\intermediates\pre-dexed\debug\com.android.support-appcompat-v7-23.4.0_32f79608510c5ab1ad4959c6822c7479afc4fd82.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="C:\Users\eldbx\Documents\Github\CommutingChecker\app\build\intermediates\exploded-aar\com.android.support\animated-vector-drawable\23.4.0\jars\classes.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="23.0.1"
+        sha1="de4db3785756bfb0915a9f59a9b3f2fea7407be4">
+        <dex dex="C:\Users\eldbx\Documents\Github\CommutingChecker\app\build\intermediates\pre-dexed\debug\com.android.support-animated-vector-drawable-23.4.0_63d603add89318d09a56226f9d7dcdae4965f9bd.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="C:\Users\eldbx\Documents\Github\CommutingChecker\app\build\intermediates\exploded-aar\com.crashlytics.sdk.android\crashlytics-core\2.3.10\jars\classes.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="23.0.1"
+        sha1="2f9a9b21b70965cde70f6eb8f2ee68794fb482e6">
+        <dex dex="C:\Users\eldbx\Documents\Github\CommutingChecker\app\build\intermediates\pre-dexed\debug\com.crashlytics.sdk.android-crashlytics-core-2.3.10_c97b23c67a2d94697a1fefc90be51edce72e9a1a.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="C:\Users\eldbx\Documents\Github\CommutingChecker\app\build\intermediates\exploded-aar\com.crashlytics.sdk.android\crashlytics\2.5.7\jars\classes.jar"
+        jumboMode="false"
         optimize="true"
         revision="23.0.1"
         sha1="2d8334c5cb1948de5dde77f8b72c82991af32f8a">
-        <dex dex="C:\Users\TKs\Desktop\gitub2\CommutingChecker-layout_work\app\build\intermediates\transforms\dex\debug\folders\1000\10\com.crashlytics.sdk.android-crashlytics-2.5.7_ae1e258399756e9ba6cf7ef94aed27a05013e3f9\classes.dex" />
+        <dex dex="C:\Users\eldbx\Documents\Github\CommutingChecker\app\build\intermediates\pre-dexed\debug\com.crashlytics.sdk.android-crashlytics-2.5.7_0d6a886038dd9f6a5e568ccc275aefcef913c7dc.jar" />
     </item>
     <item
-        is-multidex="true"
-        jar="C:\Users\TKs\Desktop\gitub2\CommutingChecker-layout_work\app\build\intermediates\exploded-aar\com.crashlytics.sdk.android\answers\1.3.8\jars\classes.jar"
-        jumboMode="true"
+        is-multidex="false"
+        jar="C:\Users\eldbx\.gradle\caches\modules-2\files-2.1\com.squareup.okhttp3\okhttp\3.0.1\b34c1f2d993044656e87f88970b6818e99e886ba\okhttp-3.0.1.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="23.0.1"
+        sha1="b34c1f2d993044656e87f88970b6818e99e886ba">
+        <dex dex="C:\Users\eldbx\Documents\Github\CommutingChecker\app\build\intermediates\pre-dexed\debug\okhttp-3.0.1_26cf5f6c1ce889be5201f34d3f4954241badc088.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="C:\Users\eldbx\Documents\Github\CommutingChecker\app\build\intermediates\exploded-aar\com.crashlytics.sdk.android\answers\1.3.8\jars\classes.jar"
+        jumboMode="false"
         optimize="true"
         revision="23.0.1"
         sha1="0c46a5a897439810b6c437ce188bd07d9d8dffb0">
-        <dex dex="C:\Users\TKs\Desktop\gitub2\CommutingChecker-layout_work\app\build\intermediates\transforms\dex\debug\folders\1000\10\com.crashlytics.sdk.android-answers-1.3.8_a4c392e225db4f8ff90adf2b35833c1fe296b774\classes.dex" />
+        <dex dex="C:\Users\eldbx\Documents\Github\CommutingChecker\app\build\intermediates\pre-dexed\debug\com.crashlytics.sdk.android-answers-1.3.8_287b7f62ca09cf34439e8593b8197e0bd027c22a.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="C:\Users\eldbx\Documents\Github\CommutingChecker\app\build\intermediates\exploded-aar\com.android.support\support-v4\23.4.0\jars\libs\internal_impl-23.4.0.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="23.0.1"
+        sha1="ea3c07504d2c8f4b13aa17c45c1b68ed9c1c3674">
+        <dex dex="C:\Users\eldbx\Documents\Github\CommutingChecker\app\build\intermediates\pre-dexed\debug\internal_impl-23.4.0_5f904db22a753a11592a081a440e96fc7387a56a.jar" />
     </item>
 
 </items>
